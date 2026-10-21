@@ -30,6 +30,13 @@ test("accepted lunar design stays the default and restores without visual drift"
   await expect(shell).toHaveAttribute("data-theme", "lunar");
   expect(await page.locator("#profile").screenshot()).toEqual(profileBefore);
   expect(await page.locator(".masthead").screenshot()).toEqual(headerBefore);
+  // A theme's width token must align the utility strip with the page as well.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.addStyleTag({
+    content: ".space-shell { --space-width: 1000px; }",
+  });
+  expect((await page.locator(".site").boundingBox())!.width).toBe(1000);
+  expect((await page.locator(".topbar > div").boundingBox())!.width).toBe(1000);
 });
 
 test("switching themes preserves flower, guestbook, filters, language, ornaments and actual audio", async ({
