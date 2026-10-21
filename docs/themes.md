@@ -6,6 +6,12 @@ commit `96dd705fa2f8443409c6729d2f11abc6d22b19bc` before theme extraction. The
 that demonstrates extension; switching does not change the owner's fictional
 content or reset any interactive module.
 
+The public **Space style** selector is temporarily hidden. To restore it, change
+`showThemeSelector` to `true` in `demo/src/themes/settings.ts`. The selector is not
+rendered while disabled, so it is absent from both keyboard and screen-reader
+navigation. The registry, palettes, extension points and saved design tag remain.
+The Stars/Paper wallpaper and pendant controls still work.
+
 ## Where to change things
 
 | Change                                                | File                                                |
@@ -83,8 +89,10 @@ required.
 
 ## Verification
 
-Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 46 desktop and
-touch-phone Chromium checks, including theme switching while audio plays,
+Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 44 active desktop
+and touch-phone Chromium checks. Two theme-switching cases are conditionally
+skipped until `showThemeSelector` is enabled again; they retain the coverage for
+theme switching while audio plays,
 flower/message/draft continuity, restore, bilingual labels, reduced motion and
 320/390/430px overflow. It compares profile/header screenshots before switching
 and after restoring within the same run, avoiding platform-dependent committed

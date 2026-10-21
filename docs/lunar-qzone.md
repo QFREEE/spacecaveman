@@ -28,7 +28,9 @@ period-inspired adaptation, not an exact recovery of a Tencent skin.
 - **Properties / log:** shows the simplified-rule explanation and up to 12 care
   actions from the current page. Numeric meters are always visible.
 - **Dress up:** switch star/paper wallpaper, place/remove the Saturn pendant,
-  choose Lunar ink or Blue hour, and restore the default lunar skin. Bloom unlocks a place/remove Moon flag. Plant reset
+  and restore the default lunar skin. The Lunar ink / Blue hour style selector is
+  temporarily hidden; its registry and palettes remain available for future use.
+  Bloom unlocks a place/remove Moon flag. Plant reset
   retains an earned flag; page refresh clears all rewards and dress-up state.
 - **Motion:** bounded stepped caveman walk and gentle pendant swing. The visible
   pause control stops both. Reduced motion gives still artwork and immediate
@@ -55,7 +57,8 @@ Guestbook → Visitors. No CSS `order` or positive `tabindex` changes keyboard f
 Desktop grid places Guestbook and the decorative counter in the lower row, while
 retaining three compact columns and the original artwork.
 
-Verified locally: 46 Chromium browser tests (desktop and touch-phone projects),
+Verified locally: 44 active Chromium browser tests (desktop and touch-phone projects),
+with 2 theme-switching cases skipped while the public selector is hidden,
 10 existing backend regressions, JavaScript checks, TypeScript/Vite build, website
 and isolated presence Worker dry-run packaging. Tests exercise growth thresholds,
 each care attribute, caps, burst-click protection, reset/refresh, reward placement,

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { showThemeSelector } from "../src/themes/settings";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -21,9 +22,14 @@ test("accepted lunar design stays the default and restores without visual drift"
   );
   const profileBefore = await page.locator("#profile").screenshot();
   const headerBefore = await page.locator(".masthead").screenshot();
-  await page.getByRole("button", { name: "Blue hour", exact: true }).click();
-  await expect(shell).toHaveAttribute("data-theme", "blue-hour");
-  await expect(shell).toHaveCSS("background-color", "rgb(220, 234, 244)");
+  if (showThemeSelector) {
+    await page.getByRole("button", { name: "Blue hour", exact: true }).click();
+    await expect(shell).toHaveAttribute("data-theme", "blue-hour");
+    await expect(shell).toHaveCSS("background-color", "rgb(220, 234, 244)");
+  } else {
+    await expect(page.locator(".theme-choices")).toHaveCount(0);
+    await page.getByRole("button", { name: "Paper", exact: true }).click();
+  }
   await page
     .getByRole("button", { name: "Restore default skin", exact: true })
     .click();
@@ -43,6 +49,10 @@ test("switching themes preserves flower, guestbook, filters, language, ornaments
   page,
   isMobile,
 }) => {
+  test.skip(
+    !showThemeSelector,
+    "Public theme switching is temporarily disabled.",
+  );
   const writes: string[] = [];
   page.on("request", (request) => {
     if (!["GET", "HEAD"].includes(request.method())) writes.push(request.url());
@@ -127,12 +137,30 @@ test("each skin fits phone widths in both languages and retains reduced-motion b
     await page.setViewportSize({ width, height: 1000 });
     for (const language of ["English", "中文"]) {
       await page.getByRole("button", { name: language, exact: true }).click();
-      for (const name of language === "English"
-        ? ["Lunar ink", "Blue hour"]
-        : ["月球黑白", "月光蓝"]) {
-        const button = page.getByRole("button", { name, exact: true });
-        await button.click();
-        await expect(button).toHaveAttribute("aria-pressed", "true");
+      for (const name of !showThemeSelector
+        ? [null]
+        : language === "English"
+          ? ["Lunar ink", "Blue hour"]
+          : ["月球黑白", "月光蓝"]) {
+        if (name) {
+          const button = page.getByRole("button", { name, exact: true });
+          await button.click();
+          await expect(button).toHaveAttribute("aria-pressed", "true");
+          const box = await button.boundingBox();
+          expect(box!.height).toBeGreaterThanOrEqual(44);
+        } else {
+          await expect(page.locator(".theme-choices")).toHaveCount(0);
+          await expect(
+            page.getByText(
+              language === "English" ? "Space style" : "空间风格",
+              { exact: true },
+            ),
+          ).toHaveCount(0);
+          await expect(page.locator(".space-shell")).toHaveAttribute(
+            "data-theme",
+            "lunar",
+          );
+        }
         expect(
           await page.evaluate(
             () => document.documentElement.scrollWidth <= innerWidth,
@@ -142,12 +170,10 @@ test("each skin fits phone widths in both languages and retains reduced-motion b
           "animation-name",
           "none",
         );
-        const box = await button.boundingBox();
-        expect(box!.height).toBeGreaterThanOrEqual(44);
       }
     }
   }
-  if (testInfo.project.name === "desktop") {
+  if (showThemeSelector && testInfo.project.name === "desktop") {
     await page.getByRole("button", { name: "English", exact: true }).click();
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 });
