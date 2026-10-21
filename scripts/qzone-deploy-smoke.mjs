@@ -28,6 +28,8 @@ try {
   });
   const response = await page.goto(base);
   assert.equal(response.status(), 200);
+  assert.match(response.headers()["cache-control"], /no-transform/);
+  assert.equal((await response.text()).includes("static.cloudflareinsights.com/beacon"), false);
   assert.match(
     response.headers()["content-security-policy"],
     /script-src 'self'/,

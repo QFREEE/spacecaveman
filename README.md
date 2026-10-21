@@ -25,7 +25,7 @@ pnpm demo:test
 pnpm check
 pnpm test
 pnpm deploy:check
-pnpm deploy
+pnpm run deploy
 ```
 
 Wrangler runs `pnpm build:site` before serving or deploying the main Worker. This
@@ -98,7 +98,7 @@ From this checkout, run:
 pnpm exec wrangler login
 pnpm exec wrangler whoami
 pnpm deploy:check
-pnpm deploy
+pnpm run deploy
 ```
 
 `login` opens a browser to authorize Wrangler. This is separate from the Cloudflare MCP connection used by Codex. `whoami` lets you verify the destination account before deployment. `deploy:check` bundles locally; `deploy` uploads the static files and Worker API to the Worker named `spacecaveman`. If that name already exists in the selected account, inspect it before deploying to avoid replacing another project.

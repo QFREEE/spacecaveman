@@ -34,12 +34,17 @@ message exists only in the test browser. It does not write to any API.
 ## Deploy
 
 ```powershell
-pnpm deploy
+pnpm run deploy
 node scripts/qzone-deploy-smoke.mjs https://spacecaveman.com
 ```
 
 The configuration pins the existing account and domain. The deploy command keeps
 dashboard variables. Secrets are managed separately and are never committed.
+
+The homepage sends `Cache-Control: public, no-cache, no-transform` so edge
+optimizations do not inject an analytics beacon into its HTML. The existing
+Content Security Policy remains unchanged. Cloudflare's documented behavior:
+https://developers.cloudflare.com/web-analytics/get-started/.
 
 Before this homepage deployment, the main Worker version was
 `b4e60ab3-e2f4-4a6e-bc70-85a4fa2d203c`. Keep deployment/version history available
