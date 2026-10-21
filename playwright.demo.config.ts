@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
+const port = Number(process.env.DEMO_TEST_PORT || 4173);
+const baseURL = `http://127.0.0.1:${port}`;
+
 export default defineConfig({
   testDir: "./demo/e2e",
   outputDir: "./outputs/qzone-test-results",
@@ -12,7 +15,7 @@ export default defineConfig({
   ],
   use: {
     launchOptions: { args: ["--autoplay-policy=user-gesture-required"] },
-    baseURL: "http://127.0.0.1:4173",
+    baseURL,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
@@ -32,8 +35,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm demo:dev",
-    url: "http://127.0.0.1:4173",
+    command: `pnpm demo:dev --port ${port}`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
 });

@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/worker.js";
 
-test("visit endpoint explicitly identifies sample data and prevents caching", async () => {
+test("visit endpoint explicitly identifies sample data and prevents caching", async (context) => {
+  context.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-21T12:00:00Z') });
   const response = await worker.fetch(new Request("https://example.com/api/visits"));
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("Cache-Control"), "no-store");
@@ -14,6 +15,13 @@ test("visit endpoint explicitly identifies sample data and prevents caching", as
     assert.ok(Date.parse(visit.end) > Date.parse(visit.start));
     assert.ok(["confirmed", "tentative"].includes(visit.status));
   }
+});
+
+test("expired sample visits disappear without breaking the endpoint", async (context) => {
+  context.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-01T12:00:00Z') });
+  const response = await worker.fetch(new Request('https://example.com/api/visits'));
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).visits, []);
 });
 
 test("the demo never accepts meetup writes", async () => {

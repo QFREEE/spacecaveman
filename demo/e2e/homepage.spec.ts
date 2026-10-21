@@ -8,6 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 test("all modules load locally, with no page errors or unexpected requests", async ({
   page,
+  baseURL,
 }) => {
   const errors: string[] = [];
   const requests: string[] = [];
@@ -45,8 +46,8 @@ test("all modules load locally, with no page errors or unexpected requests", asy
   expect(
     requests.filter(
       (url) =>
-        !url.startsWith("http://127.0.0.1:4173/") &&
-        !url.startsWith("ws://127.0.0.1:4173/"),
+        !url.startsWith(`${baseURL}/`) &&
+        !url.startsWith(`${baseURL?.replace(/^http/, "ws")}/`),
     ),
   ).toEqual([]);
   expect(requests.some((url) => url.includes("/api/"))).toBe(false);

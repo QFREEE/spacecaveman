@@ -2,6 +2,7 @@
   "name": "spacecaveman",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.25.0",
   "type": "module",
   "scripts": {
     "build:site": "pnpm demo:build && node scripts/build-site.mjs",

@@ -2,6 +2,15 @@
 
 A small site for invited friends to see current and upcoming NYC visits.
 
+## GitHub deployment
+
+Pull requests run checks. Successful checks on `main` are followed by automatic
+deployment of the homepage, supporting static assets, and Worker API using the
+official Wrangler GitHub Action. The production environment needs its dedicated
+Cloudflare token before deployment can succeed. See [deployment setup and rollback](docs/deployment.md).
+
+The isolated presence trial is checked but not automatically deployed.
+
 ## Qzone homepage preview
 
 The isolated React + Vite + TypeScript demo lives in `demo/`. It uses fictional
