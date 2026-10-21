@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.25.0",
   "type": "module",
   "scripts": {
+    "verify": "pnpm check && pnpm test && pnpm demo:build && pnpm demo:test && pnpm deploy:check && pnpm presence:deploy:check",
     "build:site": "pnpm demo:build && node scripts/build-site.mjs",
     "demo:dev": "vite --config vite.demo.config.ts",
     "demo:build": "tsc -p demo/tsconfig.json && vite build --config vite.demo.config.ts",
