@@ -50,12 +50,18 @@ two-by-two group with 44px targets; body copy is at least 14px and form controls
 use 16px text. The horizon is recomposed for phones instead of scaling down a
 desktop canvas. Normal browser zoom remains enabled.
 
-Verified locally: 44 Chromium browser tests (desktop and touch-phone projects),
+Source order matches that phone sequence, including Albums → Music → Dress up →
+Guestbook → Visitors. No CSS `order` or positive `tabindex` changes keyboard flow.
+Desktop grid places Guestbook and the decorative counter in the lower row, while
+retaining three compact columns and the original artwork.
+
+Verified locally: 46 Chromium browser tests (desktop and touch-phone projects),
 10 existing backend regressions, JavaScript checks, TypeScript/Vite build, website
 and isolated presence Worker dry-run packaging. Tests exercise growth thresholds,
 each care attribute, caps, burst-click protection, reset/refresh, reward placement,
 both languages, keyboard care, reduced motion, ambient pause, real audio states,
-guestbook validation, literal user text, albums, filters, zero network writes and
+guestbook validation, literal user text, albums, filters, source/visual order,
+real Tab transitions, zero network writes and
 overflow at 320/390/430/720/800/1440px. Physical iOS/Android devices were not tested.
 
 Run `pnpm demo:dev` for local preview, and `pnpm demo:test` for browser checks.

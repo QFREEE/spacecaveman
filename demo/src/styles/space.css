@@ -222,6 +222,28 @@ html[lang="en"] .masthead h1 {
   flex-direction: column;
   gap: var(--space-gap);
 }
+/* DOM flow is the phone/keyboard reading order. Desktop grid places groups
+   without flex order, tabindex overrides, or moving live modules between trees. */
+.left-column {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+.center-column {
+  grid-column: 2;
+  grid-row: 1;
+}
+.right-column {
+  grid-column: 3;
+  grid-row: 1;
+}
+.guestbook {
+  grid-column: 2;
+  grid-row: 2;
+}
+.visitors {
+  grid-column: 3;
+  grid-row: 2;
+}
 .module {
   background: var(--skin-surface);
   box-shadow: 2px 2px 0 var(--skin-shadow);
@@ -838,33 +860,6 @@ footer p {
   }
   .module-column {
     display: contents;
-  }
-  .profile {
-    order: 1;
-  }
-  .flower {
-    order: 2;
-  }
-  .diary {
-    order: 3;
-  }
-  .meetup {
-    order: 4;
-  }
-  .albums {
-    order: 5;
-  }
-  .music {
-    order: 6;
-  }
-  .dressup {
-    order: 7;
-  }
-  .guestbook {
-    order: 8;
-  }
-  .visitors {
-    order: 9;
   }
   .module-heading {
     min-height: 34px;

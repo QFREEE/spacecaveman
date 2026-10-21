@@ -83,14 +83,22 @@ required.
 
 ## Verification
 
-Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 44 desktop and
+Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 46 desktop and
 touch-phone Chromium checks, including theme switching while audio plays,
 flower/message/draft continuity, restore, bilingual labels, reduced motion and
 320/390/430px overflow. It compares profile/header screenshots before switching
 and after restoring within the same run, avoiding platform-dependent committed
 golden images. Physical iOS/Android devices remain untested.
 
+The source and phone visual order agree: Profile, Flower, Diary, Meetups, Albums,
+Music, Dress up, Guestbook, Visitors. Keep that order when extending a skin.
+Desktop uses grid placement rather than CSS `order`; Guestbook and the sample
+counter occupy the lower row. A regression test uses real Tab presses across
+Albums → Music and Dress up → Guestbook in both languages at 320/390/430/720/1440px.
+
 During extraction, 320px and 390px default lunar viewport screenshots were
 byte-identical to captures from before refactoring. Desktop comparison found zero
 changed pixels outside the Dress up column in the 1440×1000 viewport; that column
-gained a Space style selector. The same composition and artwork remain the default.
+gained a Space style selector. A subsequent accessibility review moved the desktop
+counter to the lower grid row so phone visual and source order remain identical;
+the artwork, palette and phone composition stay the same.
