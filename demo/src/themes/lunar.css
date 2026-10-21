@@ -1,0 +1,59 @@
+/* Accepted lunar palette. Keep this entry as the default; override in another skin. */
+:root,
+[data-theme="lunar"] {
+  --skin-link: #242424;
+  --skin-frame: #909090;
+  --skin-surface-muted: #f3f3f3;
+  --skin-text: #292929;
+  --skin-page: #191919;
+  --skin-strong: #111;
+  --skin-border-soft: #aaa;
+  --skin-border: #777;
+  --skin-paper-stripe: #efefef;
+  --skin-surface-hover: #fafafa;
+  --skin-chrome-end: #dedede;
+  --skin-ink: #333;
+  --skin-text-strong: #222;
+  --skin-muted: #555;
+  --skin-sky: #171717;
+  --skin-sky-muted: #bcbcbc;
+  --skin-sky-text: #ddd;
+  --skin-bevel-mid: #eee;
+  --skin-nav-bevel: #d2d2d2;
+  --skin-notice: #f9f9f9;
+  --skin-control-border: #888;
+  --skin-surface: #fff;
+  --skin-shadow: #0005;
+  --skin-heading-end: #e5e5e5;
+  --skin-button-end: #e1e1e1;
+  --skin-button-inner: #bbb;
+  --skin-pressed: #d8d8d8;
+  --skin-inset: #999;
+  --skin-update: #f4f4f4;
+  --skin-soft-ink: #444;
+  --skin-display: #ededed;
+  --skin-counter-dark: #151515;
+  --skin-placeholder: #666;
+  --skin-flower-heading: #d5d5d5;
+  --skin-footer-link: #ccc;
+  --skin-footer-text: #ddd;
+  --skin-wet-soil: #c3c3c3;
+  --space-width: 960px;
+  --space-sidebar: 220px;
+  --space-gap: 10px;
+  --space-header-height: 222px;
+  --space-phone-header-height: 211px;
+  --space-font: Tahoma, "Microsoft YaHei", "PingFang SC", SimSun, sans-serif;
+  --space-wallpaper-image:
+    radial-gradient(
+      circle at 15px 35px,
+      var(--skin-border-soft) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 69px 80px,
+      var(--skin-border) 0 1px,
+      transparent 1.5px
+    );
+  --space-wallpaper-size: 137px 179px, 211px 223px;
+}

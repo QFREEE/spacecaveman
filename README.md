@@ -7,9 +7,14 @@ upcoming visits; private friend access and owner administration remain planned.
 ## Current status
 
 - [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
-  Qzone-style homepage with fictional content. English is the default; the
+  Qzone-style homepage with fictional content. The lunar skin adds a four-attribute
+  flower vine, dress-up controls, a walking caveman, and an original pendant.
+  [Skin behavior and screenshots](docs/lunar-qzone.md). English is the default; the
   English/中文 switch preserves module state. The demo guestbook stays in the
   visitor's browser and does not send messages to the owner.
+- The accepted lunar design is saved as `design/lunar-qzone-v1`. A typed theme
+  registry and palette files support optional skins through Dress up; Lunar ink
+  stays the default. [How to extend a skin](docs/themes.md).
 - [Visits page](https://spacecaveman.com/visits): the earlier minimal frontend,
   backed by `/api/visits` with fictional upcoming visits. Past visits are omitted;
   the list becomes empty when the sample dates have passed.
@@ -65,7 +70,8 @@ pnpm presence:deploy:check
 ```
 
 The browser suite checks desktop and touch-enabled phone layouts, both languages,
-albums, filters, guestbook behavior, and audio controls. Phone emulation does not
+albums, filters, guestbook behavior, audio controls, flower growth and caps,
+duplicate-care protection, dress-up rewards, and reduced motion. Phone emulation does not
 replace physical iOS/Android testing. On Linux, install Chromium dependencies with
 `pnpm exec playwright install --with-deps chromium`, as CI does. Set
 `DEMO_TEST_PORT` to an unused port if another preview already occupies port 4173.

@@ -8,7 +8,7 @@ test("English is the default, including fixtures, labels, metadata and errors", 
   page,
 }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page).toHaveTitle("Blue Sky Corner · Summer, take your time");
+  await expect(page).toHaveTitle("Space Caveman · My little Qzone");
   await expect(
     page.getByRole("button", { name: "English", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -26,7 +26,7 @@ test("English is the default, including fixtures, labels, metadata and errors", 
     ).toBeVisible();
   }
   await expect(
-    page.getByRole("heading", { name: "Jamie LinOnline", exact: true }),
+    page.getByRole("heading", { name: "Ogg StoneOnline", exact: true }),
   ).toBeVisible();
   expect(
     (await page.locator("body").innerText()).replace("中文", ""),
@@ -44,7 +44,7 @@ test("English is the default, including fixtures, labels, metadata and errors", 
     );
   expect(labels.join(" ")).not.toMatch(/[\u4e00-\u9fff]/);
   await page.getByRole("button", { name: "Post message", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText(
+  await expect(page.locator("#guestbook").getByRole("status")).toHaveText(
     "Please enter a name and a message.",
   );
   await page.reload();
@@ -61,7 +61,7 @@ test("English interactions work and language switches preserve local content and
   await expect(page).toHaveURL(/#diary$/);
   await page.getByRole("button", { name: "Read more" }).first().click();
   await expect(
-    page.getByText("In the evening I went down to the river", { exact: false }),
+    page.getByText("Back at the cave", { exact: false }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Confirmed", exact: true }).click();
   await page.getByLabel("Filter by date").selectOption("08.26");
@@ -71,23 +71,23 @@ test("English interactions work and language switches preserve local content and
     ),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Open album: Let's see the sea", exact: true })
+    .getByRole("button", { name: "Open album: Moon walks", exact: true })
     .click();
   await expect(page.getByRole("dialog").getByRole("heading")).toHaveText(
-    "Let's see the sea",
+    "Moon walks",
   );
   await page.getByRole("button", { name: "Close album", exact: true }).click();
   await page.getByLabel("Your name").fill("Language visitor");
-  await page.getByLabel("Your message").fill("Keep my words exactly: 晴空小站");
+  await page.getByLabel("Your message").fill("Keep my words exactly: 月球洞口");
   await page.getByRole("button", { name: "Post message", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator("#guestbook").getByRole("status")).toContainText(
     "Message added to this page.",
   );
   await page.getByLabel("Your message").fill("Unsubmitted draft");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await expect(
-    page.getByRole("heading", { name: "晴空小站", exact: true }),
+    page.getByRole("heading", { name: "月球洞口", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "收起日志" })).toBeVisible();
   await expect(
@@ -95,14 +95,14 @@ test("English interactions work and language switches preserve local content and
   ).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("留言内容")).toHaveValue("Unsubmitted draft");
   await expect(
-    page.getByText("Keep my words exactly: 晴空小站", { exact: true }),
+    page.getByText("Keep my words exactly: 月球洞口", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(page.getByLabel("Your message")).toHaveValue(
     "Unsubmitted draft",
   );
   await expect(
-    page.getByText("Keep my words exactly: 晴空小站", { exact: true }),
+    page.getByText("Keep my words exactly: 月球洞口", { exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Read less" })).toBeVisible();
 });

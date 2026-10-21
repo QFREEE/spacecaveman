@@ -15,7 +15,7 @@ export function PhotoAlbums() {
     <ModuleFrame
       id="albums"
       title={t("我的相册")}
-      english="SUMMER IN FRAMES"
+      english="MOON IN FRAMES"
       icon="photo"
       className="albums"
       extra={<span className="heading-note">{t("2 本相册")}</span>}
@@ -60,7 +60,7 @@ export function PhotoAlbums() {
         </div>
         <img className="album-full" src={album.image} alt={t(album.alt)} />
         <p>{t(album.subtitle)} · 1 / 1</p>
-        <p className="fine-print">{t("原创生成图片 · 虚构相册")}</p>
+        <p className="fine-print">{t("原创简笔画 · 虚构相册")}</p>
       </dialog>
     </ModuleFrame>
   );

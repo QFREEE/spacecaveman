@@ -5,18 +5,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { lunarCopy } from "./lunarCopy";
 
 type Language = "en" | "zh";
 
 // Chinese source copy is retained as the lookup key for the original skin.
 // Unknown strings pass through, including user-authored guestbook content.
 const english: Record<string, string> = {
-  晴空小站: "Blue Sky Corner",
+  ...lunarCopy,
   一页旧时光: "A page from the old days",
-  留言给小屿: "Leave a hello",
+  留言给小咕: "Leave a hello",
   "虚构空间 · DEMO": "FICTIONAL SPACE · DEMO",
-  "夏天慢慢走，我们慢慢说。": "Slow summer days. A little more time to talk.",
-  "有风经过的地方，就有好心情。": "A little breeze, a little happiness.",
   空间导航: "Space navigation",
   主页: "Home",
   日志: "Diary",
@@ -26,8 +25,6 @@ const english: Record<string, string> = {
   留言板: "Guestbook",
   个人档: "Profile",
   欢迎光临我的空间: "Welcome to my little space",
-  "小站公告：把快乐存进这里，也把晴天分你一点。":
-    "Notice: saving little happy things here. Sharing a little sunshine with you.",
   "2007.08.18 晴": "2007.08.18 · Sunny",
   小站足迹: "Visitors",
   你是这里的第: "You are visitor number",
@@ -37,46 +34,43 @@ const english: Record<string, string> = {
   "“愿每次路过，": "“May every little visit",
   "都能遇见一点小小的快乐。”": "bring a little happiness.”",
   回到顶部: "Back to top",
-  "晴空小站 · 留住一点夏天": "Blue Sky Corner · keeping a little summer",
   "2005–2008 Qzone 风格练习 · 全部人物、图片与内容均为虚构演示":
     "Inspired by 2005–2008 Qzone · all people, images and content are fictional demo material",
-  林小屿: "Jamie Lin",
-  "把日子过成蓝色的。": "Collecting blue-sky days.",
-  "晴川 · 虚构小城": "Clearwater · fictional town",
+  石小咕: "Ogg Stone",
+  "月球很大，慢慢走。": "A whole Moon to wander.",
+  "月球后院 · 虚构住址": "Moon backyard · fictional address",
   "08月16日": "August 16",
-  "散步 / 拍照 / 听老歌": "Walks / photos / old songs",
-  "窗边的白色陶瓷兔子，虚构主人公的头像":
-    "A white ceramic rabbit by a window, the fictional owner's avatar",
+  "捡石头 / 种花 / 听老歌": "Rocks / flowers / old songs",
   在线: "Online",
   现居: "From",
   生日: "Birthday",
   喜欢: "Likes",
-  "一个喜欢收集晴天的人。": "Someone who likes collecting sunny days.",
+  "一个在月球上乱逛的人。": "An amateur Moon wanderer.",
   "欢迎来我的小小空间坐坐。": "Stay a while in my little corner.",
   给我留言: "Leave me a message",
   心情: "Mood",
   晴: "Sunny",
   我的日志: "My diary",
   "共 2 篇": "2 entries",
-  "今天也有好好地看看天空。": "Made a little time to look at the sky today.",
+  "今天也有好好地给花浇水。": "Remembered to water the flower today.",
   "分类：": "Filed under: ",
   阅读全文: "Read more",
   收起日志: "Read less",
   "阅读(": "Views (",
   ") · 评论(": ") · Comments (",
   示例: "sample",
-  夏天慢慢走: "Summer, take your time",
+  今天的石头有点像土豆: "This rock looks like a potato",
   小日子: "Little days",
-  "午后的风把窗帘吹得鼓鼓的，像一艘准备出发的小船。\n收拾抽屉的时候，翻到了去年夏天的车票。原来那些以为忘记的小事，都有好好地留在某个地方。":
-    "The afternoon breeze filled the curtains like the sails of a tiny boat.\nWhile tidying a drawer, I found a ticket from last summer. Those little things I thought I'd forgotten were waiting somewhere all along.",
-  "傍晚去了河边，买了一瓶冰汽水。坐着看了很久的云，什么也没做，觉得这样也很好。希望下次见面的时候，我们都还有好多小事可以分享。":
-    "In the evening I went down to the river and bought a cold soda. I sat watching clouds for ages, doing nothing at all. That felt good too. I hope we'll have lots of little stories to share next time we meet.",
-  今天捡到一朵云: "Found a cloud today",
+  "今天往东走了十九步，发现一块很像土豆的石头。\n想带回洞里，又觉得它在这里晒太阳也挺好。于是给它起了个名字：小土。":
+    "Nineteen steps east of the cave: a rock shaped like a potato.\nI almost brought it home, but it looked happy in the sunshine. I named it Spud and left it there.",
+  "傍晚回到洞口，给花浇了水。月球上没有风，叶子却好像朝我挥了挥。明天再去看小土。":
+    "Back at the cave, I watered the flower. There is no wind here, but its leaf seemed to wave at me. Tomorrow I will visit Spud again.",
+  给月球种一朵花: "A flower for the Moon",
   碎碎念: "Small thoughts",
-  "回家的路上抬头，看到一朵很像兔子的云。\n于是绕了一点远路，陪它走到了路口。":
-    "On the way home I spotted a cloud shaped like a rabbit.\nSo I took the long way and kept it company until the crossroads.",
-  "相机没有带在身上，就把它记在这里吧。也许明天会遇到一朵长得像鲸鱼的云。":
-    "I'd left my camera at home, so I'll save it here in words. Maybe tomorrow I'll find a cloud that looks like a whale.",
+  "把种子埋进月球土里。\n等了好一会儿，冒出一根歪歪的小芽。它大概也在适应低重力。":
+    "A seed, a pot, a scoop of Moon soil.\nAfter a while, one crooked sprout appeared. Perhaps it is getting used to low gravity too.",
+  "欢迎来给它浇花。四种照料都试试，说不定会开花。":
+    "You can help tend it. Try all four kinds of care; perhaps it will bloom.",
   有空见个面: "Let's meet",
   虚构安排: "Sample plans",
   筛选见面安排: "Filter meetup plans",
@@ -99,20 +93,18 @@ const english: Record<string, string> = {
   "打开相册：": "Open album: ",
   关闭相册: "Close album",
   张: " photo",
-  "原创生成图片 · 虚构相册": "Original generated image · fictional album",
-  去看海吧: "Let's see the sea",
-  "2007.08 · 夏日出走": "August 2007 · a summer escape",
-  蓝色海岸与白色浪花的原创虚构旅行照片:
-    "Original fictional travel photo of a blue coast and white surf",
-  路过的小风景: "Little sights along the way",
-  "2007.07 · 慢慢散步": "July 2007 · slow walks",
-  绿树与蓝色自行车的原创虚构小巷照片:
-    "Original fictional photo of a leafy lane and blue bicycle",
+  "原创简笔画 · 虚构相册": "Original line drawing · fictional album",
+  月球散步: "Moon walks",
+  "2007.08 · 第一次探险": "August 2007 · first expedition",
+  月球旗和脚印的原创简笔画:
+    "Original line drawing of a Moon flag and footprints",
+  石头收藏: "Rock collection",
+  "2007.07 · 洞外写生": "July 2007 · sketches outside",
+  两块奇怪石头的原创简笔画: "Original line drawing of two odd Moon rocks",
   音乐盒: "Music box",
-  夏日海岸唱片封面: "Summer coast album cover",
   正在收藏的旋律: "A tune to keep",
-  晴天的来信: "A letter from the sunshine",
-  小屿的八音盒: "Jamie's music box",
+  来自地球的旋律: "A tune from Earth",
+  小咕的八音盒: "Ogg's music box",
   音乐暂时无法载入: "Unable to load this track",
   "正在播放…": "Playing…",
   播放完毕: "Track finished",
@@ -143,11 +135,11 @@ const english: Record<string, string> = {
   "留言只保存在当前页面，不会发送到服务器。":
     "Messages stay on this page and are never sent to a server.",
   苏打泡泡: "Soda Pop",
-  "来踩踩～蓝色的新皮肤好好看！下次一起去看海呀。":
-    "Dropping by! Love the new blue skin. Let's see the sea together next time.",
+  "踩一脚～给花浇过水啦！小土今天还好吗？":
+    "Leaving a footprint! Watered your flower. How is Spud today?",
   风里的信: "Airmail",
-  "慢慢走，也要记得常常更新。送你一整个晴天。":
-    "Take your time, but keep posting. Sending you a whole sunny day.",
+  "土星挂件有点歪，不过这样才像你的空间。":
+    "Your Saturn pendant is crooked. That feels about right for this space.",
 };
 
 type LanguageContextValue = {
@@ -166,15 +158,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = language === "en" ? "en" : "zh-CN";
     document.title =
       language === "en"
-        ? "Blue Sky Corner · Summer, take your time"
-        : "晴空小站 · 夏天慢慢走";
+        ? "Space Caveman · My little Qzone"
+        : "月球洞口 · 我的 QQ 空间";
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute(
         "content",
         language === "en"
-          ? "A fictional summer homepage inspired by early Qzone. Local demo."
-          : "晴空小站，一页关于夏天的虚构旧时光。Qzone 风格本地演示。",
+          ? "A fictional lunar Qzone with a flower vine, dress-up toys and a wandering caveman."
+          : "月球洞口：花藤、装扮和闲逛的穴居人。虚构 Qzone 风格演示。",
       );
   }, [language]);
 

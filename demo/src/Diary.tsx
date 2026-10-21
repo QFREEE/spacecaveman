@@ -17,7 +17,7 @@ export function Diary() {
     >
       <p className="update">
         <span className="new-label">{t("心情")}</span>
-        {t("今天也有好好地看看天空。")}
+        {t("今天也有好好地给花浇水。")}
         <time>08-18</time>
       </p>
       {diaries.map((entry) => (

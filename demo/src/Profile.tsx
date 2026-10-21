@@ -1,9 +1,11 @@
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
 import { profile } from "./data";
+import { useTheme } from "./themes/ThemeProvider";
 
 export function Profile() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   return (
     <ModuleFrame
       id="profile"
@@ -14,10 +16,10 @@ export function Profile() {
     >
       <div className="portrait">
         <img
-          src="/assets/avatar.jpg"
+          src={theme.portrait.src}
           width="130"
           height="130"
-          alt={t("窗边的白色陶瓷兔子，虚构主人公的头像")}
+          alt={t(theme.portrait.alt)}
         />
       </div>
       <h3>
@@ -40,7 +42,7 @@ export function Profile() {
         </div>
       </dl>
       <p className="profile-note">
-        {t("一个喜欢收集晴天的人。")}
+        {t("一个在月球上乱逛的人。")}
         <br /> {t("欢迎来我的小小空间坐坐。")}
       </p>
       <a className="bevel guest-link" href="#guestbook">

@@ -2,9 +2,11 @@ import { useLanguage } from "./Language";
 import { useState, type FormEvent } from "react";
 import { messages, type Message } from "./data";
 import { ModuleFrame } from "./ModuleFrame";
+import { useTheme } from "./themes/ThemeProvider";
 
 export function Guestbook() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const [entries, setEntries] = useState<Message[]>(messages);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
@@ -75,7 +77,7 @@ export function Guestbook() {
         {entries.map((entry, index) => (
           <article className="message" key={entry.id}>
             <span className="message-avatar" aria-hidden="true">
-              <img src="/assets/avatar.jpg" alt="" />
+              <img src={theme.portrait.src} alt="" />
             </span>
             <div>
               <div className="message-byline">
