@@ -1,0 +1,35 @@
+name: Documentation review
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  review:
+    name: Documentation review
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      # Only trusted base code is executed, never PR code or interpolated PR text.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { documentationErrors } = require('./scripts/documentation-review.cjs');
+            const params = { ...context.repo, pull_number: context.issue.number };
+            const { data: pr } = await github.rest.pulls.get(params);
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...params, per_page: 100 });
+            const errors = documentationErrors(pr.body, files.map(file => file.filename));
+            await core.summary.addHeading('Documentation review')
+              .addRaw(errors.length ? 'Complete the Documentation review section in the PR description. See docs/agents/pr-documentation.md.' : 'Documentation review recorded. Accuracy remains the author and reviewer’s responsibility.')
+              .write();
+            for (const error of errors) core.error(error);
+            if (errors.length) core.setFailed('Documentation review is incomplete. Edit the PR description to rerun this check.');
