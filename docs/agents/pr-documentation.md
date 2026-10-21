@@ -36,3 +36,14 @@ The workflow uses `pull_request_target` to read current PR metadata and changed
 filenames. It checks out only trusted `main`, executes no PR code, uses
 read-only repository/PR permissions, and receives no production environment secret.
 If the check fails, edit the PR description and it will run again.
+
+## Maintaining the hook
+
+Run `node --test test/documentation-review.test.js` when changing the validator.
+Use a draft PR to verify that an incomplete description fails and that completing
+the record passes. Do not use a passing check as proof that the prose is accurate.
+
+The intended main-branch rule is recorded in
+`.github/rulesets/documentation-review.json`; repository Settings → Rules → Rulesets
+holds the live configuration. Editing that JSON does not apply a rule change.
+The rule requires the GitHub Actions check and has no configured bypass actors.
