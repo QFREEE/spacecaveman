@@ -121,6 +121,12 @@ Avoid modern portfolio styling, oversized typography, pill buttons, glassmorphis
 
 ## Further Notes
 
+- The user subsequently authorized pushing and deployment after testing. That
+  authorization supersedes the initial local-only restriction below: deploy the
+  Qzone homepage to the existing main Worker, preserve the visits page at
+  `/visits` and the presence/API functionality, and leave the separate protected
+  presence-trial Worker unchanged. See the publishing guide for commands.
+
 - Follow-up requirement (Issue #8): English is the default on each fresh page
   load, with an accessible English/中文 switch. Both locales translate sample
   content, controls, accessible labels, metadata, and status messages. Switching

@@ -2,13 +2,17 @@
 
 GitHub Actions runs checks for pull requests and pushes to `main`. After successful
 checks on `main`, the official Cloudflare Wrangler action deploys the Worker named
-`spacecaveman` and its `public/` static assets together. Manual workflow dispatch is
+`spacecaveman` and its built static assets together. Wrangler runs the existing
+`build:site` pipeline to combine the React homepage and supporting pages in
+`dist/site/`. Manual workflow dispatch is
 also supported from `main` and runs the same checks before deployment.
 
 The isolated `spacecaveman-presence-trial` Worker is bundled during checks but is
 not automatically deployed. Its D1 database, credentials and migrations remain
-separate. The React demo is built and browser-tested but is not the production
-frontend. Do not enable another deploy-on-push integration for the same Worker.
+separate. The React homepage is built and browser-tested before deployment. The
+existing visits and presence pages are retained by the site build. Deployment
+keeps existing dashboard variables. Do not enable another deploy-on-push
+integration for the same Worker.
 
 ## One-time deployment credential
 

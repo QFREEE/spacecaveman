@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.25.0",
   "type": "module",
   "scripts": {
+    "build:site": "pnpm demo:build && node scripts/build-site.mjs",
     "demo:dev": "vite --config vite.demo.config.ts",
     "demo:build": "tsc -p demo/tsconfig.json && vite build --config vite.demo.config.ts",
     "demo:preview": "vite preview --config vite.demo.config.ts",
@@ -14,7 +15,7 @@
     "check": "node --check public/app.js && node --check src/worker.js && node --check src/presence.js && node --check public/presence-viewer.js",
     "test": "node --test test/*.test.js",
     "deploy:check": "wrangler deploy --dry-run",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --keep-vars",
     "presence:dev": "wrangler dev --config wrangler.presence.jsonc --ip 127.0.0.1 --port 8791",
     "presence:credentials": "node scripts/presence-credentials.mjs",
     "presence:deploy:check": "wrangler deploy --config wrangler.presence.jsonc --dry-run",

@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "spacecaveman",
+  "account_id": "b72709d7edb8e1f6d064c69ee4b6d3c5",
   "workers_dev": true,
   "routes": [
     { "pattern": "spacecaveman.com", "custom_domain": true }
@@ -8,8 +9,12 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-10-20",
   "compatibility_flags": ["nodejs_compat"],
+  "build": {
+    "command": "pnpm build:site",
+    "watch_dir": ["demo/src", "demo/public", "public", "scripts/build-site.mjs"]
+  },
   "assets": {
-    "directory": "./public",
+    "directory": "./dist/site",
     "run_worker_first": ["/api/*"]
   },
   "observability": {

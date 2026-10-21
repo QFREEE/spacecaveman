@@ -5,11 +5,11 @@ A small site for invited friends to see current and upcoming NYC visits.
 ## GitHub deployment
 
 Pull requests run checks. Successful checks on `main` are followed by automatic
-deployment of the website Worker and static assets using the official Wrangler
-GitHub Action. The production environment needs its dedicated Cloudflare token
-before deployment can succeed. See [deployment setup and rollback](docs/deployment.md).
+deployment of the homepage, supporting static assets, and Worker API using the
+official Wrangler GitHub Action. The production environment needs its dedicated
+Cloudflare token before deployment can succeed. See [deployment setup and rollback](docs/deployment.md).
 
-The isolated presence trial and React demo are checked but not automatically deployed.
+The isolated presence trial is checked but not automatically deployed.
 
 ## Qzone homepage preview
 
@@ -20,6 +20,28 @@ and sample content without resetting module state. Visitor-written messages are
 never translated. The language selection is local to the page and resets to
 English on refresh.
 The existing Worker and presence trial remain separate.
+
+## Publish the Qzone homepage
+
+The main Worker now builds the Qzone demo as the site homepage. The earlier
+visits page remains available at `/visits`, and `/presence` plus the existing
+`/api/*` routes retain their behavior. The separate protected presence-trial
+Worker uses its own configuration and is not redeployed by these commands.
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm demo:test
+pnpm check
+pnpm test
+pnpm deploy:check
+pnpm deploy
+```
+
+Wrangler runs `pnpm build:site` before serving or deploying the main Worker. This
+builds the React app and combines it with the existing static files in
+`dist/site/`, retaining security headers and copying the old homepage to
+`visits.html`. Source files under `public/` stay intact. Deployment targets the
+existing `spacecaveman` Worker and its configured custom domain.
 
 ```powershell
 pnpm install

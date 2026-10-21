@@ -68,6 +68,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: b72709d7edb8e1f6d064c69ee4b6d3c5
           packageManager: pnpm
-          command: deploy --config wrangler.jsonc
+          command: deploy --config wrangler.jsonc --keep-vars
       - name: Verify public website
         run: node scripts/verify-deployment.mjs

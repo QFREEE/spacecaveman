@@ -110,6 +110,14 @@ dist
 .env.*
 .presence-private/
 
+# Local reference captures, downloaded tools, reports, and publishing checkout
+work/
+outputs/
+.codex/
+test-results/
+playwright-report/
+__pycache__/
+
 # Local tools, scratch data, and generated browser reports
 work/
 outputs/qzone-test-report/
