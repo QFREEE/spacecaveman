@@ -1,0 +1,40 @@
+/* Optional palette: same gadgets and layout, blue moonlight and pale-blue wallpaper. */
+[data-theme="blue-hour"] {
+  --skin-link: #264e70;
+  --skin-frame: #94b2c7;
+  --skin-surface-muted: #eef5fa;
+  --skin-text: #233d51;
+  --skin-page: #dceaf4;
+  --skin-strong: #102e45;
+  --skin-border-soft: #a9bdcd;
+  --skin-border: #7899b1;
+  --skin-paper-stripe: #eff6fb;
+  --skin-surface-hover: #f6fbff;
+  --skin-chrome-end: #dbeaf5;
+  --skin-ink: #294e68;
+  --skin-text-strong: #1e4058;
+  --skin-muted: #486477;
+  --skin-sky: #172b42;
+  --skin-sky-muted: #a8c7dc;
+  --skin-sky-text: #dceaf5;
+  --skin-bevel-mid: #e5f0f8;
+  --skin-nav-bevel: #bcd4e7;
+  --skin-notice: #f5fbff;
+  --skin-control-border: #7e9fb7;
+  --skin-surface: #fff;
+  --skin-shadow: #1235;
+  --skin-heading-end: #d8e8f4;
+  --skin-button-end: #d1e4f2;
+  --skin-button-inner: #b0c8da;
+  --skin-pressed: #bfd8eb;
+  --skin-inset: #91b0c6;
+  --skin-update: #eff7fd;
+  --skin-soft-ink: #3a5c74;
+  --skin-display: #e5eff7;
+  --skin-counter-dark: #14344b;
+  --skin-placeholder: #506d83;
+  --skin-flower-heading: #c9dfef;
+  --skin-footer-link: #385469;
+  --skin-footer-text: #385469;
+  --skin-wet-soil: #aac5d8;
+}

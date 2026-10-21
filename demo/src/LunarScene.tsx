@@ -4,7 +4,7 @@ export function Caveman({ className = "" }: { className?: string }) {
     <svg
       className={className}
       viewBox="0 0 100 120"
-      fill="white"
+      fill="var(--skin-surface)"
       stroke="currentColor"
       strokeWidth="2.4"
       strokeLinecap="round"
@@ -31,13 +31,7 @@ export function Caveman({ className = "" }: { className?: string }) {
   );
 }
 
-export function LunarScene({
-  ornaments,
-  treasure,
-}: {
-  ornaments: boolean;
-  treasure: boolean;
-}) {
+export function LunarScene({ ornaments, treasure }: SceneProps) {
   return (
     <div className="lunar-scene" aria-hidden="true">
       <span className="scene-stars">·　+　　　.　　　　+　　　·</span>
@@ -50,8 +44,8 @@ export function LunarScene({
         className="moon-ground"
         viewBox="0 0 960 130"
         preserveAspectRatio="none"
-        fill="white"
-        stroke="#242424"
+        fill="var(--skin-surface)"
+        stroke="var(--skin-link)"
         strokeWidth="1.5"
       >
         <path d="M-5 58Q145 5 321 48T645 36T965 39V135H-5Z" />
@@ -71,3 +65,4 @@ export function LunarScene({
     </div>
   );
 }
+import type { SceneProps } from "./themes/registry";

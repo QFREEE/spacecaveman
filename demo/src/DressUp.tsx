@@ -1,5 +1,6 @@
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
+import { useTheme } from "./themes/ThemeProvider";
 
 export function DressUp({
   wallpaper,
@@ -21,6 +22,7 @@ export function DressUp({
   restore: () => void;
 }) {
   const { t } = useLanguage();
+  const { theme, themes, setThemeId } = useTheme();
   return (
     <ModuleFrame
       id="dressup"
@@ -30,6 +32,22 @@ export function DressUp({
       className="dressup"
     >
       <p className="dressup-intro">{t("小小空间，自己摆弄。")}</p>
+      <fieldset>
+        <legend>{t("空间风格")}</legend>
+        <div className="theme-choices">
+          {themes.map((item) => (
+            <button
+              type="button"
+              className="bevel"
+              key={item.id}
+              aria-pressed={theme.id === item.id}
+              onClick={() => setThemeId(item.id)}
+            >
+              {t(item.label)}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       <fieldset>
         <legend>{t("背景")}</legend>
         <div className="wallpaper-choices">

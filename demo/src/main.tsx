@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { StrictMode, useState } from "react";
 import { FlowerVine } from "./FlowerVine";
 import { DressUp } from "./DressUp";
-import { LunarScene } from "./LunarScene";
+import { ThemeProvider, useTheme } from "./themes/ThemeProvider";
 import { Profile } from "./Profile";
 import { Diary } from "./Diary";
 import { MeetupAvailability } from "./MeetupAvailability";
@@ -11,11 +11,13 @@ import { PhotoAlbums } from "./PhotoAlbums";
 import { MusicPlayer } from "./MusicPlayer";
 import { Guestbook } from "./Guestbook";
 import { ModuleFrame } from "./ModuleFrame";
-import "./style.css";
-import "./lunar.css";
+import "./styles/qzone.css";
+import "./styles/space.css";
 
 function App() {
   const { t } = useLanguage();
+  const { theme, resetTheme } = useTheme();
+  const Scene = theme.Scene;
   const [wallpaper, setWallpaper] = useState("stars");
   const [ornaments, setOrnaments] = useState(true);
   const [motion, setMotion] = useState(true);
@@ -23,6 +25,7 @@ function App() {
   const [flag, setFlag] = useState(false);
   return (
     <div
+      data-theme={theme.id}
       className={`space-shell wallpaper-${wallpaper} ${motion ? "" : "motion-off"}`}
     >
       <div className="topbar">
@@ -47,7 +50,7 @@ function App() {
               spacecaveman.com / my little Qzone
             </span>
           </div>
-          <LunarScene ornaments={ornaments} treasure={flag} />
+          <Scene ornaments={ornaments} treasure={flag} />
           <div className="skin-toolbar">
             <a className="bevel" href="#dressup">
               {t("装扮空间")}
@@ -108,6 +111,7 @@ function App() {
               flag={flag}
               setFlag={setFlag}
               restore={() => {
+                resetTheme();
                 setWallpaper("stars");
                 setOrnaments(true);
                 setFlag(false);
@@ -151,7 +155,9 @@ function App() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <LanguageProvider>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </LanguageProvider>
   </StrictMode>,
 );

@@ -115,8 +115,8 @@ export function FlowerVine({ onBloom }: { onBloom: () => void }) {
         <svg
           viewBox="0 0 200 153"
           aria-hidden="true"
-          fill="white"
-          stroke="#222"
+          fill="var(--skin-surface)"
+          stroke="var(--skin-text-strong)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -124,7 +124,7 @@ export function FlowerVine({ onBloom }: { onBloom: () => void }) {
           <path d="M8 139q22-5 41 0m107 0 28 1M49 136q49-12 101 0" />
           <path
             d="M76 110l5 31q20 7 39-1l5-30M73 108q25-8 54 0v8q-27 7-54 0z"
-            fill={stats.rain ? "#c3c3c3" : "white"}
+            fill={stats.rain ? "var(--skin-wet-soil)" : "var(--skin-surface)"}
           />
           <path
             d={stage === 0 ? "M100 105Q96 90 103 78" : "M100 105Q90 66 103 42"}

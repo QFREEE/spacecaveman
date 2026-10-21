@@ -1,9 +1,11 @@
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
 import { profile } from "./data";
+import { useTheme } from "./themes/ThemeProvider";
 
 export function Profile() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   return (
     <ModuleFrame
       id="profile"
@@ -14,10 +16,10 @@ export function Profile() {
     >
       <div className="portrait">
         <img
-          src="/assets/caveman.svg"
+          src={theme.portrait.src}
           width="130"
           height="130"
-          alt={t("戴着泡泡头盔的虚构月球穴居人")}
+          alt={t(theme.portrait.alt)}
         />
       </div>
       <h3>

@@ -28,7 +28,7 @@ period-inspired adaptation, not an exact recovery of a Tencent skin.
 - **Properties / log:** shows the simplified-rule explanation and up to 12 care
   actions from the current page. Numeric meters are always visible.
 - **Dress up:** switch star/paper wallpaper, place/remove the Saturn pendant,
-  restore the default skin. Bloom unlocks a place/remove Moon flag. Plant reset
+  choose Lunar ink or Blue hour, and restore the default lunar skin. Bloom unlocks a place/remove Moon flag. Plant reset
   retains an earned flag; page refresh clears all rewards and dress-up state.
 - **Motion:** bounded stepped caveman walk and gentle pendant swing. The visible
   pause control stops both. Reduced motion gives still artwork and immediate
@@ -50,7 +50,7 @@ two-by-two group with 44px targets; body copy is at least 14px and form controls
 use 16px text. The horizon is recomposed for phones instead of scaling down a
 desktop canvas. Normal browser zoom remains enabled.
 
-Verified locally: 38 Chromium browser tests (desktop and touch-phone projects),
+Verified locally: 44 Chromium browser tests (desktop and touch-phone projects),
 10 existing backend regressions, JavaScript checks, TypeScript/Vite build, website
 and isolated presence Worker dry-run packaging. Tests exercise growth thresholds,
 each care attribute, caps, burst-click protection, reset/refresh, reward placement,
@@ -72,6 +72,9 @@ care mappings and 0–3 levels are our explicit demo rules. Original artwork and
 icon/audio provenance are recorded in [ASSETS.md](../demo/ASSETS.md).
 
 `FlowerVine.tsx` owns plant state and reports bloom to the page. `DressUp.tsx`
-renders controlled local skin settings; `LunarScene.tsx` contains decorative
-artwork only. `lunarCopy.ts` holds new translations and `lunar.css` the skin and
-motion. Existing module components and backend contracts stay separate.
+renders local settings; `LunarScene.tsx` contains decorative artwork only.
+`themes/registry.ts` registers palette/scene/portrait choices, `ThemeProvider.tsx`
+owns selection, `themes/lunar.css` preserves the accepted palette, and
+`styles/space.css` supplies the shared composition and motion. Existing modules
+and backend contracts stay separate. See [theme extension instructions](themes.md)
+and the saved design tag `design/lunar-qzone-v1`.
