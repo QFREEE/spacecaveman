@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Private presence trial · spacecaveman</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/presence.css">
+  <script type="module" src="/presence-viewer.js"></script>
+</head>
+<body>
+  <header><a class="brand" href="/">spacecaveman</a><span>Private trial</span></header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">iPhone presence trial</p>
+      <h1>Last reported status.</h1>
+      <p>This report expires after six hours. Being in NYC does not mean availability to meet.</p>
+    </section>
+    <section aria-labelledby="access-title">
+      <h2 id="access-title">Private access</h2>
+      <form id="access-form">
+        <label for="read-token">Read credential</label>
+        <input id="read-token" name="credential" type="password" autocomplete="off" spellcheck="false" required>
+        <button type="submit">View status</button>
+        <button type="button" id="forget">Clear access</button>
+      </form>
+      <p>Your credential stays in this tab's memory until you clear it or reload.</p>
+      <p id="presence-status" role="status">Enter your private read credential to view the report.</p>
+      <p id="presence-time"></p>
+      <p id="presence-health" role="status"></p>
+    </section>
+  </main>
+</body>
+</html>
