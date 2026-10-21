@@ -1,0 +1,44 @@
+SPACECAVEMAN: EASIER SHORTCUT SETUP
+
+This package contains two credential-free shortcut templates and a Mac signing helper.
+They were generated and their plist structure checked on Windows. They have NOT yet
+been imported or run on a Mac/iPhone. Signing alone does not validate execution.
+No third-party software needs to be installed.
+
+ON YOUR MAC
+1. Extract this ZIP. Open Terminal in the extracted folder.
+2. Run: bash "Sign on Mac.command"
+   Apple receives the secret-free templates for validation. This uses the Mac's
+   built-in shortcuts sign command. It may require you to be signed in to iCloud.
+3. In the opened signed folder, open "Spacecaveman In NYC.shortcut" and add it.
+   Repeat for "Spacecaveman Left NYC.shortcut". Do not open the unsigned sources.
+4. Paste the WRITE credential from your earlier setup email when asked.
+   Paste only the credential; do not include "Bearer". If no import question appears,
+   edit the first Text action (after the comment) and replace its placeholder.
+   Never put the READ credential in either shortcut.
+5. Enable Shortcuts iCloud Sync on your Mac and iPhone using the same Apple account.
+   On iOS 17: Settings > Shortcuts > iCloud Sync. Inspect both shortcuts on iPhone.
+   If sync is unavailable, AirDrop the SIGNED files and configure them on the phone.
+
+ON YOUR IPHONE
+6. Run the shortcut matching your actual current state once. Resolve permissions
+   and check that its response contains accepted: true. Wait at least 10 seconds
+   before another report. Verify it in the private viewer using your READ credential:
+   https://spacecaveman-presence-trial.spacecaveman.workers.dev/presence
+7. Create Automation > Arrive > choose your place/circle > Run Immediately >
+   Run Shortcut "Spacecaveman In NYC".
+8. Create Automation > Leave for the SAME place/circle > Run Immediately >
+   Run Shortcut "Spacecaveman Left NYC".
+9. Test both crossings with the phone locked. A circle may represent a station or
+   neighborhood rather than all of NYC. These personal automations do not sync.
+
+Reports expire after six hours; a longer visit needs a fresh manual report.
+The shortcuts contain no menu, credential prompt, or confirmation at runtime.
+The import question configures the Text action once, rather than asking each run.
+Keep shortcuts private after adding your credential. iCloud Sync includes their
+configured contents. Never share an iCloud link to a configured copy.
+
+IF IMPORT OR RUN FAILS
+Do not repeatedly report a guessed state. Keep the generated files and report the
+error and which action failed, with the token hidden. The existing manual recipe
+remains the fallback; these generated encodings need Apple-device validation.

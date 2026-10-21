@@ -1,0 +1,1 @@
+C:/Users/qufre/Documents/ChatGPT/spacecavemen/AGENTS.md
