@@ -13,8 +13,8 @@ upcoming visits; private friend access and owner administration remain planned.
   English/中文 switch preserves module state. The demo guestbook stays in the
   visitor's browser and does not send messages to the owner.
 - The accepted lunar design is saved as `design/lunar-qzone-v1`. A typed theme
-  registry and palette files support optional skins through Dress up; Lunar ink
-  stays the default. [How to extend a skin](docs/themes.md).
+  registry and palette files support optional skins. The public style selector
+  is temporarily hidden; Lunar ink stays the default. [How to extend a skin](docs/themes.md).
 - [Visits page](https://spacecaveman.com/visits): the earlier minimal frontend,
   backed by `/api/visits` with fictional upcoming visits. Past visits are omitted;
   the list becomes empty when the sample dates have passed.
