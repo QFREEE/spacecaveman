@@ -1,5 +1,9 @@
 ## Agent skills
 
+### Engineering workflow
+
+Before implementation, read `docs/agents/engineering.md` for the repository map, local setup, verification, and security boundaries. Use `pnpm verify` for the shared local/CI verification sequence.
+
 ### Issue tracker
 
 Plan work in GitHub Issues for `QFREEE/spacecaveman`. Before tracker operations, read `docs/agents/issue-tracker.md`.
