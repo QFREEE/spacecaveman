@@ -82,6 +82,11 @@ and sample visits API. The production secret is configured. See the
 [deployment guide](docs/deployment.md) for the workflow, exact credential settings,
 rotation, manual recovery, and rollback limits.
 
+Every PR also requires a [documentation review](docs/agents/pr-documentation.md):
+revisit setup instructions and accuracy, then record the documents inspected and
+either the updates made or why no edit is needed. The PR template and required
+**Documentation review** check enforce that record.
+
 GitHub deploys only the `spacecaveman` Worker. Changes to the presence trial, its
 credentials, or D1 migrations require their separate workflow and verification.
 
