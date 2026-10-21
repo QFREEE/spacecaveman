@@ -61,10 +61,10 @@ test("navigation and diary expansion work", async ({ page }) => {
   await expect(page).toHaveURL(/#diary$/);
   const read = page.getByRole("button", { name: "阅读全文" }).first();
   await read.click();
-  await expect(page.getByText("傍晚去了河边", { exact: false })).toBeVisible();
+  await expect(page.getByText("傍晚回到洞口", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "收起日志" }).click();
   await expect(
-    page.getByText("傍晚去了河边", { exact: false }),
+    page.getByText("傍晚回到洞口", { exact: false }),
   ).not.toBeVisible();
 });
 
@@ -90,7 +90,7 @@ test("availability filters, dates, empty state, and recovery", async ({
 test("album opens, closes with keyboard and button, and restores focus", async ({
   page,
 }) => {
-  const open = page.getByRole("button", { name: "打开相册：去看海吧" });
+  const open = page.getByRole("button", { name: "打开相册：月球散步" });
   await open.click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("dialog").getByRole("img")).toBeVisible();
@@ -111,12 +111,16 @@ test("guestbook validates, renders literal text, stays local and resets", async 
     if (request.method() !== "GET") writes.push(request.url());
   });
   await page.getByRole("button", { name: "发表留言" }).click();
-  await expect(page.getByRole("status")).toContainText("请填写昵称和留言内容");
+  await expect(page.locator("#guestbook").getByRole("status")).toContainText(
+    "请填写昵称和留言内容",
+  );
   await page.getByLabel("你的昵称").fill("测试来客");
   const text = "<img src=x onerror=alert(1)> 晴天真好";
   await page.getByLabel("留言内容").fill(text);
   await page.getByRole("button", { name: "发表留言" }).click();
-  await expect(page.getByRole("status")).toContainText("留言已添加到本页");
+  await expect(page.locator("#guestbook").getByRole("status")).toContainText(
+    "留言已添加到本页",
+  );
   await expect(page.getByText(text, { exact: true })).toBeVisible();
   await expect(page.locator('.messages img[src="x"]')).toHaveCount(0);
   expect(writes).toEqual([]);
@@ -182,7 +186,7 @@ test("phone layouts and dialogs fit 320, 390, 430 and landscape widths", async (
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await page.getByRole("button", { name: "打开相册：路过的小风景" }).click();
+    await page.getByRole("button", { name: "打开相册：石头收藏" }).click();
     const box = await page
       .getByRole("button", { name: "关闭相册" })
       .boundingBox();
@@ -224,7 +228,7 @@ test("primary controls accept touch on phones and pointer on desktop", async ({
   page,
   isMobile,
 }) => {
-  const album = page.getByRole("button", { name: "打开相册：去看海吧" });
+  const album = page.getByRole("button", { name: "打开相册：月球散步" });
   if (isMobile) await album.tap();
   else await album.click();
   await expect(page.getByRole("dialog")).toBeVisible();

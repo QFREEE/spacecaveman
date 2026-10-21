@@ -30,13 +30,23 @@ export function MusicPlayer() {
       icon="music"
       className="music"
     >
-      <div className="music-cover">
-        <img src="/assets/coast.jpg" alt={t("夏日海岸唱片封面")} />
+      <div className={`music-cover ${playing && !error ? "is-playing" : ""}`}>
+        <span className="record-disc" aria-hidden="true">
+          <i />
+        </span>
         <div>
           <span>{t("正在收藏的旋律")}</span>
-          <h3>{t("晴天的来信")}</h3>
-          <p>{t("小屿的八音盒")}</p>
+          <h3>{t("来自地球的旋律")}</h3>
+          <p>{t("小咕的八音盒")}</p>
         </div>
+      </div>
+      <div
+        className={`equalizer ${playing && !error ? "is-playing" : ""}`}
+        aria-hidden="true"
+      >
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+          <i key={i} style={{ animationDelay: `${(i % 4) * -0.18}s` }} />
+        ))}
       </div>
       <audio
         ref={audio}
@@ -48,11 +58,16 @@ export function MusicPlayer() {
             setDuration(audio.current.duration);
           }
         }}
-        onPlay={() => setPlaying(true)}
+        onPlaying={() => setPlaying(true)}
+        onWaiting={() => setPlaying(false)}
+        onStalled={() => setPlaying(false)}
         onPause={() => setPlaying(false)}
         onEnded={() => setPlaying(false)}
         onTimeUpdate={() => setTime(audio.current?.currentTime ?? 0)}
-        onError={() => setError(true)}
+        onError={() => {
+          setError(true);
+          setPlaying(false);
+        }}
       />
       <div className="player-display">
         <span>

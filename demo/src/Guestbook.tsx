@@ -75,7 +75,7 @@ export function Guestbook() {
         {entries.map((entry, index) => (
           <article className="message" key={entry.id}>
             <span className="message-avatar" aria-hidden="true">
-              <img src="/assets/avatar.jpg" alt="" />
+              <img src="/assets/caveman.svg" alt="" />
             </span>
             <div>
               <div className="message-byline">

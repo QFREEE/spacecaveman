@@ -2,6 +2,9 @@
 
 Status: implemented, verified, and published. This document retains the original local-preview scope; its restrictions on publishing were superseded by the owner's later deployment authorization recorded in Further Notes. Use the [publishing guide](qzone-publishing.md) and [deployment guide](deployment.md) for the current release process. Tracker: https://github.com/QFREEE/spacecaveman/issues/1.
 
+The later [lunar skin](lunar-qzone.md), tracked in issue #15, replaces the pale-blue
+visual direction and fictional summer copy while retaining these module behaviors.
+
 ## Problem Statement
 
 Build a working personal homepage demo that feels like authentic 2005–2008 QQ空间, rather than a modern portfolio with nostalgic decorations. The code should be straightforward for coding agents to navigate and change. The existing application serves fictional upcoming visits and includes a separate presence trial; this preview must avoid coupling to real presence or personal information.

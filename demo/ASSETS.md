@@ -34,15 +34,26 @@ Final prompt set:
   blue sky, casual slightly grainy 2007 digital camera snapshot. Square
   composition. No people, no text, no logos, no watermark.
 
-The wallpaper uses a pale CSS overlay to match the requested skin and maintain
-text contrast. Album photos remain separate assets at their intended aspect ratio.
+These JPGs are retained from the original pale-blue version. The lunar skin does
+not display them. Its wallpaper is CSS star dots over black, or neutral paper stripes.
+
+## Lunar line drawings
+
+The monochrome skin adds original SVG illustrations authored directly as code:
+`caveman.svg` (fictional portrait), `moon-walk.svg` (flag and footprints), and
+`moon-rocks.svg` (two imaginary rocks). `LunarScene.tsx` draws the corresponding
+walking caveman and lunar horizon; `FlowerVine.tsx` draws four plant stages.
+There are no recovered Qzone graphics, copied characters, external images, fonts,
+or animation libraries. SVG/CSS keeps the drawings small and the motion pausable.
 
 ## Icons
 
-Eight icons are copied from the npm `pixelarticons` package, version recorded in
+Ten icons are copied from the npm `pixelarticons` package, version recorded in
 the project lockfile. Source: https://github.com/halfmage/pixelarticons. MIT license
 is retained at `public/assets/icons/LICENSE.txt`. CSS masks apply the skin color
 to the original library SVGs; the icons are not handwritten approximations.
+The lunar additions are `cloud-sun.svg` saved as `flower.svg`, and `sliders.svg`
+saved as `dressup.svg`; both retain the same MIT license.
 
 ## Audio
 
@@ -56,5 +67,6 @@ The three UML-hosted historical screenshots supplied in the specification were
 successfully downloaded and visually inspected during implementation after the
 initial connectivity failure. They remain under `work/qzone-references/` for
 study only. The additional Qzone museum example was inspected in the browser.
-The implementation is an original pale-blue adaptation, not a pixel-for-pixel
-copy of a particular historical skin.
+The current implementation is an original monochrome lunar adaptation, not a
+pixel-for-pixel copy of a particular historical skin. Flower care rules are a
+clearly labeled local adaptation, not a recovered historical score formula.
