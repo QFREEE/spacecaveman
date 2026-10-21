@@ -33,13 +33,21 @@ message exists only in the test browser. It does not write to any API.
 
 ## Deploy
 
+Open a pull request and merge to `main` after checks pass. GitHub Actions builds
+and deploys the homepage and Worker API, preserving existing dashboard variables.
+The [deployment guide](deployment.md) is the source for credentials, manual
+recovery, and rollback. The first automated production deployment passed on
+October 21, 2026; its run is linked in that guide.
+
+The CI smoke check verifies HTTPS for the homepage and sample visits API. For the
+broader browser smoke check described above, run:
+
 ```powershell
-pnpm run deploy
 node scripts/qzone-deploy-smoke.mjs https://spacecaveman.com
 ```
 
-The configuration pins the existing account and domain. The deploy command keeps
-dashboard variables. Secrets are managed separately and are never committed.
+The configuration pins the existing account and domain. Secrets are managed
+separately and are never committed.
 
 The homepage sends `Cache-Control: public, no-cache, no-transform` so edge
 optimizations do not inject an analytics beacon into its HTML. The existing

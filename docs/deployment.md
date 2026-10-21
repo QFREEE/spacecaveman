@@ -1,5 +1,20 @@
 # GitHub checks and Cloudflare deployment
 
+## Verified status
+
+Automatic deployment is active. [PR #10](https://github.com/QFREEE/spacecaveman/pull/10)
+merged as `c058e31c276ccfa5059044a9fca44b447fd43d4d`. The
+[first production run](https://github.com/QFREEE/spacecaveman/actions/runs/39596511494)
+passed on October 21, 2026: checks, deployment, and live HTTPS verification.
+The `production` environment contains `CLOUDFLARE_API_TOKEN` and permits the `main`
+branch. This is a record of that verification, not a promise about future runs.
+
+## Normal release path
+
+Open a pull request, wait for its checks, and merge to `main`. Track the release
+in [GitHub Actions](https://github.com/QFREEE/spacecaveman/actions). No local
+Cloudflare login or manual upload is needed for this path.
+
 GitHub Actions runs checks for pull requests and pushes to `main`. After successful
 checks on `main`, the official Cloudflare Wrangler action deploys the Worker named
 `spacecaveman` and its built static assets together. Wrangler runs the existing
@@ -14,32 +29,44 @@ existing visits and presence pages are retained by the site build. Deployment
 keeps existing dashboard variables. Do not enable another deploy-on-push
 integration for the same Worker.
 
-## One-time deployment credential
+## Credential setup and rotation
 
-The existing interactive Wrangler and Cloudflare MCP logins are not CI credentials.
-Create a dedicated, expiring Cloudflare API token and store it directly in GitHub;
-never paste it into chat, source files, an issue, or a command argument.
+The dedicated CI token is already configured. These instructions are for replacing
+it or setting up another environment. Interactive Wrangler and Cloudflare MCP
+logins are separate from the CI credential. Keep token values in Cloudflare and
+GitHub's secret form, outside chat, source files, issues, and command arguments.
 
-1. In Cloudflare, create an API token named `spacecaveman-github-deploy`.
-2. Grant the existing Worker deployment permissions in account
-   `b72709d7edb8e1f6d064c69ee4b6d3c5`. Cloudflare currently documents Editor as
-   sufficient for an existing Worker. Its Custom Domains API does not yet support
-   per-Worker roles, so this custom-domain configuration currently needs the
-   Workers Editor role at the account's Workers scope. Do not grant all accounts.
-3. Scope Workers Routes Write to the `spacecaveman.com` zone for the custom-domain
-   declaration managed by Wrangler. Do not grant general DNS Edit, account admin,
-   D1, or token-management permissions. Review current permission names in the
-   linked documentation when creating the token.
-4. Choose an expiration and record a rotation reminder privately. Do not restrict
+1. In [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens),
+   create a custom token named `spacecaveman-github-deploy`.
+2. The token form used for the successful deployment exposes these permissions:
+
+   | Category | Permission | Access | Resource scope |
+   | --- | --- | --- | --- |
+   | Account | Workers Scripts | Edit | Include only account `b72709d7edb8e1f6d064c69ee4b6d3c5` |
+   | Zone | Workers Routes | Edit | Include only `spacecaveman.com` |
+
+   The summary should show the specific account, rather than **All accounts**.
+   `Workers Editor` is role terminology in newer authorization documentation;
+   `Workers Scripts → Edit` is the label verified in this token form. No D1,
+   general DNS Edit, account admin, or token-management permission is needed for
+   this website deployment. Account-scoped script editing still covers the other
+   Workers in that account; it is not limited to the website Worker.
+3. Choose an expiration and record a rotation reminder privately. Do not restrict
    the token to the owner's home IP; GitHub-hosted runners use different addresses.
-5. In GitHub repository Settings → Environments → `production`, add environment
-   secret `CLOUDFLARE_API_TOKEN` with that value. The environment permits deployment
-   only from `main`. Pull request checks do not receive this secret.
+4. In [GitHub repository Settings → Environments](https://github.com/QFREEE/spacecaveman/settings/environments),
+   open the existing **production** environment, then **Add environment secret**
+   (or edit the existing secret). Name the secret **CLOUDFLARE_API_TOKEN** and paste
+   the token as its value. The environment name and secret name are different;
+   an environment named after the secret will not supply it to this workflow.
+5. Keep the deployment branch rule set to `main`. Pull request checks do not
+   receive the production secret. Run **Check and deploy → Run workflow** on
+   `main` to verify a replacement, then revoke the old token in Cloudflare.
 
 The account ID is public configuration, not a secret. The scoped token still lets
-its holder replace deployed code; treat it as a production credential. Revoke it
-in Cloudflare and replace the GitHub secret if exposed. No token was generated or
-copied from the existing interactive login for this setup.
+its holder replace deployed code; treat it as a production credential. If exposed,
+revoke it immediately in Cloudflare and replace the GitHub secret. GitHub does not
+reveal saved secret values or move them between environments; reuse your securely
+held original value or create a replacement token.
 
 ## Local commands
 
@@ -68,6 +95,12 @@ job performs read-only HTTPS checks of the homepage and sample visits API; a fai
 check marks the job failed but does not automatically undo a deployment. The API
 may correctly return an empty visits list after the fictional dates pass.
 
+For an exceptional manual upload, authenticate locally with
+`pnpm exec wrangler login`, verify the target with `pnpm exec wrangler whoami`,
+run `pnpm deploy:check`, then `pnpm run deploy`. The `run` is intentional:
+`pnpm deploy` is also a pnpm command with different behavior. Manual deployment
+bypasses the GitHub check gate, so use the normal release path for routine changes.
+
 For a bad code release, revert its commit through a pull request and merge the
 revert to redeploy a reviewed previous source state. To recover urgently, inspect
 `pnpm exec wrangler deployments list --config wrangler.jsonc` and run
@@ -81,4 +114,5 @@ rollback path is documented, not exercised against production by this setup.
 - [Cloudflare's GitHub Actions guide](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
 - [Official Wrangler action](https://github.com/cloudflare/wrangler-action)
 - [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/)
+- [API token permission names](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
 - [Worker rollback limitations](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)

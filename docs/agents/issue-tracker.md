@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and specs live in https://github.com/QFREEE/spacecaveman/issues. Use the `gh` CLI for tracker operations. Pass `--repo QFREEE/spacecaveman` explicitly while this checkout has no remote. For `gh api`, use explicit `repos/QFREEE/spacecaveman/...` paths.
+Issues and specs live in https://github.com/QFREEE/spacecaveman/issues. Use the `gh` CLI for tracker operations. Pass `--repo QFREEE/spacecaveman` explicitly. For `gh api`, use explicit `repos/QFREEE/spacecaveman/...` paths.
 
 ## Conventions
 
