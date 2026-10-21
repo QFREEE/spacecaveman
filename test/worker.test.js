@@ -1,0 +1,29 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import worker from "../src/worker.js";
+
+test("visit endpoint explicitly identifies sample data and prevents caching", async () => {
+  const response = await worker.fetch(new Request("https://example.com/api/visits"));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("Cache-Control"), "no-store");
+  const data = await response.json();
+  assert.equal(data.demo, true);
+  assert.equal(data.timeZone, "America/New_York");
+  assert.ok(data.visits.length > 0);
+  for (const visit of data.visits) {
+    assert.ok(Date.parse(visit.end) > Date.parse(visit.start));
+    assert.ok(["confirmed", "tentative"].includes(visit.status));
+  }
+});
+
+test("the demo never accepts meetup writes", async () => {
+  const response = await worker.fetch(new Request("https://example.com/api/visits", { method: "POST" }));
+  assert.equal(response.status, 405);
+  assert.equal(response.headers.get("Allow"), "GET");
+});
+
+test("unknown API paths return JSON 404s", async () => {
+  const response = await worker.fetch(new Request("https://example.com/api/missing"));
+  assert.equal(response.status, 404);
+  assert.deepEqual(await response.json(), { error: "Not found" });
+});

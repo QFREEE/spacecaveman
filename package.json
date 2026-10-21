@@ -1,0 +1,38 @@
+{
+  "name": "spacecaveman",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:site": "pnpm demo:build && node scripts/build-site.mjs",
+    "demo:dev": "vite --config vite.demo.config.ts",
+    "demo:build": "tsc -p demo/tsconfig.json && vite build --config vite.demo.config.ts",
+    "demo:preview": "vite preview --config vite.demo.config.ts",
+    "demo:check": "tsc -p demo/tsconfig.json",
+    "demo:test": "playwright test --config playwright.demo.config.ts",
+    "dev": "wrangler dev --ip 127.0.0.1",
+    "check": "node --check public/app.js && node --check src/worker.js && node --check src/presence.js && node --check public/presence-viewer.js",
+    "test": "node --test test/*.test.js",
+    "deploy:check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy --keep-vars",
+    "presence:dev": "wrangler dev --config wrangler.presence.jsonc --ip 127.0.0.1 --port 8791",
+    "presence:credentials": "node scripts/presence-credentials.mjs",
+    "presence:deploy:check": "wrangler deploy --config wrangler.presence.jsonc --dry-run",
+    "presence:deploy": "wrangler deploy --config wrangler.presence.jsonc"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "pixelarticons": "^2.4.2",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

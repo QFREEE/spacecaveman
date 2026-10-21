@@ -102,3 +102,28 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Cloudflare local state and secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env.*
+.presence-private/
+
+# Local reference captures, downloaded tools, reports, and publishing checkout
+work/
+outputs/
+.codex/
+test-results/
+playwright-report/
+__pycache__/
+
+# Local tools, scratch data, and generated browser reports
+work/
+outputs/qzone-test-report/
+outputs/qzone-test-results/
+outputs/planning-setup-draft.md
+outputs/qzone-language-issue.md
+outputs/qzone-issue-completion.md
+__pycache__/
+*.pyc

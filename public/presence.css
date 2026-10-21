@@ -1,0 +1,5 @@
+#access-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0; }
+#access-form label { flex-basis: 100%; }
+#read-token { min-width: 0; width: min(100%, 420px); padding: 12px; font: inherit; border: 1px solid #777; border-radius: 6px; }
+#presence-status { font-size: 1.5rem; font-weight: 600; }
+#presence-health { min-height: 1.5em; }
