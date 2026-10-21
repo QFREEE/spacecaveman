@@ -1,6 +1,6 @@
 # Qzone personal homepage demo
 
-Status: implemented and locally verified. The user confirmed the testing boundary, including automated browser interaction tests and special attention to mobile. See the repository's visual QA report and demo instructions for evidence and device-testing limits. Tracker: https://github.com/QFREEE/spacecaveman/issues/1.
+Status: implemented, verified, and published. This document retains the original local-preview scope; its restrictions on publishing were superseded by the owner's later deployment authorization recorded in Further Notes. Use the [publishing guide](qzone-publishing.md) and [deployment guide](deployment.md) for the current release process. Tracker: https://github.com/QFREEE/spacecaveman/issues/1.
 
 ## Problem Statement
 

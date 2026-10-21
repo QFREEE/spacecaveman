@@ -19,7 +19,15 @@ The preserved legacy root A record (`199.36.158.100`) was removed from Cloudflar
 
 The domain was attached using the Cloudflare API to the existing deployed Worker. In-progress local presence changes were not deployed by this operation.
 
-## Verification and remaining work
+## Later deployment verification
+
+The [first automated production deployment](https://github.com/QFREEE/spacecaveman/actions/runs/39596511494)
+on October 21, 2026 passed HTTPS checks for the homepage and `/api/visits` using
+ordinary resolution. The [deployment guide](deployment.md) describes ongoing
+releases. The DNSSEC and resolver details below record observations during the
+earlier cutover; that deployment check did not re-audit DNSSEC management status.
+
+## Cutover verification observations
 
 - Cloudflare zone activation: confirmed.
 - Root custom-domain attachment: confirmed.

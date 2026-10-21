@@ -1,139 +1,100 @@
 # spacecaveman
 
-A small site for invited friends to see current and upcoming NYC visits.
+A personal website and learning project, hosted on Cloudflare Workers Free with
+Workers Static Assets. The goal is to help invited friends see NYC presence and
+upcoming visits; private friend access and owner administration remain planned.
 
-## GitHub deployment
+## Current status
 
-Pull requests run checks. Successful checks on `main` are followed by automatic
-deployment of the homepage, supporting static assets, and Worker API using the
-official Wrangler GitHub Action. The production environment needs its dedicated
-Cloudflare token before deployment can succeed. See [deployment setup and rollback](docs/deployment.md).
+- [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
+  Qzone-style homepage with fictional content. English is the default; the
+  English/中文 switch preserves module state. The demo guestbook stays in the
+  visitor's browser and does not send messages to the owner.
+- [Visits page](https://spacecaveman.com/visits): the earlier minimal frontend,
+  backed by `/api/visits` with fictional upcoming visits. Past visits are omitted;
+  the list becomes empty when the sample dates have passed.
+- Deployment is automated: pull request → checks → merge to `main` → checks →
+  deploy the homepage, supporting assets, and Worker API together. The
+  [first successful production run](https://github.com/QFREEE/spacecaveman/actions/runs/39596511494)
+  completed on October 21, 2026 after [PR #10](https://github.com/QFREEE/spacecaveman/pull/10).
+- The registrar remains Squarespace; Cloudflare serves the root custom domain.
+  [Domain connection records](docs/domain-connection.md) describe the cutover and
+  the DNSSEC observations made at that time.
+- An isolated, protected Worker/D1 [presence trial](docs/presence-trial.md) accepts
+  coarse reports using scoped credentials. It is separate from the public site
+  and is not automatically deployed by the website workflow. Physical iPhone
+  automation testing remains outstanding.
 
-The isolated presence trial is checked but not automatically deployed.
+The public website contains demo content, not private plans or live presence.
+Invited-friend authentication, persistent visits, owner editing, and integration
+of current presence are tracked in [GitHub Issues](https://github.com/QFREEE/spacecaveman/issues).
 
-## Qzone homepage preview
+## Local development
 
-The isolated React + Vite + TypeScript demo lives in `demo/`. It uses fictional
-content, local assets, a local-only guestbook, and an original music-box sample.
-English is the default; the top-bar English/中文 switch translates the interface
-and sample content without resetting module state. Visitor-written messages are
-never translated. The language selection is local to the page and resets to
-English on refresh.
-The existing Worker and presence trial remain separate.
+Use Node 24 and the pnpm version recorded in `package.json`. The pnpm lockfile is
+the dependency source of truth.
 
-## Publish the Qzone homepage
-
-The main Worker now builds the Qzone demo as the site homepage. The earlier
-visits page remains available at `/visits`, and `/presence` plus the existing
-`/api/*` routes retain their behavior. The separate protected presence-trial
-Worker uses its own configuration and is not redeployed by these commands.
-
-```powershell
+```sh
 pnpm install --frozen-lockfile
-pnpm demo:test
-pnpm check
-pnpm test
-pnpm deploy:check
-pnpm run deploy
+pnpm dev
 ```
 
-Wrangler runs `pnpm build:site` before serving or deploying the main Worker. This
-builds the React app and combines it with the existing static files in
-`dist/site/`, retaining security headers and copying the old homepage to
-`visits.html`. Source files under `public/` stay intact. Deployment targets the
-existing `spacecaveman` Worker and its configured custom domain.
+Wrangler builds the React homepage, combines it with the existing static pages,
+and serves the Worker and assets locally. Open the URL it prints. Opening an HTML
+file directly does not run the API.
 
-```powershell
-pnpm install
+For the faster frontend-only preview:
+
+```sh
 pnpm demo:dev
 ```
 
-Open http://127.0.0.1:4173/. To check and build the demo:
+Open http://127.0.0.1:4173/. This preview uses fictional local data; it does not run
+the Worker. `pnpm demo:preview` serves the frontend production build on port 4174.
 
-```powershell
+## Checks
+
+```sh
+pnpm check
+pnpm test
 pnpm demo:build
 pnpm exec playwright install chromium
 pnpm demo:test
-pnpm check
-pnpm test
-```
-
-The browser suite covers desktop and touch-enabled phone contexts, narrow layouts,
-albums, filters, guestbook validation/reset, and real audio controls. Build output
-is isolated in `dist/qzone-demo/`; `pnpm demo:preview` serves that build at
-http://127.0.0.1:4174/. These commands do not deploy anything.
-
-See [the specification](docs/qzone-demo-spec.md), [asset provenance](demo/ASSETS.md),
-and [visual QA](design-qa.md). Screenshots and the browser test report are under
-`outputs/qzone-qa/` and `outputs/qzone-test-report/`. Phone viewport emulation is
-not physical iOS/Android device testing.
-
-## First milestone: local demo
-
-- Plain HTML, CSS, and browser JavaScript. No frontend framework or build step.
-- Cloudflare Workers Static Assets serves `public/`.
-- A Worker serves `GET /api/visits` with clearly fictional fixtures.
-- Show current and upcoming visits with confirmed/tentative filters. Past visits are omitted.
-- No messaging or meetup-request functionality. There is no authentication or database yet.
-
-## Run locally
-
-Install Node.js LTS with npm, then from this repository:
-
-```sh
-npm install
-npm run dev
-```
-
-Open the local URL printed by Wrangler. Wrangler runs the Worker locally alongside the static assets; no Cloudflare login is needed for this demo. Opening `index.html` directly won't run the API.
-
-If you use pnpm instead, use `pnpm install` and `pnpm dev`. This checkout includes a pnpm lockfile.
-
-```sh
-npm run check
-npm test
-npm run deploy:check
-```
-
-The last command bundles the Worker without publishing it. It does not prove production authentication or account configuration.
-
-## First deployment: sample site on workers.dev
-
-Use the free Workers plan for this milestone. The site contains fictional visits only and has no private access yet.
-
-From this checkout, run:
-
-```sh
-pnpm exec wrangler login
-pnpm exec wrangler whoami
 pnpm deploy:check
-pnpm run deploy
+pnpm presence:deploy:check
 ```
 
-`login` opens a browser to authorize Wrangler. This is separate from the Cloudflare MCP connection used by Codex. `whoami` lets you verify the destination account before deployment. `deploy:check` bundles locally; `deploy` uploads the static files and Worker API to the Worker named `spacecaveman`. If that name already exists in the selected account, inspect it before deploying to avoid replacing another project.
+The browser suite checks desktop and touch-enabled phone layouts, both languages,
+albums, filters, guestbook behavior, and audio controls. Phone emulation does not
+replace physical iOS/Android testing. On Linux, install Chromium dependencies with
+`pnpm exec playwright install --with-deps chromium`, as CI does. Set
+`DEMO_TEST_PORT` to an unused port if another preview already occupies port 4173.
 
-Wrangler prints the deployment URL, normally `https://spacecaveman.<your-subdomain>.workers.dev`. It may prompt you to choose a workers.dev subdomain on first deployment. Open the returned URL, confirm the visits load, and open `/api/visits` on the same host to inspect the JSON response. This step requires no domain or nameserver changes.
+Both deploy checks are dry runs. They build/package code without publishing it.
+See the [publishing guide](docs/qzone-publishing.md) for a smoke test against the
+complete Worker package and [visual QA](design-qa.md) for the frontend review.
 
-With npm, substitute `npx wrangler` for `pnpm exec wrangler`, and `npm run deploy:check` / `npm run deploy` for the package scripts.
+## Deployment
 
-## Learning path
+Use a pull request for changes. After its checks pass, merge to `main`; GitHub
+Actions deploys through the official Wrangler action and checks the live homepage
+and sample visits API. The production secret is configured. See the
+[deployment guide](docs/deployment.md) for the workflow, exact credential settings,
+rotation, manual recovery, and rollback limits.
 
-1. Inspect `/api/visits` in your browser's Network tab: the page fetches JSON and renders it.
-2. Design invited-friend access and owner access before adding any real plans. Hidden URLs and frontend filters are not access controls.
-3. Add D1 migrations for visits, then authenticated reads for friends and writes for the owner.
-4. Run and test locally, then perform your first Wrangler login and deployment together.
-5. Connect `spacecaveman.com` to Cloudflare while keeping the existing registrar. Review existing DNS records before any nameserver changes.
+GitHub deploys only the `spacecaveman` Worker. Changes to the presence trial, its
+credentials, or D1 migrations require their separate workflow and verification.
 
-The sample site is deployed at https://spacecaveman.spacecaveman.workers.dev. The root domain `spacecaveman.com` is attached to that Worker; see [domain connection status](docs/domain-connection.md) for DNS propagation, HTTPS verification, and DNSSEC restoration. The demo is not an invitation-only production service.
+## Architecture and references
 
-## iPhone presence research
+`demo/` holds the React homepage. Wrangler runs `build:site` to combine its build
+with `public/` in generated `dist/site/`, preserving the earlier homepage as
+`visits.html`, the presence viewer, and security headers. Workers Static Assets
+serves those files; only `/api/*` uses Worker-first routing. The public Worker has
+no presence database binding; the trial uses its own D1 binding and credentials.
 
-An isolated, protected Worker/D1 trial now accepts coarse presence reports and provides a private status viewer. It passes local and deployed HTTP checks; the iPhone automations still need to be created and tested on-device. Start with the [deployed trial guide](docs/presence-trial.md), then follow the [Shortcuts recipe](docs/iphone-shortcuts-setup.md). The [security design](docs/iphone-presence-design.md) also covers future invited-friend access and owner administration.
-
-## Architecture
-
-Browser → static HTML/CSS/JS → same-origin `/api/visits` → Worker
-
-Only `/api/*` uses Worker-first routing. This keeps the API boundary explicit while other files use Static Assets.
-
-References: [Worker and Static Assets routing](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/), [Wrangler](https://developers.cloudflare.com/workers/wrangler/), [D1](https://developers.cloudflare.com/d1/).
+- [Deployment and rollback](docs/deployment.md)
+- [Homepage publishing and package smoke tests](docs/qzone-publishing.md)
+- [Homepage specification](docs/qzone-demo-spec.md) and [asset provenance](demo/ASSETS.md)
+- [Presence trial](docs/presence-trial.md), [Shortcuts recipe](docs/iphone-shortcuts-setup.md), and [security design](docs/iphone-presence-design.md)
+- [Cloudflare Static Assets routing](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/)
