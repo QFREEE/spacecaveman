@@ -7,6 +7,11 @@ serves it as the production homepage.
 
 ## Homepage behavior
 
+- The header Earth dial combines an analog clock and calendar in one drawing.
+  It always shows US Eastern time and date, including daylight-saving changes.
+  It updates each minute and when returning to the tab.
+  The accessible date/time and visible calendar follow the language selector.
+
 - NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
   reports presence; the homepage refreshes every minute and shows the latest answer.
   Update age is approximate: within a few minutes (under five), within an hour,
