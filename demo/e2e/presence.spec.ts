@@ -70,7 +70,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
   await page.goto("/");
   const presence = page.getByRole("region", { name: "Live NYC status" });
   await expect(presence.getByRole("status")).toHaveText(
-    "No, I am in the woods.",
+    "Nope! Chilling in the woods",
   );
   await expect(presence).toContainText("Updated within the last few minutes");
   await expect(presence.locator("time, [datetime]")).toHaveCount(0);
@@ -87,7 +87,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
     expires_at: new Date(now + 120_000).toISOString(),
   };
   await page.clock.fastForward(60_000);
-  await expect(presence.getByRole("status")).toHaveText("Yes, I’m in NYC!");
+  await expect(presence.getByRole("status")).toHaveText("Yep!");
   await expect(presence).toContainText("Updated within the last few minutes");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
@@ -122,7 +122,7 @@ test("update age stays approximate and advances when refreshing fails", async ({
   await page.clock.fastForward(5 * 60_000);
   await expect(presence).toContainText("Updated within the last hour");
   await expect(presence).toContainText("Could not refresh");
-  await expect(presence.getByRole("status")).toHaveText("Yes, I’m in NYC!");
+  await expect(presence.getByRole("status")).toHaveText("Yep!");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(presence).toContainText("一小时内更新");
   await page.clock.fastForward(55 * 60_000);
