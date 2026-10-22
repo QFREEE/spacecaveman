@@ -8,8 +8,8 @@ upcoming visits; private friend access and owner administration remain planned.
 
 - [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
   Qzone-style homepage with exactly three modules: **Am I in NYC?**, the flower
-  vine, and a decorative visitor counter. The public NYC card shows **Unknown**;
-  it is not connected to the private presence trial. The count is sample data.
+  vine, and a decorative visitor counter. The public NYC card shows **No update yet.**
+  and is not connected to the private presence trial. The count is sample data.
   [Current behavior and screenshots](docs/three-module-homepage.md). English is
   the default; the English/中文 switch preserves flower state. The lunar header,
   walking caveman and pendant remain.

@@ -1,5 +1,9 @@
 ## Agent skills
 
+### Deployment
+
+Merging a pull request triggers production deployment. For deployment requests, use the PR merge workflow. Run Wrangler deployment commands only when the user explicitly requests a manual deployment.
+
 ### Engineering workflow
 
 Before implementation, read `docs/agents/engineering.md` for the repository map, local setup, verification, and security boundaries. Use `pnpm verify` for the shared local/CI verification sequence.

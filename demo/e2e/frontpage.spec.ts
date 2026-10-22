@@ -19,10 +19,12 @@ test("front page contains exactly NYC, flower and sample visitor count, without 
   await expect(
     page.getByRole("heading", { name: "Am I in NYC?", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("#nyc .presence-answer")).toContainText("Unknown");
+  await expect(page.locator("#nyc").getByRole("status")).toHaveText(
+    "No update yet.",
+  );
   await expect(
-    page.locator("#nyc").getByText("No public update yet."),
-  ).toBeVisible();
+    page.locator("#nyc .presence-caption, #nyc .presence-note"),
+  ).toHaveCount(0);
   await expect(page.getByLabel("Sample visit count: 1286")).toHaveText(
     "001286",
   );
@@ -110,7 +112,7 @@ test("public NYC status remains unknown and flower care survives language change
     "data-status",
     "unknown",
   );
-  await expect(page.locator(".presence-answer")).toContainText("未知");
+  await expect(page.locator(".presence-answer")).toContainText("还没有更新。");
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
@@ -123,7 +125,9 @@ test("public NYC status remains unknown and flower care survives language change
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "0");
-  await expect(page.locator(".presence-answer")).toContainText("Unknown");
+  await expect(page.locator(".presence-answer")).toContainText(
+    "No update yet.",
+  );
 });
 
 test("enlarged text and flower properties fit a short phone viewport", async ({

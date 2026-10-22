@@ -5,13 +5,19 @@ page now contains exactly **Am I in NYC?**, **My flower vine**, and **Visitors**
 It retains the accepted monochrome lunar Qzone header, compact framed modules,
 bitmap icons, beveled controls, English default and Chinese language switch.
 
+The screenshots below show the original layout before the NYC answer reveal.
+
 ![Desktop homepage](screenshots/home-desktop.png)
 
 ![Phone homepage at 390px](screenshots/home-phone.png)
 
 ## Behavior
 
-- NYC status shows **Unknown** and **No public update yet.** The existing presence
+- NYC status shows **No update yet.** with a subtle 1.2-second fade and upward
+  settle on page load. The answer stays visible and is available to screen readers
+  immediately. Pausing animation or requesting reduced motion shows it immediately.
+  English and Chinese copy support all three states; the public default remains
+  unknown. The existing presence
   trial is private and credential-protected; this card makes no request to it,
   exposes no credential, and does not infer a yes/no status. Connecting a public
   status requires a separate integration decision.
@@ -46,7 +52,7 @@ The complete previous composition is recoverable from Git commit
 ## Verification
 
 Run `pnpm demo:build` and `pnpm demo:test`; set `DEMO_TEST_PORT` if 4173 is occupied.
-The 18 active Chromium checks cover desktop and touch-phone projects: exact
+The active Chromium checks cover desktop and touch-phone projects: exact
 module count, no API requests, sample labeling, valid links, bilingual state,
 real Tab order, care stages/caps/reward/reset, burst protection, pause/reduced
 motion, enlarged text and overflow at 320/390/430/720/1440px. Screenshots above
