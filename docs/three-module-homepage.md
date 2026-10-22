@@ -16,6 +16,11 @@ The screenshots below show the original layout before the NYC answer reveal.
 - NYC status shows **No update yet.** with a subtle 1.2-second fade and upward
   settle on page load. The answer stays visible and is available to screen readers
   immediately. Pausing animation or requesting reduced motion shows it immediately.
+  With an in-NYC status, a small train arrives in the skyline; with an outside-NYC
+  status, a figure appears among trees. Both scenes settle after 1.2 seconds.
+  The woods are a playful symbol for being outside NYC, not a location report.
+  Unknown status keeps a quiet skyline without either scene. Pausing or reduced
+  motion immediately settles the scene; resuming does not replay it.
   English and Chinese copy support all three states; the public default remains
   unknown. The existing presence
   trial is private and credential-protected; this card makes no request to it,
