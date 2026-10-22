@@ -73,6 +73,6 @@ remains outstanding. Existing Worker checks and deployment packaging remain in C
 package's security headers, three modules, bilingual flower interactions and
 preserved routes; follow the [publishing guide](qzone-publishing.md) to start it.
 
-The outside-NYC answer is the owner's playful wording: **No, I am in the woods.**
+The outside-NYC answer is the owner's playful wording: **Nope! Chilling in the woods**
 (**不在，我在树林里。**). The status remains a coarse outside-NYC value; the wording
 does not introduce more precise location data.
