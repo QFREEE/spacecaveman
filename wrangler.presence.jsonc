@@ -5,7 +5,7 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-10-20",
   "compatibility_flags": ["nodejs_compat"],
-  "assets": { "directory": "./public", "run_worker_first": ["/api/*"] },
+  "assets": { "directory": "./public", "run_worker_first": ["/api/*", "/shortcuts*"] },
   "d1_databases": [{ "binding": "PRESENCE_DB", "database_name": "spacecaveman-presence-trial", "database_id": "9d05a3a7-1c0e-4cd0-a267-dcad60cb3613" }],
   "observability": { "enabled": false, "traces": { "enabled": false } }
 }

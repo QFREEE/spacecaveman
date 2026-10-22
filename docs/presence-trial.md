@@ -14,8 +14,10 @@ Open the local `.presence-private/iphone-setup.txt` file for your credentials. I
 
 The original bundle may be in the parent workspace rather than this publishing
 checkout. Reuse that file; do not generate a replacement just because a checkout
-has no bundle. The credential-free `/shortcuts.html` guide gives a reusable manual
-publisher and Arrive/Leave wiring. It is a setup recipe, not an installed shortcut.
+has no bundle. The [repository-only setup guide](iphone-shortcuts-setup.md) gives
+a manual publisher and Arrive/Leave wiring. Its HTML copy is under `docs/`, not
+deployed assets; former `/shortcuts` URLs on both production sites return 410
+Gone at the owner's request. This does not disable the private write API.
 
 1. Follow [the action recipe](iphone-shortcuts-setup.md): Date → Format Date (ISO 8601 with time zone) → fresh event ID → URL → Get Contents of URL.
 2. Use the API URL above, method **POST**, JSON body, and the **Authorization** header from the private file. Use the write credential only.
