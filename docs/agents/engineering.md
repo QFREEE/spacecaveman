@@ -14,9 +14,9 @@ Track work in the configured issue tracker. Root `AGENTS.md` is authoritative;
 
 | Area | Responsibility |
 | --- | --- |
-| `demo/src/` | Published React homepage; fictional fixtures and browser-local guestbook |
+| `demo/src/` | Published bilingual React homepage; retired prototypes stay unmounted |
 | `public/` | Supporting static pages and security headers; visits and presence viewer |
-| `src/worker.js`, `src/presence.js` | Visits API and scoped presence handler |
+| `src/worker.js`, `src/presence.js` | Public homepage endpoints and protected presence handler |
 | `wrangler.jsonc` | Website Worker and generated `dist/site/` assets |
 | `wrangler.presence.jsonc`, `migrations/` | Separate private presence trial and D1 schema |
 | `test/`, `demo/e2e/` | Node API/storage tests and Playwright browser tests |

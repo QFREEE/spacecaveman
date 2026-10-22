@@ -1,4 +1,4 @@
-import { useLanguage } from "./Language";
+import { useLegacyLanguage as useLanguage } from "./legacy/Language";
 import { useState } from "react";
 import { diaries } from "./data";
 import { ModuleFrame } from "./ModuleFrame";

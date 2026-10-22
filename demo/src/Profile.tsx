@@ -1,4 +1,4 @@
-import { useLanguage } from "./Language";
+import { useLegacyLanguage as useLanguage } from "./legacy/Language";
 import { ModuleFrame } from "./ModuleFrame";
 import { profile } from "./data";
 import { useTheme } from "./themes/ThemeProvider";

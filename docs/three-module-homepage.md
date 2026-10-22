@@ -1,5 +1,10 @@
 # Three-module homepage
 
+Historical design milestone: the current homepage now uses live presence, shared
+flower storage and real page views. See [production behavior](homepage-production.md)
+and the [bilingual editing guide](bilingual-homepage.md). The behavior and screenshots
+below describe the earlier demo milestone.
+
 Implements [issue #22](https://github.com/QFREEE/spacecaveman/issues/22). The front
 page now contains exactly **Am I in NYC?**, **My flower vine**, and **Visitors**.
 It retains the accepted monochrome lunar Qzone header, compact framed modules,

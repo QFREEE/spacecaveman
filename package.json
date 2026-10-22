@@ -13,7 +13,7 @@
     "demo:check": "tsc -p demo/tsconfig.json",
     "demo:test": "playwright test --config playwright.demo.config.ts",
     "dev": "wrangler dev --ip 127.0.0.1",
-    "check": "node --check public/app.js && node --check src/worker.js && node --check src/presence.js && node --check public/presence-viewer.js && node --check scripts/presence-check.mjs",
+    "check": "node --check public/app.js && node --check src/worker.js && node --check src/site.js && node --check src/presence.js && node --check public/presence-viewer.js && node --check scripts/presence-check.mjs",
     "test": "node --test test/*.test.js",
     "deploy:check": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy --keep-vars",

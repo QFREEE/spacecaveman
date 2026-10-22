@@ -1,60 +1,42 @@
-# Publishing the Qzone demo
+# Publishing the homepage
 
-The main `spacecaveman` Worker serves the English-default Qzone homepage at
-https://spacecaveman.com/ and https://spacecaveman.spacecaveman.workers.dev/.
-The English/中文 switch and flower demo remain client-side. The homepage contains
-NYC status (Unknown), flower and sample visitor count; other modules remain in
-source but are not mounted. See the [current composition](three-module-homepage.md).
+The main Worker serves the English-default personal homepage, live coarse NYC
+status, a shared flower and a real aggregate page-view counter. See
+[production behavior](homepage-production.md) and [translation editing](bilingual-homepage.md).
 
-## Build and verify
+## Build and check
 
-```powershell
+Use Node 24 and the pnpm version pinned in package.json.
+
+```sh
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
 pnpm verify
 ```
 
-`build:site` combines the React production build with the existing static assets
-in `dist/site/`. It preserves `_headers`, `/presence`, and the API routing, and
-retains the earlier homepage at `/visits`. The source files in `public/` remain
-intact. The separate protected presence-trial Worker is not redeployed.
+The shared verification performs syntax checks, real SQLite tests, the frontend
+build, browser tests and both Worker dry runs. It does not publish or migrate
+production. Use `pnpm exec playwright install --with-deps chromium` on Linux.
 
-For a test of the exact Worker package, run the following in separate terminals:
+For a complete local preview, apply the D1 migrations locally, then run `pnpm dev`.
+`pnpm demo:dev` serves only the frontend; endpoints need the Worker.
 
-```powershell
-pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
-node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
-```
+## Release
 
-The smoke test checks the real security headers, exactly three modules, Unknown
-status, sample counter labeling, bilingual flower state, growth/flag controls,
-animation pause, phone layouts, and preserved visits/presence routes. Flower
-actions exist only in the test browser. It sends no API writes or credentials.
+Push a task branch and open a PR with the documentation review record. Merge
+after **Checks** and **Documentation review** pass. GitHub Actions builds and
+deploys the main Worker and assets. The separate phone Worker is not deployed.
+See [deployment](deployment.md) for credentials, rollback and exceptional manual
+deployment, which requires an explicit owner request.
 
-## Deploy
+The current production D1 database already has migrations 0002 and 0003. A new
+environment needs those applied before serving the homepage; CI does not apply
+migrations automatically. Never include credentials or private bundles in Git.
 
-Open a pull request and merge to `main` after checks pass. GitHub Actions builds
-and deploys the homepage and Worker API, preserving existing dashboard variables.
-The [deployment guide](deployment.md) is the source for credentials, manual
-recovery, and rollback. The first automated production deployment passed on
-October 21, 2026; its run is linked in that guide.
+The build retains supporting visits/presence pages and security headers. Retired
+setup URLs remain 410 Gone. The read-only deployment check expects an empty
+public visits list, not fictional plans.
 
-The CI smoke check verifies HTTPS for the homepage and sample visits API. For the
-broader browser smoke check described above, run:
-
-```powershell
-node scripts/qzone-deploy-smoke.mjs https://spacecaveman.com
-```
-
-The configuration pins the existing account and domain. Secrets are managed
-separately and are never committed.
-
-The homepage sends `Cache-Control: public, no-cache, no-transform` so edge
-optimizations do not inject an analytics beacon into its HTML. The existing
-Content Security Policy remains unchanged. Cloudflare's documented behavior:
-https://developers.cloudflare.com/web-analytics/get-started/.
-
-Before this homepage deployment, the main Worker version was
-`b4e60ab3-e2f4-4a6e-bc70-85a4fa2d203c`. Keep deployment/version history available
-when investigating a regression. Local tools, credentials, downloaded historical
-references, test reports, and generated output are excluded from Git.
+Historical browser smoke scripts may write page views or care for the shared
+flower. Use the normal browser suite with intercepted responses for routine
+frontend checks. Read any smoke script before running it against production.

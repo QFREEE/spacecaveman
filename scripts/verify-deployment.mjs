@@ -8,7 +8,7 @@ for (const path of ['/', '/api/visits']) {
       if (response.status !== 200) throw new Error(`HTTP ${response.status}`);
       if (path === '/api/visits') {
         const body = await response.json();
-        if (body.demo !== true || !Array.isArray(body.visits)) throw new Error('Unexpected sample API contract');
+        if (body.demo !== undefined || !Array.isArray(body.visits) || body.visits.length !== 0) throw new Error('Unexpected public visits contract');
         if (response.headers.get('cache-control') !== 'no-store') throw new Error('API caching is unsafe');
       } else if (!(response.headers.get('content-type') || '').includes('text/html')) {
         throw new Error('Expected HTML');

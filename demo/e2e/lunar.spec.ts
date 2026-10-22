@@ -1,13 +1,14 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("care advances four independent attributes and all growth stages, unlocks a usable ornament, then resets", async ({
+test("shared care grows all stages and preserves progress and reward preferences on reload", async ({
   page,
   isMobile,
 }) => {
+  test.setTimeout(60000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   const flower = page.locator("#flower");
   const writes: string[] = [];
@@ -34,33 +35,35 @@ test("care advances four independent attributes and all growth stages, unlocks a
       );
     }
   }
-  await expect(flower.getByRole("status")).toHaveText(
-    "In bloom! You earned a Moon flag.",
-  );
-  await page.getByLabel("Moon flag · bloom reward").check();
+  await expect(flower.getByRole("status")).toHaveText("Flag unlocked.");
+  await page.getByLabel("Show flag").check();
   await expect(page.locator(".treasure-flag")).toBeVisible();
-  await page.getByLabel("Moon flag · bloom reward").uncheck();
+  await page.getByLabel("Show flag").uncheck();
   await expect(page.locator(".treasure-flag")).toHaveCount(0);
   await flower.getByRole("button", { name: "Water", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "3");
-  await flower
-    .getByRole("button", { name: "Properties / log", exact: true })
-    .click();
+  await flower.getByRole("button", { name: "Details", exact: true }).click();
   await expect(flower.locator(".plant-properties li")).toHaveCount(12);
-  await flower.getByRole("button", { name: "Reset demo", exact: true }).click();
+  await flower
+    .getByRole("button", { name: "Refresh plant", exact: true })
+    .click();
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
-    "0",
+    "3",
   );
-  await expect(flower.getByText("No care recorded yet.")).toBeVisible();
-  expect(writes).toEqual([]);
+  await expect(flower.locator(".plant-properties li")).toHaveCount(12);
+  expect(writes.every((url) => url.includes("/api/flower?care="))).toBe(true);
   await page.reload();
-  await expect(page.getByLabel("Moon flag · bloom reward")).toHaveCount(0);
+  await expect(page.getByLabel("Show flag")).not.toBeChecked();
+  await expect(page.locator(".treasure-flag")).toHaveCount(0);
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "0");
+  ).toHaveAttribute("value", "3");
+  await page.getByLabel("Show flag").check();
+  await page.reload();
+  await expect(page.locator(".treasure-flag")).toBeVisible();
 });
 
 test("watering gives visible feedback without stage growth, rejects burst clicks and reports full attributes", async ({
@@ -69,6 +72,7 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const flower = page.locator("#flower");
   const water = flower.getByRole("button", { name: "Water", exact: true });
+  await expect(water).toBeEnabled();
   // A burst in one event turn must not count as multiple care actions.
   await water.evaluate((button: HTMLButtonElement) => {
     button.click();
@@ -84,18 +88,18 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
     "data-stage",
     "0",
   );
-  await expect(flower.getByRole("status")).toContainText("Soil watered");
+  await expect(flower.getByRole("status")).toContainText("Watered.");
   await expect(water).toBeEnabled();
   for (let i = 0; i < 2; i++) {
     await water.click();
     await expect(water).toBeEnabled();
   }
   await water.click();
-  await expect(flower.getByRole("status")).toHaveText(
-    "This attribute is full. Try another kind of care.",
-  );
+  await expect(flower.getByRole("status")).toHaveText("Already full.");
   await flower.getByRole("button", { name: "Sun", exact: true }).click();
-  await flower.getByRole("button", { name: "Reset demo", exact: true }).click();
+  await flower
+    .getByRole("button", { name: "Refresh plant", exact: true })
+    .click();
   await expect(water).toBeEnabled();
   await expect(flower.locator(".care-effect")).toHaveCount(0);
 });
@@ -116,45 +120,38 @@ test("language preserves care and properties; keyboard and reduced motion work",
     "animation-name",
     "none",
   );
-  await flower
-    .getByRole("button", { name: "Properties / log", exact: true })
-    .click();
+  await flower.getByRole("button", { name: "Details", exact: true }).click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
-  await expect(flower.getByRole("status")).toContainText("泥土湿润");
-  await expect(
-    flower.getByRole("button", { name: "属性 / 记录" }),
-  ).toHaveAttribute("aria-expanded", "true");
+  await expect(flower.getByRole("status")).toContainText("已浇水。");
+  await expect(flower.getByRole("button", { name: "详情" })).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "1");
-  await expect(flower.getByRole("status")).toContainText("Soil watered");
+  await expect(flower.getByRole("status")).toContainText("Watered.");
 });
 
-test("pause stops and resumes all ambient motion", async ({ page }) => {
+test("animation has no pause control and follows the device motion preference", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page
-    .getByRole("button", { name: "Pause animation", exact: true })
-    .click();
-  for (const selector of [
-    ".caveman-traveler",
-    ".walk-leg",
-    ".hanging-planet",
-  ]) {
-    await expect(page.locator(selector).first()).toHaveCSS(
-      "animation-play-state",
-      "paused",
-    );
-  }
-  await page
-    .getByRole("button", { name: "Resume animation", exact: true })
-    .click();
+  await expect(
+    page.getByRole("button", { name: /Pause animation|Resume animation/ }),
+  ).toHaveCount(0);
   await expect(page.locator(".caveman-traveler")).toHaveCSS(
     "animation-play-state",
     "running",
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".caveman-traveler")).toHaveCSS(
+    "animation-name",
+    "none",
   );
 });
 

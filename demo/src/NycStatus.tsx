@@ -1,14 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
+import { Presence } from "./Presence";
 
 type NycStatusValue = "in_nyc" | "not_in_nyc" | "unknown";
-
-const answers: Record<NycStatusValue, string> = {
-  in_nyc: "在，我在纽约！",
-  not_in_nyc: "现在不在纽约。",
-  unknown: "还没有更新。",
-};
 
 function SceneDrawing({ children }: { children: ReactNode }) {
   return (
@@ -95,18 +90,21 @@ function StatusReveal({
     </div>
   );
 }
-// Public status stays unknown until an authorized public data source is connected.
-export function NycStatus({ status = "unknown" }: { status?: NycStatusValue }) {
+export function NycStatus() {
   const { t } = useLanguage();
   return (
     <ModuleFrame
       id="nyc"
-      title={t("我在纽约吗？")}
+      title={t("presence.question")}
       english=""
       icon="home"
       className="nyc-status"
     >
-      <StatusReveal key={status} status={status} answer={t(answers[status])} />
+      <Presence
+        renderAnswer={(status, answer) => (
+          <StatusReveal key={status} status={status} answer={answer} />
+        )}
+      />
     </ModuleFrame>
   );
 }

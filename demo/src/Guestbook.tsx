@@ -1,4 +1,4 @@
-import { useLanguage } from "./Language";
+import { useLegacyLanguage as useLanguage } from "./legacy/Language";
 import { useState, type FormEvent } from "react";
 import { messages, type Message } from "./data";
 import { ModuleFrame } from "./ModuleFrame";

@@ -1,61 +1,151 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLanguage } from "./Language";
+import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
 
 const actions = [
   {
     id: "rain",
-    label: "浇花",
-    stat: "雨露",
+    label: "flower.care.water",
+    stat: "flower.stat.rain",
     icon: "♧",
     effect: "﹅ ﹅ ﹅",
-    response: "泥土湿润了，叶子精神起来了。",
+    response: "flower.notice.watered",
   },
   {
     id: "sun",
-    label: "日照",
-    stat: "阳光",
+    label: "flower.care.sun",
+    stat: "flower.stat.sun",
     icon: "☼",
     effect: "☼",
-    response: "晒到太阳啦，暖乎乎的。",
+    response: "flower.notice.sunAdded",
   },
   {
     id: "love",
-    label: "修剪",
-    stat: "爱心",
+    label: "flower.care.prune",
+    stat: "flower.stat.love",
     icon: "✂",
     effect: "✂",
-    response: "修好了小枝，长得整齐一点了。",
+    response: "flower.notice.pruned",
   },
   {
     id: "food",
-    label: "施肥",
-    stat: "营养",
+    label: "flower.care.feed",
+    stat: "flower.stat.food",
     icon: "⋄",
     effect: "✧ · ✧",
-    response: "加了月球肥料，根部闪了一下。",
+    response: "flower.notice.fed",
   },
 ] as const;
 type Care = (typeof actions)[number];
-const stages = ["嫩芽", "长叶", "花苞", "开花"];
+type Stats = Record<Care["id"], number>;
+type Plant = {
+  stats: Stats;
+  log: string[];
+  generation: number;
+  bloomed_at: string | null;
+  error?: string;
+};
+const stages = [
+  "flower.stage.sprout",
+  "flower.stage.leaves",
+  "flower.stage.bud",
+  "flower.stage.bloom",
+] as const;
 const initialStats = { rain: 0, sun: 0, love: 0, food: 0 };
+
+async function requestPlant(
+  care?: Care["id"],
+): Promise<{ plant: Plant; status: number }> {
+  const response = await fetch(`/api/flower${care ? `?care=${care}` : ""}`, {
+    method: care ? "POST" : "GET",
+    signal: AbortSignal.timeout(10000),
+  });
+  if (![200, 409, 429].includes(response.status))
+    throw new Error("Flower unavailable");
+  const plant = await response.json();
+  if (
+    !plant.stats ||
+    !actions.every(
+      ({ id }) =>
+        Number.isInteger(plant.stats[id]) &&
+        plant.stats[id] >= 0 &&
+        plant.stats[id] <= 3,
+    ) ||
+    !Array.isArray(plant.log) ||
+    plant.log.length > 12 ||
+    !plant.log.every((id: unknown) =>
+      actions.some((action) => action.id === id),
+    ) ||
+    !Number.isSafeInteger(plant.generation) ||
+    plant.generation < 1 ||
+    !(
+      plant.bloomed_at === null ||
+      (typeof plant.bloomed_at === "string" &&
+        Number.isFinite(Date.parse(plant.bloomed_at)))
+    )
+  ) {
+    throw new Error("Invalid flower");
+  }
+  return { plant, status: response.status };
+}
 
 export function FlowerVine({
   onBloom,
   reward,
 }: {
-  onBloom: () => void;
+  onBloom: (generation: number) => void;
   reward?: ReactNode;
 }) {
   const { t } = useLanguage();
   const [stats, setStats] = useState(initialStats);
   const [active, setActive] = useState<Care | null>(null);
-  const [notice, setNotice] = useState("");
-  const [log, setLog] = useState<string[]>([]);
+  const [notice, setNotice] = useState<MessageKey | "">("");
+  const [log, setLog] = useState<MessageKey[]>([]);
   const [details, setDetails] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [generation, setGeneration] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(false);
+  const revision = useRef(0);
   const stage = Math.min(...Object.values(stats));
+  function applyPlant(plant: Plant) {
+    setStats(plant.stats);
+    setLog(
+      plant.log.map((id) => actions.find((action) => action.id === id)!.label),
+    );
+    setGeneration(plant.generation);
+    setLoaded(true);
+    setFailed(false);
+  }
+  useEffect(() => {
+    if (stage === 3) onBloom(generation);
+  }, [stage, generation, onBloom]);
+  useEffect(() => {
+    let current = true;
+    async function refresh() {
+      if (busy.current) return;
+      const version = ++revision.current;
+      try {
+        const { plant } = await requestPlant();
+        if (current && version === revision.current) applyPlant(plant);
+      } catch {
+        if (current && version === revision.current) setFailed(true);
+      }
+    }
+    void refresh();
+    const poll = setInterval(() => {
+      if (!document.hidden) void refresh();
+    }, 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      current = false;
+      clearInterval(poll);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
@@ -63,52 +153,55 @@ export function FlowerVine({
     [],
   );
 
-  function care(action: Care) {
+  async function care(action: Care) {
     if (busy.current) return;
-    if (stats[action.id] === 3) {
+    busy.current = true;
+    setPending(true);
+    ++revision.current;
+    try {
+      const { plant, status } = await requestPlant(action.id);
+      applyPlant(plant);
+      const bloom = Math.min(...Object.values(plant.stats)) === 3;
       setNotice(
-        stage === 3
-          ? "开花啦！你获得了一面月球旗。"
-          : "这一项已经满了，试试其他照料。",
+        status === 429
+          ? "flower.notice.wait"
+          : bloom
+            ? "flower.notice.flagUnlocked"
+            : status === 409
+              ? "flower.notice.full"
+              : action.response,
       );
-      return;
-    }
-    const next = { ...stats, [action.id]: stats[action.id] + 1 };
-    setStats(next);
-    setLog((prev) => [action.label, ...prev].slice(0, 12));
-    const bloom = Math.min(...Object.values(next)) === 3;
-    setNotice(bloom ? "开花啦！你获得了一面月球旗。" : action.response);
-    if (bloom) onBloom();
-    // State changes immediately. Only the short decorative response is timed.
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      busy.current = true;
-      setActive(action);
+      if (
+        status === 200 &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      )
+        setActive(action);
+    } catch {
+      setFailed(true);
+      setNotice("flower.notice.unconfirmed");
+    } finally {
+      // Match the server cooldown even when reduced motion is enabled.
       timer.current = setTimeout(() => {
         busy.current = false;
+        setPending(false);
         setActive(null);
         timer.current = null;
-      }, 650);
+      }, 2000);
     }
-  }
-
-  function reset() {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
-    busy.current = false;
-    setStats(initialStats);
-    setActive(null);
-    setLog([]);
-    setNotice("重新种好啦。小芽等你来照料。");
   }
 
   return (
     <ModuleFrame
       id="flower"
-      title={t("我的花藤")}
-      english="LUNAR GARDEN"
+      title={t("flower.title")}
+      english=""
       icon="flower"
       className="flower"
-      extra={<span className="heading-note">Lv.{stage + 1}</span>}
+      extra={
+        <span className="heading-note">
+          {t("flower.level")} {stage + 1}
+        </span>
+      }
     >
       <div
         className="flower-stage"
@@ -168,7 +261,6 @@ export function FlowerVine({
             {active.effect}
           </span>
         ) : null}
-        <small>{t("月球土壤 · 认真乱养")}</small>
       </div>
       <div className="plant-meters">
         {actions.map((action) => (
@@ -190,7 +282,7 @@ export function FlowerVine({
             key={action.id}
             className="bevel"
             type="button"
-            disabled={active !== null}
+            disabled={pending || !loaded || failed}
             onClick={() => care(action)}
           >
             <span aria-hidden="true">{action.icon} </span>
@@ -198,9 +290,10 @@ export function FlowerVine({
           </button>
         ))}
       </div>
-      <p className="plant-hint">{t("四项都照料，花儿才会长大。")}</p>
-      <p className="plant-notice" role="status" aria-label={t("花藤状态")}>
-        {t(notice)}
+      <p className="plant-notice" role="status" aria-label={t("flower.status")}>
+        {notice || failed || !loaded
+          ? t(notice || (failed ? "flower.unavailable" : "flower.loading"))
+          : ""}
       </p>
       <div className="plant-tools">
         <button
@@ -210,17 +303,39 @@ export function FlowerVine({
           aria-controls="plant-properties"
           onClick={() => setDetails((v) => !v)}
         >
-          {t("属性 / 记录")}
+          {t("flower.details")}
         </button>
-        <button type="button" className="text-button" onClick={reset}>
-          {t("重置演示")}
+        <button
+          type="button"
+          className="text-button"
+          disabled={pending}
+          onClick={async () => {
+            if (busy.current) return;
+            busy.current = true;
+            setPending(true);
+            const version = ++revision.current;
+            try {
+              const { plant } = await requestPlant();
+              if (version === revision.current) {
+                applyPlant(plant);
+                setNotice("");
+              }
+            } catch {
+              setFailed(true);
+            } finally {
+              busy.current = false;
+              setPending(false);
+            }
+          }}
+        >
+          {t("flower.refresh")}
         </button>
       </div>
       {details ? (
         <div id="plant-properties" className="plant-properties">
-          <p>{t("简化演示规则，并非历史计分公式。")}</p>
-          <p>{t("生长阶段取四项最低值。")}</p>
-          <h3>{t("照料记录")}</h3>
+          <p>{t("flower.bloomRule")}</p>
+          <p>{t("flower.replantRule")}</p>
+          <h3>{t("flower.careLog")}</h3>
           {log.length ? (
             <ol>
               {log.map((entry, i) => (
@@ -228,12 +343,11 @@ export function FlowerVine({
               ))}
             </ol>
           ) : (
-            <p>{t("还没有照料记录。")}</p>
+            <p>{t("flower.noCare")}</p>
           )}
         </div>
       ) : null}
       {reward}
-      <p className="fine-print">{t("本地演示 · 刷新后重置")}</p>
     </ModuleFrame>
   );
 }
