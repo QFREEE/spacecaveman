@@ -93,6 +93,7 @@ html[lang="en"] .masthead h1 {
 }
 .lunar-scene {
   position: absolute;
+  z-index: 1;
   inset: 0;
   pointer-events: none;
 }
@@ -136,13 +137,6 @@ html[lang="en"] .masthead h1 {
   color: var(--skin-muted);
   font: 8px monospace;
   letter-spacing: 1px;
-}
-.treasure-flag {
-  position: absolute;
-  bottom: 32px;
-  right: 20%;
-  color: var(--skin-strong);
-  font-size: 48px;
 }
 .skin-toolbar {
   position: absolute;
@@ -636,15 +630,6 @@ meter::-moz-meter-bar {
   height: 16px;
   flex: none;
 }
-.treasure-drawer {
-  border-block: 1px dotted var(--skin-border-soft);
-  padding: 6px 0;
-  font-size: 10px;
-}
-.treasure-drawer h3 {
-  font-size: 11px;
-  margin-bottom: 3px;
-}
 .restore-skin {
   width: 100%;
   margin-top: 8px;
@@ -887,8 +872,6 @@ footer p {
   .dressup legend,
   .swatch,
   .ornament-toggle,
-  .treasure-drawer,
-  .treasure-drawer h3,
   .restore-skin {
     font-size: 14px;
   }
@@ -919,11 +902,6 @@ footer p {
   }
   .album-grid {
     gap: var(--space-gap);
-  }
-  .treasure-flag {
-    bottom: 50px;
-    right: 16%;
-    font-size: 38px;
   }
 }
 @keyframes moon-wander-phone {

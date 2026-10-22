@@ -8,18 +8,12 @@ export function DressUp({
   setWallpaper,
   ornaments,
   setOrnaments,
-  unlocked,
-  flag,
-  setFlag,
   restore,
 }: {
   wallpaper: string;
   setWallpaper: (v: string) => void;
   ornaments: boolean;
   setOrnaments: (v: boolean) => void;
-  unlocked: boolean;
-  flag: boolean;
-  setFlag: (v: boolean) => void;
   restore: () => void;
 }) {
   const { t } = useLanguage();
@@ -77,21 +71,6 @@ export function DressUp({
         />
         {t("土星挂件")}
       </label>
-      <div className="treasure-drawer">
-        <h3>◇ {t("我的物品")}</h3>
-        {unlocked ? (
-          <label className="ornament-toggle">
-            <input
-              type="checkbox"
-              checked={flag}
-              onChange={(e) => setFlag(e.target.checked)}
-            />
-            {t("月球旗 · 开花奖励")}
-          </label>
-        ) : (
-          <p>{t("照料花藤开花，领取一面月球旗。")}</p>
-        )}
-      </div>
       <button className="bevel restore-skin" onClick={restore}>
         {t("恢复默认装扮")}
       </button>

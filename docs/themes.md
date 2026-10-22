@@ -7,8 +7,8 @@ that demonstrates extension; switching does not change the owner's fictional
 content or reset any interactive module.
 
 The current [three-module homepage](three-module-homepage.md) does not mount
-`DressUp.tsx`. It uses Stars and the pendant, with the earned flag controlled
-inside the flower. The registry, palettes, extension points and saved design tag
+`DressUp.tsx`. It uses Stars and an Earth clock behind the lunar surface. There
+is no flag or flower reward. The registry, palettes, extension points and saved design tag
 remain. To restore the public **Space style** selector, first restore a settings
 surface using `DressUp`, then set `showThemeSelector` to `true` in
 `demo/src/themes/settings.ts`. The selector is currently absent from both keyboard
@@ -64,10 +64,8 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
-Use a named React scene satisfying `SceneProps`: `{ ornaments: boolean;
-treasure: boolean }`. It renders **decoration only** inside the reserved header
+Use a named React component with no required props. It renders **decoration only** inside the reserved header
 region. It can read the active CSS tokens and supply theme-scoped selectors.
-Honor both prop values so the pendant and earned ornament controls remain honest.
 Retain the pause convention (`.motion-off`) and a reduced-motion still state;
 keep drawing clear of text, navigation and phone controls.
 
@@ -82,9 +80,10 @@ availability data, audio source or language.
 `data-theme` to the existing space wrapper and selects the configured scene. It
 does not key/remount the application or its modules. Flower progress, drafts,
 posted local messages, filters, expanded diary entries, playback, language and
-ornament choices survive switching. **Restore default skin** selects Lunar ink,
-restores Stars and the pendant, and removes the flag from the scene; an earned
-reward and flower progress remain. Refresh resets all demo state.
+ornament choices in the retained demo survive switching. Its **Restore default
+skin** control selects Lunar ink and restores Stars and the pendant. The current
+homepage has no earned ornaments; shared flower progress lives on the server and
+resets at New York midnight rather than on page reload.
 
 The first registry entry defines the default. Keep Lunar ink first to preserve
 the accepted design. Changing an optional palette must not edit the lunar CSS or

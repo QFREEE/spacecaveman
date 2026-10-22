@@ -70,7 +70,7 @@ async function requestPlant(
       ({ id }) =>
         Number.isInteger(plant.stats[id]) &&
         plant.stats[id] >= 0 &&
-        plant.stats[id] <= 3,
+        plant.stats[id] <= 50,
     ) ||
     !Array.isArray(plant.log) ||
     plant.log.length > 12 ||
@@ -90,11 +90,7 @@ async function requestPlant(
   return { plant, status: response.status };
 }
 
-export function FlowerVine({
-  onBloom,
-}: {
-  onBloom: (generation: number) => void;
-}) {
+export function FlowerVine() {
   const { t } = useLanguage();
   const [stats, setStats] = useState(initialStats);
   const [active, setActive] = useState<Care | null>(null);
@@ -102,20 +98,15 @@ export function FlowerVine({
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [pending, setPending] = useState(false);
-  const [generation, setGeneration] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(false);
   const revision = useRef(0);
-  const stage = Math.min(...Object.values(stats));
+  const stage = Math.floor((Math.min(...Object.values(stats)) * 3) / 50);
   function applyPlant(plant: Plant) {
     setStats(plant.stats);
-    setGeneration(plant.generation);
     setLoaded(true);
     setFailed(false);
   }
-  useEffect(() => {
-    if (stage === 3) onBloom(generation);
-  }, [stage, generation, onBloom]);
   useEffect(() => {
     let current = true;
     async function refresh() {
@@ -154,15 +145,12 @@ export function FlowerVine({
     try {
       const { plant, status } = await requestPlant(action.id);
       applyPlant(plant);
-      const bloom = Math.min(...Object.values(plant.stats)) === 3;
       setNotice(
         status === 429
           ? "flower.notice.wait"
-          : bloom
-            ? "flower.notice.flagUnlocked"
-            : status === 409
-              ? "flower.notice.full"
-              : action.response,
+          : status === 409
+            ? "flower.notice.full"
+            : action.response,
       );
       if (
         status === 200 &&
@@ -190,13 +178,6 @@ export function FlowerVine({
       english=""
       icon="flower"
       className="flower"
-      extra={
-        loaded ? (
-          <span className="heading-note">
-            {t("flower.level")} {stage + 1}
-          </span>
-        ) : undefined
-      }
     >
       <div aria-busy={!loaded && !failed}>
         <div
@@ -206,9 +187,7 @@ export function FlowerVine({
         >
           {loaded ? (
             <>
-              <span className="plant-label">
-                {t(stages[stage])} / 0{stage + 1}
-              </span>
+              <span className="plant-label">{t(stages[stage])}</span>
               <svg
                 viewBox="0 0 200 153"
                 aria-hidden="true"
@@ -275,10 +254,9 @@ export function FlowerVine({
                 <meter
                   aria-label={t(action.stat)}
                   min="0"
-                  max="3"
+                  max="50"
                   value={stats[action.id]}
                 />
-                <span>{stats[action.id]}/3</span>
               </div>
             ))}
           </div>

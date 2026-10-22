@@ -10,6 +10,7 @@ serves it as the production homepage.
 - NYC and flower widgets show loading feedback until their first response, without
   flashing a default scene or plant. Later refreshes keep the last confirmed state.
 - The header Earth dial combines an analog clock and calendar in one drawing.
+  It sits behind the Moon surface and foreground artwork.
   It always shows US Eastern time and date, including daylight-saving changes.
   It updates each minute and when returning to the tab.
   The accessible date/time and visible calendar follow the language selector.
@@ -21,15 +22,16 @@ serves it as the production homepage.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
 - Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
-  advance one attribute to a maximum of three. Growth follows the lowest
+  advance one attribute to a maximum of fifty. The interface shows bars without
+  numeric counts or levels. Growth follows the lowest
   attribute. A shared two-second cooldown rejects overlapping rapid actions.
   The last twelve care actions are stored without visitor identities.
-- A bloom lasts at least 24 hours. The first care action after that starts the
-  next plant. There is no public reset that can erase other visitors' progress.
+- The flower starts fresh at midnight in New York every day, whether or not it
+  bloomed. The first read or care request after midnight resets the plant, care
+  log and bloom time once for everyone. Daylight-saving changes follow New York.
+  There is no public reset that can erase other visitors' progress.
   Flower state refreshes every 30 seconds and when the window regains focus.
-- A bloom automatically shows the Moon flag. The unlock is saved in the
-  browser when browser storage is available. Flower progress is saved on the
-  server, independently of browser storage.
+- Flower progress is saved on the server, independently of browser storage.
 - The counter starts at zero when its migration is applied and counts accepted
   page-load reports, including reloads. It is an aggregate, not a count of unique
   people, and is not bot-filtered analytics. The counter stores no IP addresses,
@@ -68,7 +70,7 @@ pnpm verify
 ```
 
 The browser suite covers desktop and touch-enabled phone contexts, both languages,
-shared care, reload persistence, automatic bloom rewards, unavailable storage, and
+shared care, reload persistence, blooming, unavailable storage, and
 responsive layouts. The backend suite executes the schema and conditional SQL
 against SQLite. A dry run builds and packages the Worker without publishing it.
 

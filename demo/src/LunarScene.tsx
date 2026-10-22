@@ -31,7 +31,7 @@ export function Caveman({ className = "" }: { className?: string }) {
   );
 }
 
-export function LunarScene({ treasure }: SceneProps) {
+export function LunarScene() {
   return (
     <div className="lunar-scene" aria-hidden="true">
       <span className="scene-stars">·　+　　　.　　　　+　　　·</span>
@@ -56,8 +56,6 @@ export function LunarScene({ treasure }: SceneProps) {
         <Caveman />
       </div>
       <span className="moon-caption">THE MOON IS A VERY BIG BACKYARD.</span>
-      {treasure ? <span className="treasure-flag">⚑</span> : null}
     </div>
   );
 }
-import type { SceneProps } from "./themes/registry";

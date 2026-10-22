@@ -1,6 +1,6 @@
 import { useLanguage, LanguageProvider, LanguageSwitch } from "./Language";
 import { createRoot } from "react-dom/client";
-import { StrictMode, useCallback, useState } from "react";
+import { StrictMode } from "react";
 import { SpaceTime } from "./SpaceTime";
 import { FlowerVine } from "./FlowerVine";
 import { ThemeProvider, useTheme } from "./themes/ThemeProvider";
@@ -10,30 +10,10 @@ import "./styles/qzone.css";
 import "./styles/space.css";
 import "./styles/home.css";
 
-function readSetting(key: string) {
-  try {
-    return localStorage.getItem(`spacecaveman:${key}`);
-  } catch {
-    return null;
-  }
-}
-function saveSetting(key: string, value: string) {
-  try {
-    localStorage.setItem(`spacecaveman:${key}`, value);
-  } catch {
-    /* Optional browser preference. */
-  }
-}
-
 function App() {
   const { t } = useLanguage();
   const { theme } = useTheme();
   const Scene = theme.Scene;
-  const [flag, setFlag] = useState(() => readSetting("bloom") !== null);
-  const onBloom = useCallback((generation: number) => {
-    setFlag(true);
-    saveSetting("bloom", String(generation));
-  }, []);
   return (
     <div data-theme={theme.id} className="space-shell wallpaper-stars">
       <div className="topbar">
@@ -50,7 +30,7 @@ function App() {
           <div className="masthead-copy">
             <h1 lang="en">{t("site.title")}</h1>
           </div>
-          <Scene ornaments treasure={flag} />
+          <Scene />
           <SpaceTime />
         </header>
         <nav className="navigation home-navigation" aria-label={t("nav.label")}>
@@ -71,7 +51,7 @@ function App() {
         </nav>
         <main className="modules home-modules">
           <NycStatus />
-          <FlowerVine onBloom={onBloom} />
+          <FlowerVine />
           <VisitorCounter />
         </main>
         <footer>

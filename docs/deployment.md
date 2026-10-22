@@ -31,7 +31,20 @@ The isolated `spacecaveman-presence-trial` Worker is bundled during checks but i
 not automatically deployed. The website reads its existing D1 database for public presence
 and stores flower/counter state in separate tables. Credentials stay protected;
 CI does not apply migrations. The current production database already has homepage
-migrations 0002 and 0003; provision those before serving a new environment. The React homepage is built and browser-tested before deployment. The
+migrations 0002 and 0003. Before merging the daily-flower release, apply migration
+0004 to `spacecaveman-presence-trial` using an authorized migration credential:
+
+```powershell
+pnpm exec wrangler d1 migrations apply spacecaveman-presence-trial --remote
+```
+
+This widens care bounds to fifty and adds the daily reset key. The migration
+preserves the stored row; the new Worker starts a fresh daily plant on its first
+request. The previous Worker can still read and write the widened schema while
+the rollout completes. A rollback of Worker code does not reverse schema changes;
+after any care value exceeds three, restore the daily-flower version rather than
+the older frontend that rejects larger values. Provision all migrations before
+serving a new environment. The React homepage is built and browser-tested before deployment. The
 existing visits and presence pages are retained by the site build. Deployment
 keeps existing dashboard variables. Do not enable another deploy-on-push
 integration for the same Worker.
