@@ -3,8 +3,11 @@ import { test, expect } from "./fixtures";
 test("answer reveals once, remains accessible, and motion opt-outs show it immediately", async ({
   page,
 }) => {
-  // Keep the request pending: the public unknown answer needs no network response.
-  await page.route("**/api/presence/public", () => {});
+  await page.route("**/api/presence/public", (route) =>
+    route.fulfill({
+      json: { status: "unknown", observed_at: null, expires_at: null },
+    }),
+  );
   await page.goto("/");
   const answer = page.locator("#nyc").getByRole("status");
   await expect(answer).toHaveText("No update yet.");

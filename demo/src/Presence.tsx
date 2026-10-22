@@ -27,7 +27,10 @@ export function Presence({
       try {
         const response = await fetch("/api/presence/public", {
           cache: "no-store",
-          signal: controller.signal,
+          signal: AbortSignal.any([
+            controller.signal,
+            AbortSignal.timeout(10000),
+          ]),
         });
         if (!response.ok) throw new Error("Refresh failed");
         const next: Report = await response.json();
@@ -87,8 +90,23 @@ export function Presence({
           ? t("presence.updatedThreeHours")
           : t("presence.updatedEarlier");
   return (
-    <section className="presence-strip" aria-label={t("presence.label")}>
-      {renderAnswer(state, label)}
+    <section
+      className="presence-strip"
+      aria-label={t("presence.label")}
+      aria-busy={health === "loading"}
+    >
+      {health === "loading" ? (
+        <div className="presence-loading">
+          <div className="nyc-loading-scene" aria-hidden="true">
+            · · ·
+          </div>
+          <p role="status" aria-atomic="true">
+            {t("presence.loading")}
+          </p>
+        </div>
+      ) : (
+        renderAnswer(state, label)
+      )}
       {Number.isFinite(observed) || health === "error" ? (
         <div className="presence-detail">
           {Number.isFinite(observed) ? <span>{recency}</span> : null}

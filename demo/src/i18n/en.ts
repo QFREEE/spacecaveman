@@ -13,6 +13,7 @@ export const en = {
   "presence.inNyc": "Yes, I’m in NYC!",
   "presence.outsideNyc": "No, I am in the woods.",
   "presence.unknown": "No update yet.",
+  "presence.loading": "Checking if I’m in NYC…",
   "presence.updatedMinutes": "Updated within the last few minutes",
   "presence.updatedHour": "Updated within the last hour",
   "presence.updatedThreeHours": "Updated within the last 3 hours",

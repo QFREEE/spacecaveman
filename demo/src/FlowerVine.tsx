@@ -191,128 +191,148 @@ export function FlowerVine({
       icon="flower"
       className="flower"
       extra={
-        <span className="heading-note">
-          {t("flower.level")} {stage + 1}
-        </span>
+        loaded ? (
+          <span className="heading-note">
+            {t("flower.level")} {stage + 1}
+          </span>
+        ) : undefined
       }
     >
-      <div
-        className="flower-stage"
-        data-stage={stage}
-        data-care={active?.id ?? "idle"}
-      >
-        <span className="plant-label">
-          {t(stages[stage])} / 0{stage + 1}
-        </span>
-        <svg
-          viewBox="0 0 200 153"
-          aria-hidden="true"
-          fill="var(--skin-surface)"
-          stroke="var(--skin-text-strong)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <div aria-busy={!loaded && !failed}>
+        <div
+          className="flower-stage"
+          data-stage={loaded ? stage : undefined}
+          data-care={active?.id ?? "idle"}
         >
-          <path d="M8 139q22-5 41 0m107 0 28 1M49 136q49-12 101 0" />
-          <path
-            d="M76 110l5 31q20 7 39-1l5-30M73 108q25-8 54 0v8q-27 7-54 0z"
-            fill={stats.rain ? "var(--skin-wet-soil)" : "var(--skin-surface)"}
-          />
-          <path
-            d={stage === 0 ? "M100 105Q96 90 103 78" : "M100 105Q90 66 103 42"}
-          />
-          <path d="M98 95q-24 0-26-18 21-3 26 18m2-9q21 1 25-16-20-4-25 16" />
-          {stage >= 1 ? (
-            <path d="M98 67q-19 0-20-15 18-2 20 15m3-10q17 1 20-12-15-4-20 12" />
+          {loaded ? (
+            <>
+              <span className="plant-label">
+                {t(stages[stage])} / 0{stage + 1}
+              </span>
+              <svg
+                viewBox="0 0 200 153"
+                aria-hidden="true"
+                fill="var(--skin-surface)"
+                stroke="var(--skin-text-strong)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M8 139q22-5 41 0m107 0 28 1M49 136q49-12 101 0" />
+                <path
+                  d="M76 110l5 31q20 7 39-1l5-30M73 108q25-8 54 0v8q-27 7-54 0z"
+                  fill={
+                    stats.rain ? "var(--skin-wet-soil)" : "var(--skin-surface)"
+                  }
+                />
+                <path
+                  d={
+                    stage === 0
+                      ? "M100 105Q96 90 103 78"
+                      : "M100 105Q90 66 103 42"
+                  }
+                />
+                <path d="M98 95q-24 0-26-18 21-3 26 18m2-9q21 1 25-16-20-4-25 16" />
+                {stage >= 1 ? (
+                  <path d="M98 67q-19 0-20-15 18-2 20 15m3-10q17 1 20-12-15-4-20 12" />
+                ) : null}
+                {stage === 2 ? (
+                  <path d="M103 43q-18-13-5-24l5 5 6-5q12 14-6 24z" />
+                ) : null}
+                {stage === 3 ? (
+                  <g>
+                    <path d="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z" />
+                    <circle cx="100" cy="41" r="11" />
+                    <path d="M95 43q5 6 10-1" />
+                    <circle cx="96" cy="38" r=".7" />
+                    <circle cx="105" cy="38" r=".7" />
+                  </g>
+                ) : null}
+                {stats.rain > 0 ? (
+                  <path
+                    className="wet-soil"
+                    d="M84 112l6 1m8 0h6m8-1h5"
+                    strokeWidth="3"
+                  />
+                ) : null}
+              </svg>
+              {active ? (
+                <span
+                  className={`care-effect effect-${active.id}`}
+                  aria-hidden="true"
+                >
+                  {active.effect}
+                </span>
+              ) : null}
+            </>
           ) : null}
-          {stage === 2 ? (
-            <path d="M103 43q-18-13-5-24l5 5 6-5q12 14-6 24z" />
-          ) : null}
-          {stage === 3 ? (
-            <g>
-              <path d="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z" />
-              <circle cx="100" cy="41" r="11" />
-              <path d="M95 43q5 6 10-1" />
-              <circle cx="96" cy="38" r=".7" />
-              <circle cx="105" cy="38" r=".7" />
-            </g>
-          ) : null}
-          {stats.rain > 0 ? (
-            <path
-              className="wet-soil"
-              d="M84 112l6 1m8 0h6m8-1h5"
-              strokeWidth="3"
-            />
-          ) : null}
-        </svg>
-        {active ? (
-          <span
-            className={`care-effect effect-${active.id}`}
-            aria-hidden="true"
-          >
-            {active.effect}
-          </span>
-        ) : null}
-      </div>
-      <div className="plant-meters">
-        {actions.map((action) => (
-          <div className="plant-stat" key={action.id}>
-            <span>{t(action.stat)}</span>
-            <meter
-              aria-label={t(action.stat)}
-              min="0"
-              max="3"
-              value={stats[action.id]}
-            />
-            <span>{stats[action.id]}/3</span>
+        </div>
+        {loaded ? (
+          <div className="plant-meters">
+            {actions.map((action) => (
+              <div className="plant-stat" key={action.id}>
+                <span>{t(action.stat)}</span>
+                <meter
+                  aria-label={t(action.stat)}
+                  min="0"
+                  max="3"
+                  value={stats[action.id]}
+                />
+                <span>{stats[action.id]}/3</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="care-actions">
-        {actions.map((action) => (
-          <button
-            key={action.id}
-            className="bevel"
-            type="button"
-            disabled={pending || !loaded || failed}
-            onClick={() => care(action)}
-          >
-            <span aria-hidden="true">{action.icon} </span>
-            {t(action.label)}
-          </button>
-        ))}
-      </div>
-      <p className="plant-notice" role="status" aria-label={t("flower.status")}>
-        {notice || failed || !loaded
-          ? t(notice || (failed ? "flower.unavailable" : "flower.loading"))
-          : ""}
-      </p>
-      <div className="plant-tools">
-        <button
-          type="button"
-          className="text-button"
-          disabled={pending}
-          onClick={async () => {
-            if (busy.current) return;
-            busy.current = true;
-            setPending(true);
-            const version = ++revision.current;
-            try {
-              const { plant } = await requestPlant();
-              if (version === revision.current) {
-                applyPlant(plant);
-                setNotice("");
-              }
-            } catch {
-              setFailed(true);
-            } finally {
-              busy.current = false;
-              setPending(false);
-            }
-          }}
+        ) : null}
+        <div className="care-actions">
+          {actions.map((action) => (
+            <button
+              key={action.id}
+              className="bevel"
+              type="button"
+              disabled={pending || !loaded || failed}
+              onClick={() => care(action)}
+            >
+              <span aria-hidden="true">{action.icon} </span>
+              {t(action.label)}
+            </button>
+          ))}
+        </div>
+        <p
+          className="plant-notice"
+          role="status"
+          aria-label={t("flower.status")}
         >
-          {t("flower.refresh")}
-        </button>
+          {notice || failed || !loaded
+            ? t(notice || (failed ? "flower.unavailable" : "flower.loading"))
+            : ""}
+        </p>
+        <div className="plant-tools">
+          <button
+            type="button"
+            className="text-button"
+            disabled={pending || (!loaded && !failed)}
+            onClick={async () => {
+              if (busy.current) return;
+              busy.current = true;
+              setPending(true);
+              const version = ++revision.current;
+              try {
+                const { plant } = await requestPlant();
+                if (version === revision.current) {
+                  applyPlant(plant);
+                  setNotice("");
+                }
+              } catch {
+                setFailed(true);
+              } finally {
+                busy.current = false;
+                setPending(false);
+              }
+            }}
+          >
+            {t("flower.refresh")}
+          </button>
+        </div>
       </div>
     </ModuleFrame>
   );

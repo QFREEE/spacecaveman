@@ -7,6 +7,8 @@ serves it as the production homepage.
 
 ## Homepage behavior
 
+- NYC and flower widgets show loading feedback until their first response, without
+  flashing a default scene or plant. Later refreshes keep the last confirmed state.
 - The header Earth dial combines an analog clock and calendar in one drawing.
   It always shows US Eastern time and date, including daylight-saving changes.
   It updates each minute and when returning to the tab.
