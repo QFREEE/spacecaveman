@@ -99,19 +99,19 @@ export async function handleFlower(request, env, now = Date.now()) {
       .first();
     if (request.method === "POST") {
       // The column is selected from a fixed allowlist, never arbitrary input.
-      // Each conditional UPDATE is atomic, including the shared cooldown.
+      // Atomic increments keep rapid and concurrent care within the cap.
       const row = await db
         .prepare(
           `UPDATE site_flower SET
-        ${action} = ${action} + 1,
+        ${action} = MIN(50, ${action} + 5),
         log = json_insert(CASE WHEN json_array_length(log) >= 12 THEN json_remove(log, '$[0]') ELSE log END, '$[#]', ?),
         bloomed_at = CASE
-          WHEN ${careIds.map((id) => `${id} = ${id === action ? 49 : 50}`).join(" AND ")} THEN ? ELSE bloomed_at END,
+          WHEN ${careIds.map((id) => (id === action ? `${id} >= 45` : `${id} = 50`)).join(" AND ")} THEN ? ELSE bloomed_at END,
         updated_at = ?
-        WHERE id = 1 AND day_key = ? AND updated_at <= ? AND ${action} < 50
+        WHERE id = 1 AND day_key = ? AND ${action} < 50
         RETURNING *`,
         )
-        .bind(action, now, now, today, now - 2000)
+        .bind(action, now, now, today)
         .first();
       if (row) return Response.json(flowerResponse(row), { headers });
       const current = await db
@@ -121,10 +121,10 @@ export async function handleFlower(request, env, now = Date.now()) {
       if (!current) throw new Error("Missing flower");
       const full = current[action] === 50;
       return Response.json(
-        { ...flowerResponse(current), error: full ? "full" : "cooldown" },
+        { ...flowerResponse(current), error: full ? "full" : "day_changed" },
         {
-          status: full ? 409 : 429,
-          headers: { ...headers, ...(full ? {} : { "Retry-After": "2" }) },
+          status: 409,
+          headers,
         },
       );
     }

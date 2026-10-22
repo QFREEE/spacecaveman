@@ -35,7 +35,7 @@ export const test = base.extend<{ flowerPlant: Plant }>({
             status: 409,
             json: { ...plant, error: "full" },
           });
-        plant.stats[key]++;
+        plant.stats[key] = Math.min(50, plant.stats[key] + 5);
         plant.log = [key, ...plant.log].slice(0, 12);
         if (Object.values(plant.stats).every((value) => value === 50))
           plant.bloomed_at = new Date().toISOString();

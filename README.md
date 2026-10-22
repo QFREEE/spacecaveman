@@ -22,9 +22,12 @@ serves it as the production homepage.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
 - Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
-  advance one attribute to a maximum of fifty. The interface shows bars without
-  numeric counts or levels. Growth follows the lowest
-  attribute. A shared two-second cooldown rejects overlapping rapid actions.
+  advance one attribute by five to a maximum of fifty: ten clicks fill a bar.
+  The interface shows bars without numeric counts or levels. Total shared care
+  drives nine growth stages, changing about every five clicks. Every click has
+  immediate visual feedback; saves queue while the buttons stay available.
+  Failed saves discard unsaved queued care and restore confirmed progress.
+  Atomic increments keep rapid care within the cap.
   The last twelve care actions are stored without visitor identities.
 - The flower starts fresh at midnight in New York every day, whether or not it
   bloomed. The first read or care request after midnight resets the plant, care
@@ -32,6 +35,10 @@ serves it as the production homepage.
   There is no public reset that can erase other visitors' progress.
   Flower state refreshes every 30 seconds and when the window regains focus.
 - Flower progress is saved on the server, independently of browser storage.
+- Gentle encouragement appears after three and six successful actions in the
+  current visit. After ten, the bars turn green with a personal thank-you.
+  There is no bloom message. Recognition resets for a new daily plant or page reload;
+  no visitor identity or numeric contribution count is displayed or stored.
 - The counter starts at zero when its migration is applied and counts accepted
   page-load reports, including reloads. It is an aggregate, not a count of unique
   people, and is not bot-filtered analytics. The counter stores no IP addresses,
