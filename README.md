@@ -37,7 +37,7 @@ of current presence are tracked in [GitHub Issues](https://github.com/QFREEE/spa
 
 ## Local development
 
-Use Node 24 and the pnpm version recorded in `package.json`. The pnpm lockfile is
+Use Node 24 (`.node-version`) and the pnpm version recorded in `package.json`. The pnpm lockfile is
 the dependency source of truth.
 
 ```sh
@@ -61,13 +61,8 @@ the Worker. `pnpm demo:preview` serves the frontend production build on port 417
 ## Checks
 
 ```sh
-pnpm check
-pnpm test
-pnpm demo:build
 pnpm exec playwright install chromium
-pnpm demo:test
-pnpm deploy:check
-pnpm presence:deploy:check
+pnpm verify
 ```
 
 The browser suite checks the three modules, valid navigation, keyboard order,
@@ -79,7 +74,9 @@ replace physical iOS/Android testing. On Linux, install Chromium dependencies wi
 `pnpm exec playwright install --with-deps chromium`, as CI does. Set
 `DEMO_TEST_PORT` to an unused port if another preview already occupies port 4173.
 
-Both deploy checks are dry runs. They build/package code without publishing it.
+`pnpm verify` is the shared local/CI command: syntax checks, Node tests, frontend
+type/build checks, browser tests, and both Worker dry runs. It stops on failure.
+The dry runs build/package code without publishing it or applying migrations.
 See the [publishing guide](docs/qzone-publishing.md) for a smoke test against the
 complete Worker package and [visual QA](design-qa.md) for the frontend review.
 
@@ -95,6 +92,10 @@ Every PR also requires a [documentation review](docs/agents/pr-documentation.md)
 revisit setup instructions and accuracy, then record the documents inspected and
 either the updates made or why no edit is needed. The PR template and required
 **Documentation review** check enforce that record.
+
+The main-branch rules also require the **Checks** job to pass before merging;
+deployment checks are no longer the only gate for test/build failures. Agents
+start with the [engineering guide](docs/agents/engineering.md).
 
 GitHub deploys only the `spacecaveman` Worker. Changes to the presence trial, its
 credentials, or D1 migrations require their separate workflow and verification.

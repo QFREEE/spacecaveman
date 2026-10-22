@@ -10,10 +10,8 @@ source but are not mounted. See the [current composition](three-module-homepage.
 
 ```powershell
 pnpm install --frozen-lockfile
-pnpm demo:test
-pnpm check
-pnpm test
-pnpm deploy:check
+pnpm exec playwright install chromium
+pnpm verify
 ```
 
 `build:site` combines the React production build with the existing static assets

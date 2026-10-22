@@ -15,6 +15,11 @@ Open a pull request, wait for its checks, and merge to `main`. Track the release
 in [GitHub Actions](https://github.com/QFREEE/spacecaveman/actions). No local
 Cloudflare login or manual upload is needed for this path.
 
+Both **Checks** and **Documentation review** are required main-branch merge
+checks from GitHub Actions, with no configured bypass actors. Their intended
+rules are recorded in `.github/rulesets/`; repository Settings → Rules → Rulesets
+holds the live configuration. Editing those JSON files does not apply a rule.
+
 GitHub Actions runs checks for pull requests and pushes to `main`. After successful
 checks on `main`, the official Cloudflare Wrangler action deploys the Worker named
 `spacecaveman` and its built static assets together. Wrangler runs the existing
@@ -74,14 +79,13 @@ Use Node 24 and the package manager version recorded in the project manifest.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm check
-pnpm test
-pnpm demo:build
 pnpm exec playwright install chromium
-pnpm demo:test
-pnpm deploy:check
-pnpm presence:deploy:check
+pnpm verify
 ```
+
+`pnpm verify` runs the same sequence locally and in the CI **Checks** job. See
+`package.json` for its individual commands. Node's major version is recorded in
+`.node-version` and used by both workflow jobs.
 
 CI installs Chromium's Linux system dependencies too. Actions are pinned to
 immutable commits; Dependabot checks for action updates monthly. Pull requests run
