@@ -35,7 +35,7 @@ test("care advances four independent attributes and all growth stages, unlocks a
     }
   }
   await expect(flower.getByRole("status")).toHaveText(
-    "In bloom! A Moon flag is waiting in My items.",
+    "In bloom! You earned a Moon flag.",
   );
   await page.getByLabel("Moon flag · bloom reward").check();
   await expect(page.locator(".treasure-flag")).toBeVisible();
@@ -100,7 +100,7 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
   await expect(flower.locator(".care-effect")).toHaveCount(0);
 });
 
-test("language preserves care and dress-up state; keyboard and reduced motion work", async ({
+test("language preserves care and properties; keyboard and reduced motion work", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -116,21 +116,17 @@ test("language preserves care and dress-up state; keyboard and reduced motion wo
     "animation-name",
     "none",
   );
-  await page.getByRole("button", { name: "Paper", exact: true }).click();
-  await page.getByLabel("Saturn pendant").uncheck();
+  await flower
+    .getByRole("button", { name: "Properties / log", exact: true })
+    .click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
   await expect(flower.getByRole("status")).toContainText("泥土湿润");
   await expect(
-    page.getByRole("button", { name: "白纸", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "恢复默认装扮", exact: true }).click();
-  await expect(page.locator(".hanging-planet")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "星空", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+    flower.getByRole("button", { name: "属性 / 记录" }),
+  ).toHaveAttribute("aria-expanded", "true");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
@@ -138,9 +134,7 @@ test("language preserves care and dress-up state; keyboard and reduced motion wo
   await expect(flower.getByRole("status")).toContainText("Soil watered");
 });
 
-test("pause stops ambient motion; music visualization follows actual playback", async ({
-  page,
-}) => {
+test("pause stops and resumes all ambient motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page
     .getByRole("button", { name: "Pause animation", exact: true })
@@ -162,15 +156,9 @@ test("pause stops ambient motion; music visualization follows actual playback", 
     "animation-play-state",
     "running",
   );
-  const bars = page.locator(".equalizer i").first();
-  await expect(bars).toHaveCSS("animation-play-state", "paused");
-  await page.getByRole("button", { name: "Play music", exact: true }).click();
-  await expect(bars).toHaveCSS("animation-play-state", "running");
-  await page.getByRole("button", { name: "Pause music", exact: true }).click();
-  await expect(bars).toHaveCSS("animation-play-state", "paused");
 });
 
-test("gadgets fit phones in both languages, with touch targets and flower before diary", async ({
+test("three modules fit phones in both languages, with practical flower touch targets", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -186,8 +174,10 @@ test("gadgets fit phones in both languages, with touch targets and flower before
       ).toBe(true);
       if (width < 721) {
         const flower = await page.locator("#flower").boundingBox();
-        const diary = await page.locator("#diary").boundingBox();
-        expect(flower!.y + flower!.height).toBeLessThanOrEqual(diary!.y);
+        const nyc = await page.locator("#nyc").boundingBox();
+        const visitors = await page.locator("#visitors").boundingBox();
+        expect(nyc!.y + nyc!.height).toBeLessThanOrEqual(flower!.y);
+        expect(flower!.y + flower!.height).toBeLessThanOrEqual(visitors!.y);
         for (const button of await page
           .locator(
             ".care-actions button, .skin-toolbar .bevel, .plant-tools button",

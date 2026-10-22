@@ -46,6 +46,11 @@ walking caveman and lunar horizon; `FlowerVine.tsx` draws four plant stages.
 There are no recovered Qzone graphics, copied characters, external images, fonts,
 or animation libraries. SVG/CSS keeps the drawings small and the motion pausable.
 
+`NycStatus.tsx` adds an original skyline drawn directly with SVG paths. It is
+decorative artwork for the public Unknown card, not a photo or location report.
+The current three-module page does not mount the profile, albums or music player;
+their original assets remain available in source.
+
 ## Icons
 
 Ten icons are copied from the npm `pixelarticons` package, version recorded in

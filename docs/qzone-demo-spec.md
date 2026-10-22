@@ -3,7 +3,9 @@
 Status: implemented, verified, and published. This document retains the original local-preview scope; its restrictions on publishing were superseded by the owner's later deployment authorization recorded in Further Notes. Use the [publishing guide](qzone-publishing.md) and [deployment guide](deployment.md) for the current release process. Tracker: https://github.com/QFREEE/spacecaveman/issues/1.
 
 The later [lunar skin](lunar-qzone.md), tracked in issue #15, replaces the pale-blue
-visual direction and fictional summer copy while retaining these module behaviors.
+visual direction. [Issue #22's three-module homepage](three-module-homepage.md)
+supersedes the module list below: only NYC status, flower and visitor count are
+currently mounted. Other components remain in source for future use.
 
 ## Problem Statement
 

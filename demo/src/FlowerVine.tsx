@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
 
@@ -40,7 +40,13 @@ type Care = (typeof actions)[number];
 const stages = ["嫩芽", "长叶", "花苞", "开花"];
 const initialStats = { rain: 0, sun: 0, love: 0, food: 0 };
 
-export function FlowerVine({ onBloom }: { onBloom: () => void }) {
+export function FlowerVine({
+  onBloom,
+  reward,
+}: {
+  onBloom: () => void;
+  reward?: ReactNode;
+}) {
   const { t } = useLanguage();
   const [stats, setStats] = useState(initialStats);
   const [active, setActive] = useState<Care | null>(null);
@@ -62,7 +68,7 @@ export function FlowerVine({ onBloom }: { onBloom: () => void }) {
     if (stats[action.id] === 3) {
       setNotice(
         stage === 3
-          ? "开花啦！月球旗已放进我的物品。"
+          ? "开花啦！你获得了一面月球旗。"
           : "这一项已经满了，试试其他照料。",
       );
       return;
@@ -71,7 +77,7 @@ export function FlowerVine({ onBloom }: { onBloom: () => void }) {
     setStats(next);
     setLog((prev) => [action.label, ...prev].slice(0, 12));
     const bloom = Math.min(...Object.values(next)) === 3;
-    setNotice(bloom ? "开花啦！月球旗已放进我的物品。" : action.response);
+    setNotice(bloom ? "开花啦！你获得了一面月球旗。" : action.response);
     if (bloom) onBloom();
     // State changes immediately. Only the short decorative response is timed.
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -226,6 +232,7 @@ export function FlowerVine({ onBloom }: { onBloom: () => void }) {
           )}
         </div>
       ) : null}
+      {reward}
       <p className="fine-print">{t("本地演示 · 刷新后重置")}</p>
     </ModuleFrame>
   );

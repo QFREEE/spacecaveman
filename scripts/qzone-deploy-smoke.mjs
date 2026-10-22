@@ -13,6 +13,7 @@ try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
     hasTouch: true,
+    reducedMotion: "reduce",
   });
   const page = await context.newPage();
   const errors = [];
@@ -29,44 +30,79 @@ try {
   const response = await page.goto(base);
   assert.equal(response.status(), 200);
   assert.match(response.headers()["cache-control"], /no-transform/);
-  assert.equal((await response.text()).includes("static.cloudflareinsights.com/beacon"), false);
+  assert.equal(
+    (await response.text()).includes("static.cloudflareinsights.com/beacon"),
+    false,
+  );
   assert.match(
     response.headers()["content-security-policy"],
     /script-src 'self'/,
   );
   await page
-    .getByRole("heading", { name: "Blue Sky Corner", exact: true })
+    .getByRole("heading", { name: "Space Caveman", exact: true })
     .waitFor();
-  assert.equal(await page.locator("main section").count(), 7);
-  await page
-    .locator("img")
-    .evaluateAll((images) =>
-      Promise.all(images.map((image) => image.decode())),
-    );
-  const audio = page.locator("audio");
+  assert.deepEqual(
+    await page
+      .locator("main .module")
+      .evaluateAll((items) => items.map((item) => item.id)),
+    ["nyc", "flower", "visitors"],
+  );
   assert.equal(
-    await audio.evaluate((element) => element.paused && !element.autoplay),
+    await page.locator(".presence-answer").getAttribute("data-status"),
+    "unknown",
+  );
+  await page.getByText("No public update yet.", { exact: true }).waitFor();
+  assert.equal(
+    await page.getByLabel("Sample visit count: 1286").textContent(),
+    "001286",
+  );
+  await page
+    .getByText("Decorative counter · sample data", { exact: true })
+    .waitFor();
+  assert.equal(
+    await page.locator("audio, #dressup, #guestbook, #albums, #meetup").count(),
+    0,
+  );
+  assert.equal(
+    await page
+      .locator('a[href^="#"]')
+      .evaluateAll((links) =>
+        links.every((link) => document.getElementById(link.hash.slice(1))),
+      ),
     true,
   );
+  await page.getByRole("button", { name: "Water", exact: true }).click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
   assert.equal(await page.locator("html").getAttribute("lang"), "zh-CN");
+  assert.equal(
+    await page
+      .getByRole("meter", { name: "雨露", exact: true })
+      .getAttribute("value"),
+    "1",
+  );
   await page.getByRole("button", { name: "English", exact: true }).click();
+  await page.getByRole("button", { name: "Reset demo", exact: true }).click();
+  for (let round = 0; round < 3; round++) {
+    for (const action of ["Water", "Sun", "Prune", "Feed"]) {
+      await page.getByRole("button", { name: action, exact: true }).click();
+    }
+  }
   await page
-    .getByRole("button", { name: "Open album: Let's see the sea", exact: true })
-    .click();
-  await page.getByRole("dialog").waitFor();
-  await page.getByRole("button", { name: "Close album", exact: true }).click();
-  await page.getByRole("button", { name: "Confirmed", exact: true }).click();
-  assert.equal(await page.locator(".visit").count(), 1);
-  await page.getByRole("button", { name: "Play music", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Pause music", exact: true })
+    .getByText("In bloom! You earned a Moon flag.", { exact: true })
     .waitFor();
-  await page.getByRole("button", { name: "Pause music", exact: true }).click();
-  await page.getByLabel("Your name").fill("Deployment check");
-  await page.getByLabel("Your message").fill("Local-only test message.");
-  await page.getByRole("button", { name: "Post message", exact: true }).click();
-  await page.getByText("Local-only test message.", { exact: true }).waitFor();
+  const flag = page.getByLabel("Moon flag · bloom reward", { exact: true });
+  assert.equal(await flag.isChecked(), true);
+  await flag.uncheck();
+  assert.equal(await flag.isChecked(), false);
+  await page
+    .getByRole("button", { name: "Pause animation", exact: true })
+    .click();
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Resume animation", exact: true })
+      .getAttribute("aria-pressed"),
+    "true",
+  );
   assert.deepEqual(writes, []);
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
@@ -103,7 +139,9 @@ try {
     JSON.stringify({
       base,
       homepage: 200,
-      modules: 7,
+      modules: ["nyc", "flower", "visitors"],
+      nycStatus: "unknown",
+      counter: "sample",
       languages: "en/zh",
       interactions: "passed",
       phoneWidths: [320, 390, 430],

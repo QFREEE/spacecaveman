@@ -19,7 +19,7 @@ Open the local `.presence-private/iphone-setup.txt` file for your credentials. I
 5. Attach the action sequence to **Arrive** and **Leave** for the same chosen circle; use `in_nyc` on arrival and `not_in_nyc` on departure. Enable automatic execution. Check the circle on the phone before calling it NYC.
 6. Test crossing that boundary with the phone locked. Follow the recipe's offline, reboot, and long-visit checks. These tests have not been performed from Windows.
 
-This is a private owner trial. The public visits remain fictional; full invited-friend login, an owner administration page, and manual override semantics remain future work. No live presence badge was added to the public homepage.
+This is a private owner trial. The public visits remain fictional; full invited-friend login, an owner administration page, and manual override semantics remain future work. The [public homepage card](three-module-homepage.md) shows Unknown without querying this trial; it is not a live presence badge.
 
 ## Implemented contract
 
