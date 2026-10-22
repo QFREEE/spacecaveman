@@ -8,8 +8,15 @@ against official documentation. Keep historical observations clearly dated.
 
 Update affected docs in the same PR. Record the documents inspected and the
 evidence used in the PR body. If the docs already describe the resulting behavior,
-explain why no edit is needed. A code-only or dependency PR still needs a review;
-a maintainer can add the review to a bot's PR body after inspecting it.
+explain why no edit is needed. A code-only PR still needs a review.
+
+Verified `dependabot[bot]` PRs from this repository's `dependabot/github_actions/`
+branches are exempt from the written record only when all changes replace
+immutable Action pins in existing workflow `uses:` lines. The action identity and
+indentation must stay the same. Commands, permissions, inputs, new workflows,
+other files, missing/truncated patches, and other authors take the normal review
+path. This exemption does not waive the required **Checks** job or automatically
+merge updates. Review major-version compatibility and wait for full CI.
 
 Include this section even when creating a PR using a custom body file:
 

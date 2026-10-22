@@ -23,4 +23,28 @@ function documentationErrors(body, files) {
   return errors;
 }
 
-module.exports = { documentationErrors };
+function isDependabotActionUpdate(pr, files) {
+  if (pr.user?.login !== 'dependabot[bot]' || pr.user?.type !== 'Bot' ||
+      !pr.head?.ref?.startsWith('dependabot/github_actions/') ||
+      !pr.head?.repo?.full_name || pr.head.repo.full_name !== pr.base?.repo?.full_name ||
+      !files.length) return false;
+
+  return files.every(file => {
+    if (file.status !== 'modified' || !/^\.github\/workflows\/[^/]+\.ya?ml$/.test(file.filename) ||
+        typeof file.patch !== 'string') return false;
+    const removed = [], added = [];
+    for (const line of file.patch.split('\n')) {
+      if (!/^[+-]/.test(line)) continue;
+      // Preserve indentation, action identity and immutable pins. A change to
+      // run commands, permissions or inputs therefore requires normal review.
+      const match = /^([ \t]*(?:-[ \t]+)?uses:[ \t]+)([\w.-]+\/[\w./-]+)@([a-f0-9]{40})(?:[ \t]+#.*)?$/.exec(line.slice(1));
+      if (!match) return false;
+      (line[0] === '+' ? added : removed).push({ prefix: match[1], action: match[2] });
+    }
+    return added.length > 0 && added.length === removed.length &&
+      added.length === file.additions && removed.length === file.deletions &&
+      added.every((entry, index) => entry.prefix === removed[index].prefix && entry.action === removed[index].action);
+  });
+}
+
+module.exports = { documentationErrors, isDependabotActionUpdate };

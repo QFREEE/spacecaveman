@@ -6,11 +6,14 @@ commit `96dd705fa2f8443409c6729d2f11abc6d22b19bc` before theme extraction. The
 that demonstrates extension; switching does not change the owner's fictional
 content or reset any interactive module.
 
-The public **Space style** selector is temporarily hidden. To restore it, change
-`showThemeSelector` to `true` in `demo/src/themes/settings.ts`. The selector is not
-rendered while disabled, so it is absent from both keyboard and screen-reader
-navigation. The registry, palettes, extension points and saved design tag remain.
-The Stars/Paper wallpaper and pendant controls still work.
+The current [three-module homepage](three-module-homepage.md) does not mount
+`DressUp.tsx`. It uses Stars and the pendant, with the earned flag controlled
+inside the flower. The registry, palettes, extension points and saved design tag
+remain. To restore the public **Space style** selector, first restore a settings
+surface using `DressUp`, then set `showThemeSelector` to `true` in
+`demo/src/themes/settings.ts`. The selector is currently absent from both keyboard
+and screen-reader navigation. The wallpaper and pendant controls described below
+belong to the retained full-homepage implementation.
 
 ## Where to change things
 
@@ -20,6 +23,7 @@ The Stars/Paper wallpaper and pendant controls still work.
 | Available skins, label, scene and portrait            | `demo/src/themes/registry.ts`                       |
 | Theme selection state                                 | `demo/src/themes/ThemeProvider.tsx`                 |
 | Shared responsive space composition and gadgets       | `demo/src/styles/space.css`                         |
+| Current three-module composition and NYC card          | `demo/src/styles/home.css`                          |
 | Shared Qzone typography, controls and module defaults | `demo/src/styles/qzone.css`                         |
 | New translated labels                                 | `demo/src/lunarCopy.ts`                             |
 
@@ -89,18 +93,24 @@ required.
 
 ## Verification
 
-Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 44 active desktop
-and touch-phone Chromium checks. Two theme-switching cases are conditionally
-skipped until `showThemeSelector` is enabled again; they retain the coverage for
+Run `pnpm demo:build` and `pnpm demo:test`. The current suite has 18 desktop and
+touch-phone Chromium checks for the three-module page. The previous full-homepage
+tests are preserved in `demo/previous-homepage-tests/`, outside the active test
+directory. Restore and adapt them when restoring those modules. Two historical
+theme-switching cases are conditional on `showThemeSelector`; they retain the coverage for
 theme switching while audio plays,
 flower/message/draft continuity, restore, bilingual labels, reduced motion and
 320/390/430px overflow. It compares profile/header screenshots before switching
 and after restoring within the same run, avoiding platform-dependent committed
 golden images. Physical iOS/Android devices remain untested.
 
-The source and phone visual order agree: Profile, Flower, Diary, Meetups, Albums,
-Music, Dress up, Guestbook, Visitors. Keep that order when extending a skin.
-Desktop uses grid placement rather than CSS `order`; Guestbook and the sample
+The current source, phone visual and keyboard order is NYC status → Flower →
+Visitors, with no CSS `order` or positive `tabindex`. The active suite checks real
+Tab transitions and overflow in both languages at 320/390/430/720/1440px.
+
+In the previous full homepage, source and phone visual order agreed: Profile, Flower, Diary, Meetups, Albums,
+Music, Dress up, Guestbook, Visitors. Its
+desktop used grid placement rather than CSS `order`; Guestbook and the sample
 counter occupy the lower row. A regression test uses real Tab presses across
 Albums → Music and Dress up → Guestbook in both languages at 320/390/430/720/1440px.
 

@@ -23,13 +23,14 @@ jobs:
       - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            const { documentationErrors } = require('./scripts/documentation-review.cjs');
+            const { documentationErrors, isDependabotActionUpdate } = require('./scripts/documentation-review.cjs');
             const params = { ...context.repo, pull_number: context.issue.number };
             const { data: pr } = await github.rest.pulls.get(params);
             const files = await github.paginate(github.rest.pulls.listFiles, { ...params, per_page: 100 });
-            const errors = documentationErrors(pr.body, files.map(file => file.filename));
+            const dependencyOnly = isDependabotActionUpdate(pr, files);
+            const errors = dependencyOnly ? [] : documentationErrors(pr.body, files.map(file => file.filename));
             await core.summary.addHeading('Documentation review')
-              .addRaw(errors.length ? 'Complete the Documentation review section in the PR description. See docs/agents/pr-documentation.md.' : 'Documentation review recorded. Accuracy remains the author and reviewer’s responsibility.')
+              .addRaw(dependencyOnly ? 'Verified Dependabot update changes only immutable GitHub Action pins. Written documentation review is waived; full CI remains required.' : errors.length ? 'Complete the Documentation review section in the PR description. See docs/agents/pr-documentation.md.' : 'Documentation review recorded. Accuracy remains the author and reviewer’s responsibility.')
               .write();
             for (const error of errors) core.error(error);
             if (errors.length) core.setFailed('Documentation review is incomplete. Edit the PR description to rerun this check.');
