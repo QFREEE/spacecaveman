@@ -34,11 +34,6 @@ export const test = base.extend({
       }
       return route.fulfill({ json: plant });
     });
-    await page.route("**/api/presence/public", (route) =>
-      route.fulfill({
-        json: { status: "unknown", observed_at: null, expires_at: null },
-      }),
-    );
     await use(page);
   },
 });

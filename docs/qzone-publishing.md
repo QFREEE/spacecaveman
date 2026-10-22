@@ -1,46 +1,42 @@
-# Publishing the Space Caveman homepage
+# Publishing the homepage
 
-The `spacecaveman` Worker serves https://spacecaveman.com/. The release source is
-current `main`: the bilingual personal homepage, shared flower, real aggregate
-counter, public coarse NYC read API and supporting assets.
+The main Worker serves the English-default personal homepage, live coarse NYC
+status, a shared flower and a real aggregate page-view counter. See
+[production behavior](homepage-production.md) and [translation editing](bilingual-homepage.md).
 
-## Verify locally
+## Build and check
+
+Use Node 24 and the pnpm version pinned in package.json.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm exec wrangler d1 migrations apply spacecaveman-presence-trial --local
+pnpm exec playwright install chromium
 pnpm verify
 ```
 
-The full Worker package can be checked with two terminals:
+The shared verification performs syntax checks, real SQLite tests, the frontend
+build, browser tests and both Worker dry runs. It does not publish or migrate
+production. Use `pnpm exec playwright install --with-deps chromium` on Linux.
 
-```sh
-pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
-node scripts/verify-deployment.mjs http://127.0.0.1:8799
-```
-
-The second command checks exact built assets and API contracts using GET only.
-Browser tests use independent API fixtures. `pnpm demo:dev` alone does not run D1
-or the Worker APIs.
+For a complete local preview, apply the D1 migrations locally, then run `pnpm dev`.
+`pnpm demo:dev` serves only the frontend; endpoints need the Worker.
 
 ## Release
 
-Open a PR, wait for **Checks** and **Documentation review**, and merge to `main`.
-GitHub Actions rebuilds and deploys the website, then runs the exact-build and API
-verification. Follow the [deployment guide](deployment.md) for credentials and
-rollback. Use manual Wrangler deployment only when explicitly requested.
+Push a task branch and open a PR with the documentation review record. Merge
+after **Checks** and **Documentation review** pass. GitHub Actions builds and
+deploys the main Worker and assets. The separate phone Worker is not deployed.
+See [deployment](deployment.md) for credentials, rollback and exceptional manual
+deployment, which requires an explicit owner request.
 
-The website binds the existing `spacecaveman-presence-trial` D1 database. Migrations
-0002 and 0003 create the aggregate counter and shared flower and must exist before
-those APIs can work. They are additive and were introduced with the production
-homepage. Do not reset or seed the live counter or shared plant during validation.
-The restoration does not change the separate phone Worker or its credentials.
+The current production D1 database already has migrations 0002 and 0003. A new
+environment needs those applied before serving the homepage; CI does not apply
+migrations automatically. Never include credentials or private bundles in Git.
 
-`build:site` combines the frontend with supporting pages in generated `dist/site`.
-It preserves `/presence` and `/visits`, security headers and Worker-first APIs.
-The retired `/shortcuts` routes stay 410 Gone. The homepage uses `no-transform`
-to prevent injected analytics scripts.
+The build retains supporting visits/presence pages and security headers. Retired
+setup URLs remain 410 Gone. The read-only deployment check expects an empty
+public visits list, not fictional plans.
 
-Do not re-run obsolete deployment jobs to release current work. Verify the merged
-revision and the actual live build. An older queued run can show a stale overall
-status even after its deployment job has been cancelled.
+Historical browser smoke scripts may write page views or care for the shared
+flower. Use the normal browser suite with intercepted responses for routine
+frontend checks. Read any smoke script before running it against production.

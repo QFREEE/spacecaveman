@@ -4,6 +4,6 @@
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
-# Keep the homepage free of automatically injected analytics scripts.
+# Keep the demo homepage free of automatically injected analytics scripts.
 /
   Cache-Control: public, no-cache, no-transform

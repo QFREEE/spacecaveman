@@ -16,7 +16,7 @@ function render() {
   list.replaceChildren();
   const now = Date.now();
   const visible = visits.filter((visit) => Date.parse(visit.end) > now && (filter === "all" || visit.status === filter));
-  $("#load-status").textContent = visible.length ? `${visible.length} sample visit${visible.length === 1 ? "" : "s"}` : "No upcoming visits to show.";
+  $("#load-status").textContent = visible.length ? `${visible.length} visit${visible.length === 1 ? "" : "s"}` : "No public visit plans are available.";
   for (const visit of visible) {
     const card = element("article", "", "visit");
     const heading = element("div", "", "visit-heading");

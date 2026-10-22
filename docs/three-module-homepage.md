@@ -1,56 +1,78 @@
 # Three-module homepage
 
-The production homepage is **Yuntong’s space**, with exactly **Am I in NYC?**,
-**Flower**, and **Visitors**. It keeps the monochrome lunar header and compact
-retro frames. The old fictional badge, notice, footer copy, sample counter and
-public reset control are retired.
+Historical design milestone: the current homepage now uses live presence, shared
+flower storage and real page views. See [production behavior](homepage-production.md)
+and the [bilingual editing guide](bilingual-homepage.md). The behavior and screenshots
+below describe the earlier demo milestone.
 
-## Current behavior
+Implements [issue #22](https://github.com/QFREEE/spacecaveman/issues/22). The front
+page now contains exactly **Am I in NYC?**, **My flower vine**, and **Visitors**.
+It retains the accepted monochrome lunar Qzone header, compact framed modules,
+bitmap icons, beveled controls, English default and Chinese language switch.
 
-- NYC status reads `/api/presence/public`, without browser credentials. An active
-  authorized report selects the city/train or woods/figure reveal. Answers are
-  “Yes, I’m in NYC!”, “No, I am in the woods.” and “No update yet.” The woods answer
-  is the owner's playful wording for the outside-NYC state, not precise tracking.
-  Missing, expired or revoked reports remain unknown. Approximate update age is
-  shown without exact timestamps. The private phone write API stays authenticated.
-- The answer is accessible immediately. Scene and text settle after 1.2 seconds;
-  reduced motion or the retained `.motion-off` hook shows the final state at once.
-  Resuming motion or switching language does not replay a settled scene. The
-  owner's newer homepage has no visible pause button.
-- Flower care persists in D1 and is shared across visitors, with independent
-  0–3 stats, atomic cooldown, bloom reward and next-day replant. Visitors cannot
-  reset another person's progress. The flag visibility preference is browser-local.
-- The counter reads and increments the aggregate page-load count. It never
-  substitutes the former 001286 sample when unavailable.
-- Typed English and Chinese catalogs cover metadata, feedback and accessibility.
-  Switching language preserves the current plant and its history.
+The screenshots below show the original layout before the NYC answer reveal.
 
-Desktop uses three uneven columns; at 720px and below they stack in NYC → Flower
-→ Visitors order. Retired prototype components remain unmounted and use a separate
-legacy translator.
+![Desktop homepage](screenshots/home-desktop.png)
 
-## Deployment regression and verification
+![Phone homepage at 390px](screenshots/home-phone.png)
 
-Tracked in #39. The newer production work was previously present only in the
-original checkout. PR #37 and #38 were based on the older committed demo, so their
-successful deployment restored that demo. The corrective change reconciles the
-production source into Git and makes the checked-in build the release source.
+## Behavior
 
-`pnpm verify` checks backend behavior, the frontend build, desktop/phone browser
-scenarios and both Worker packages. Browser cases cover real API fixtures,
-bilingual state, report expiry, scene timing, reduced motion and responsive layout.
+- NYC status shows **No update yet.** with a subtle 1.2-second fade and upward
+  settle on page load. The answer stays visible and is available to screen readers
+  immediately. Pausing animation or requesting reduced motion shows it immediately.
+  With an in-NYC status, a small train arrives in the skyline; with an outside-NYC
+  status, a figure appears among trees. Both scenes settle after 1.2 seconds.
+  The woods are a playful symbol for being outside NYC, not a location report.
+  Unknown status keeps a quiet skyline without either scene. Pausing or reduced
+  motion immediately settles the scene; resuming does not replay it.
+  English and Chinese copy support all three states; the public default remains
+  unknown. The existing presence
+  trial is private and credential-protected; this card makes no request to it,
+  exposes no credential, and does not infer a yes/no status. Connecting a public
+  status requires a separate integration decision.
+- Flower care retains Water, Sun, Prune and Feed, independent 0–3 attributes,
+  minimum-based growth, immediate feedback, caps, burst protection and the local
+  care log. Bloom earns and places the Moon flag. Its checkbox is inside the
+  flower module; plant reset retains the reward, and refresh resets all state.
+- The visitor count **001286** remains decorative, explicitly labeled sample
+  data. It does not measure visits. No analytics or backend changes are included.
+- Language changes preserve care and reward state. Ambient animation can be
+  paused; reduced-motion preferences give still decoration and immediate care.
 
-`scripts/verify-deployment.mjs` compares the public HTML and JS/CSS assets with
-`dist/site`, checks the public API contracts, and checks that private/retired
-routes remain protected. It uses GET requests only. A successful HTML response
-alone cannot pass verification with the old demo or stale frontend assets.
+The main content source order is NYC → Flower → Visitors. Desktop uses three
+uneven columns; at 720px and below they stack in the same order. Phone copy is
+readable and care controls keep 44px targets. Navigation links target only the
+remaining sections.
 
-The earlier screenshots in `docs/screenshots/home-desktop.png` and
-`home-phone.png` document the old demo layout; they are historical references.
-See [production behavior](homepage-production.md), [bilingual messages](bilingual-homepage.md)
-and [publishing](qzone-publishing.md).
-Local package previews (isolated SQLite data):
+## Implementation and preservation
 
-![Restored desktop homepage](screenshots/restored-home-1440.png)
+`demo/src/main.tsx` composes `NycStatus.tsx`, `FlowerVine.tsx` and
+`VisitorCounter.tsx`. `styles/home.css` supplies the composition using the existing
+theme tokens. The style selector stays hidden. Theme registry, palettes and the
+saved design tag `design/lunar-qzone-v1` remain available.
 
-![Restored phone homepage](screenshots/restored-home-390.png)
+Profile, diary, meetups, albums, music, guestbook and dress-up components remain
+in source but are not mounted or linked. Their prior browser scenarios are kept
+in `demo/previous-homepage-tests/`, outside Playwright's active `demo/e2e/`
+directory. These are historical coverage, not evidence for the current page.
+The complete previous composition is recoverable from Git commit
+`35b19bd5d215caee92f22edd027f2af7d62b5b40`.
+
+## Verification
+
+Run `pnpm demo:build` and `pnpm demo:test`; set `DEMO_TEST_PORT` if 4173 is occupied.
+The active Chromium checks cover desktop and touch-phone projects: exact
+module count, no API requests, sample labeling, valid links, bilingual state,
+real Tab order, care stages/caps/reward/reset, burst protection, pause/reduced
+motion, enlarged text and overflow at 320/390/430/720/1440px. Screenshots above
+were inspected at desktop and 390px phone widths. Physical iOS/Android testing
+remains outstanding. Existing Worker checks and deployment packaging remain in CI.
+
+`node scripts/qzone-deploy-smoke.mjs <base-url>` also checks the complete Worker
+package's security headers, three modules, bilingual flower interactions and
+preserved routes; follow the [publishing guide](qzone-publishing.md) to start it.
+
+The outside-NYC answer is the owner's playful wording: **No, I am in the woods.**
+(**不在，我在树林里。**). The status remains a coarse outside-NYC value; the wording
+does not introduce more precise location data.

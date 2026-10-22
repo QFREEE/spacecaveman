@@ -10,7 +10,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | Flower reset                             | Any visitor could reset the local demo | No public destructive reset; care starts a new plant 24 hours after bloom        |
 | Moon flag                                | Lost on reload                         | Unlocked on bloom, with visibility preference saved in browser storage           |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected       |
-| NYC presence                             | Already reads live status              | Existing behavior preserved                                                      |
+| NYC presence                             | Static Unknown card                    | Live coarse status and approximate update age                                    |
 | `/api/visits`                            | Fictional named visit plans            | Empty public list until owner/invited-friend access exists                       |
 | Old profile/diary/albums/music/guestbook | Fictional prototypes                   | Kept unmounted; no new public data or messaging features added                   |
 

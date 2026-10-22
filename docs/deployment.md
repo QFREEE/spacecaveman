@@ -28,10 +28,10 @@ checks on `main`, the official Cloudflare Wrangler action deploys the Worker nam
 also supported from `main` and runs the same checks before deployment.
 
 The isolated `spacecaveman-presence-trial` Worker is bundled during checks but is
-not automatically deployed. The main website now binds its existing D1 database
-for the public coarse-status read, shared flower and aggregate counter. The phone
-write handler and credentials remain unchanged. Database migrations remain an
-explicit operation; the deployment script does not reset live data. The React homepage is built and browser-tested before deployment. The
+not automatically deployed. The website reads its existing D1 database for public presence
+and stores flower/counter state in separate tables. Credentials stay protected;
+CI does not apply migrations. The current production database already has homepage
+migrations 0002 and 0003; provision those before serving a new environment. The React homepage is built and browser-tested before deployment. The
 existing visits and presence pages are retained by the site build. Deployment
 keeps existing dashboard variables. Do not enable another deploy-on-push
 integration for the same Worker.
@@ -47,10 +47,10 @@ GitHub's secret form, outside chat, source files, issues, and command arguments.
    create a custom token named `spacecaveman-github-deploy`.
 2. The token form used for the successful deployment exposes these permissions:
 
-   | Category | Permission | Access | Resource scope |
-   | --- | --- | --- | --- |
-   | Account | Workers Scripts | Edit | Include only account `b72709d7edb8e1f6d064c69ee4b6d3c5` |
-   | Zone | Workers Routes | Edit | Include only `spacecaveman.com` |
+   | Category | Permission      | Access | Resource scope                                          |
+   | -------- | --------------- | ------ | ------------------------------------------------------- |
+   | Account  | Workers Scripts | Edit   | Include only account `b72709d7edb8e1f6d064c69ee4b6d3c5` |
+   | Zone     | Workers Routes  | Edit   | Include only `spacecaveman.com`                         |
 
    The summary should show the specific account, rather than **All accounts**.
    `Workers Editor` is role terminology in newer authorization documentation;
@@ -58,6 +58,7 @@ GitHub's secret form, outside chat, source files, issues, and command arguments.
    general DNS Edit, account admin, or token-management permission is needed for
    this website deployment. Account-scoped script editing still covers the other
    Workers in that account; it is not limited to the website Worker.
+
 3. Choose an expiration and record a rotation reminder privately. Do not restrict
    the token to the owner's home IP; GitHub-hosted runners use different addresses.
 4. In [GitHub repository Settings → Environments](https://github.com/QFREEE/spacecaveman/settings/environments),
@@ -97,10 +98,8 @@ serially, and an in-progress production upload is not cancelled by another push.
 ## Verification and rollback
 
 Inspect the GitHub Actions run and the Cloudflare deployment history. The deploy
-job compares the public frontend assets with the exact build and performs read-only
-checks of public status, flower, count and protected routes. A failed check marks
-the job failed but does not automatically undo a deployment. The visits list stays
-empty until owner/friend authorization exists.
+job performs read-only HTTPS checks of the homepage and empty public visits API; a failed
+check marks the job failed but does not automatically undo a deployment. The public visits list stays empty until owner/friend authorization exists.
 
 For an exceptional manual upload, authenticate locally with
 `pnpm exec wrangler login`, verify the target with `pnpm exec wrangler whoami`,
@@ -124,9 +123,13 @@ rollback path is documented, not exercised against production by this setup.
 - [API token permission names](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
 - [Worker rollback limitations](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
 
-## Homepage source protection
+## Exact build verification
 
-The release smoke check compares the public HTML and hashed assets with the exact
-build in dist/site and verifies the public status, shared plant and count APIs.
-It rejects the former fictional demo even if it returns HTTP 200. See
-[the source restoration record](three-module-homepage.md#deployment-regression-and-verification).
+The release check compares the public HTML title and JS/CSS paths and contents
+with the generated dist/site build, then verifies the public presence, flower,
+visitor and empty-visits contracts plus protected and retired routes. It uses
+GET only and rejects the old demo even when it responds with HTTP 200.
+
+Issue #39 tracked a release that replaced the newer uncommitted homepage with the
+older main tree. PR #41 reconciled the intended production source into main; the
+stronger verification catches stale frontend artifacts on subsequent releases.

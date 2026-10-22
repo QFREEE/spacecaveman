@@ -25,6 +25,32 @@ both languages and marked as English in visible branding. Vite fills the initial
 HTML title and description from the English catalog, sharing their source with
 the runtime metadata.
 
+## Change or add wording
+
+1. Find the semantic key in `demo/src/i18n/en.ts`. Edit its value and the same
+   key in `demo/src/i18n/zh.ts`; keep the key stable when changing wording.
+2. For new text, add a descriptive key to both catalogs, then render it with
+   `const { t } = useLanguage()` and `t("flower.details")`. Avoid inline language
+   conditionals and do not import the legacy translator into active code.
+3. Store message keys or domain IDs for feedback/history, not translated text.
+   Translate at render time so existing content follows the language switch.
+4. Run `pnpm verify`. In a browser, switch English → 中文 → English after an
+   interaction and check labels, existing feedback, metadata and narrow layouts.
+5. Open a PR with the documentation review record. Merge after required checks
+   pass; merging triggers production deployment. Use a manual Wrangler deployment
+   only when the owner explicitly requests it.
+
+For example, the same call renders the matching wording in either language:
+
+```tsx
+const { t } = useLanguage();
+return <button>{t("flower.details")}</button>;
+```
+
+To change the name or description, edit `site.title` or `site.description` in
+both catalogs. Vite fills the initial HTML from English, and the language provider
+updates runtime metadata. Keep Yuntong's name unchanged in Chinese.
+
 ## Sources and choices
 
 - [i18next TypeScript guidance](https://www.i18next.com/overview/typescript)

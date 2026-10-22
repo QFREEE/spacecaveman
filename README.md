@@ -1,126 +1,111 @@
 # spacecaveman
 
-A personal website and learning project, hosted on Cloudflare Workers Free with
-Workers Static Assets. The goal is to help invited friends see NYC presence and
-upcoming visits; private friend access and owner administration remain planned.
+The live site at https://spacecaveman.com is a personal lunar space with three
+modules: current NYC presence, a shared flower, and a real page-view counter.
+The React frontend lives in `demo/` for historical reasons; Wrangler builds and
+serves it as the production homepage.
 
-## Current status
+## Homepage behavior
 
-- [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
-  Qzone-style homepage with exactly three modules: **Am I in NYC?**, the flower
-  vine shared by visitors, and a real aggregate page-view counter. The public NYC
-  card reads coarse status from the existing phone database without browser
-  credentials; missing, expired or revoked reports show **No update yet.**
-  [Current behavior and screenshots](docs/three-module-homepage.md). English is
-  the default; the English/中文 switch preserves flower state. The lunar header,
-  walking caveman and pendant remain.
-- The accepted lunar design is saved as `design/lunar-qzone-v1`. A typed theme
-  registry and palette files support optional skins. The public style selector
-  is temporarily hidden; Lunar ink stays the default. [How to extend a skin](docs/themes.md).
-- [Visits page](https://spacecaveman.com/visits): the earlier minimal frontend,
-  backed by an empty public `/api/visits` list. Real plans remain private until
-  invited-friend authorization is implemented.
-- Deployment is automated: pull request → checks → merge to `main` → checks →
-  deploy the homepage, supporting assets, and Worker API together. The
-  [first successful production run](https://github.com/QFREEE/spacecaveman/actions/runs/39596511494)
-  completed on October 21, 2026 after [PR #10](https://github.com/QFREEE/spacecaveman/pull/10).
-- The registrar remains Squarespace; Cloudflare serves the root custom domain.
-  [Domain connection records](docs/domain-connection.md) describe the cutover and
-  the DNSSEC observations made at that time.
-- An isolated, protected Worker/D1 [presence trial](docs/presence-trial.md) accepts
-  coarse reports using scoped credentials. It is separate from the public site
-  and is not automatically deployed by the website workflow. Physical iPhone
-  automation testing remains outstanding.
-  The [repository-only iPhone setup guide](docs/iphone-shortcuts-setup.md)
-  explains a manual publisher, Unknown/clear, and Arrive/Leave automation inputs.
-  Setup pages are excluded from both production sites; former `/shortcuts`
-  URLs return 410 Gone. `pnpm presence:check -- <private-bundle-path>`
-  diagnoses the trial with a read-only request; it never replaces the report.
+- NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
+  reports presence; the homepage refreshes every minute and shows the latest answer.
+  Update age is approximate: within a few minutes (under five), within an hour,
+  within three hours, or over three hours ago. No exact timestamp is displayed.
+  Missing reports and reports older than six hours show “No update yet.” Report age is
+  available for up to 30 days. No phone credentials are sent to the browser.
+- Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
+  advance one attribute to a maximum of three. Growth follows the lowest
+  attribute. A shared two-second cooldown rejects overlapping rapid actions.
+  The last twelve care actions are stored without visitor identities.
+- A bloom lasts at least 24 hours. The first care action after that starts the
+  next plant. There is no public reset that can erase other visitors' progress.
+  Flower state refreshes every 30 seconds and when the window regains focus.
+- A bloom unlocks the Moon flag. Its visibility preference is saved in the
+  browser when browser storage is available. Flower progress is saved on the
+  server, independently of browser storage.
+- The counter starts at zero when its migration is applied and counts accepted
+  page-load reports, including reloads. It is an aggregate, not a count of unique
+  people, and is not bot-filtered analytics. The counter stores no IP addresses,
+  cookies or browser identifiers. Loading and failed requests never show a fake
+  number.
+- English is the default. The English/中文 switch translates the interface without
+  resetting module state. Animation follows the device's reduced-motion setting;
+  there is no pause-animation button.
 
-The public website shows coarse NYC status, a shared flower and aggregate views.
-Invited-friend authentication, persistent visits and owner editing are tracked in [GitHub Issues](https://github.com/QFREEE/spacecaveman/issues).
+Homepage wording uses complete typed English and Chinese catalogs. See
+[bilingual homepage](docs/bilingual-homepage.md) for message keys, bundle choices
+and the primary references behind the approach.
 
-## Local development
+The older `/visits` page remains reachable, but its API returns an empty list.
+Fictional personal plans have been removed. Real plans need the owner and
+invited-friend access tracked in GitHub issues #3, #4 and #5.
+Earlier profile, diary, album, music and guestbook experiments remain in source
+but are not mounted on the production homepage.
 
-Use Node 24 (`.node-version`) and the pnpm version recorded in `package.json`. The pnpm lockfile is
-the dependency source of truth.
+## Local development and verification
 
-```sh
+Use Node 24 and the pnpm version in `package.json`.
+
+```powershell
 pnpm install --frozen-lockfile
+pnpm exec wrangler d1 migrations apply spacecaveman-presence-trial --local
 pnpm dev
 ```
 
-Wrangler builds the React homepage, combines it with the existing static pages,
-and serves the Worker and assets locally. Open the URL it prints. Opening an HTML
-file directly does not run the API.
+Use the URL printed by Wrangler. This runs the complete site with local D1.
+`pnpm demo:dev` runs only the frontend; the API-dependent modules need the Worker.
 
-For the faster frontend-only preview:
-
-```sh
-pnpm demo:dev
-```
-
-Open http://127.0.0.1:4173/. This preview does not run the Worker; live features
-show unavailable or unknown without their APIs. Use `pnpm dev` for the full package. `pnpm demo:preview` serves the frontend production build on port 4174.
-
-## Checks
-
-```sh
+```powershell
 pnpm exec playwright install chromium
 pnpm verify
 ```
 
-The browser suite checks the three modules, valid navigation, keyboard order,
-desktop and touch-enabled phone layouts, both languages, flower growth and caps,
-duplicate-care protection, the flag reward, enlarged text and reduced motion.
-Historical full-homepage scenarios are retained outside the active suite in
-`demo/previous-homepage-tests/`. Phone emulation does not
-replace physical iOS/Android testing. On Linux, install Chromium dependencies with
-`pnpm exec playwright install --with-deps chromium`, as CI does. Set
-`DEMO_TEST_PORT` to an unused port if another preview already occupies port 4173.
+The browser suite covers desktop and touch-enabled phone contexts, both languages,
+shared care, reload persistence, reward preferences, unavailable storage, and
+responsive layouts. The backend suite executes the schema and conditional SQL
+against SQLite. A dry run builds and packages the Worker without publishing it.
 
-`pnpm verify` is the shared local/CI command: syntax checks, Node tests, frontend
-type/build checks, browser tests, and both Worker dry runs. It stops on failure.
-The dry runs build/package code without publishing it or applying migrations.
-See the [publishing guide](docs/qzone-publishing.md) for a smoke test against the
-complete Worker package and [visual QA](design-qa.md) for the frontend review.
+To test the complete Worker package, run these in separate terminals:
 
-## Deployment
+```powershell
+pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
+node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
+```
 
-Use a pull request for changes. After its checks pass, merge to `main`; GitHub
-Actions deploys through the official Wrangler action and checks the live homepage
-and public API contracts against the current build. The production secret is configured. See the
-[deployment guide](docs/deployment.md) for the workflow, exact credential settings,
-rotation, manual recovery, and rollback limits.
+The smoke test records page views and attempts one real Water action. It checks
+shared state across reload and a second page, phone layouts, languages, private
+presence protection, preserved routes and security headers. It never resets the
+shared plant. Screenshots and browser reports are generated under `outputs/`.
 
-Every PR also requires a [documentation review](docs/agents/pr-documentation.md):
-revisit setup instructions and accuracy, then record the documents inspected and
-either the updates made or why no edit is needed. The PR template and required
-**Documentation review** check enforce that record.
+## Release the main site
 
-Verified Dependabot PRs that only update immutable GitHub Action pins pass the
-documentation gate without a written record. Full CI and the normal merge rules
-still apply; workflow behavior changes require the regular review.
+Push a task branch, open a pull request, wait for **Checks** and **Documentation
+review**, then merge to `main`. GitHub Actions deploys the existing `spacecaveman`
+Worker and custom domain. See the [deployment guide](docs/deployment.md) for
+credentials, rollback and the explicitly requested manual-deployment path.
 
-The main-branch rules also require the **Checks** job to pass before merging;
-deployment checks are no longer the only gate for test/build failures. Agents
-start with the [engineering guide](docs/agents/engineering.md).
+`build:site` combines the React build with supporting static files in
+`dist/site/`. The homepage and separate phone trial use the existing D1 database;
+flower and counter tables are independent of presence tables. Migrations 0002
+and 0003 have already been applied to the current production database. A new
+environment needs those migrations before serving the homepage. CI does not
+apply migrations or redeploy the separate phone Worker. Retired `/shortcuts`
+setup URLs remain 410 Gone.
 
-GitHub deploys only the `spacecaveman` Worker. Changes to the presence trial, its
-credentials, or D1 migrations require their separate workflow and verification.
+## Phone presence
 
-## Architecture and references
+The protected phone publisher and its credentials remain separate from public
+reading. The protected write contract remains documented in the trial guide. The public read exposes
+only status, observation time and expiry, and the homepage shows approximate age.
+Public reports older than 30 days are hidden; scheduled cleanup removes expired
+report data without deleting credentials. No arrival/departure history is stored.
 
-`demo/` holds the React homepage. Wrangler runs `build:site` to combine its build
-with `public/` in generated `dist/site/`, preserving the earlier homepage as
-`visits.html`, the presence viewer, and security headers. Workers Static Assets
-serves those files; only `/api/*` uses Worker-first routing. The public Worker has
-a binding to the existing D1 database for the public status read, shared flower
-and aggregate counter. The phone trial remains a separate deployment; its
-authenticated handler and credentials are unchanged by the restoration.
+For local setup and the shared verification workflow, see the
+[engineering guide](docs/agents/engineering.md).
 
-- [Deployment and rollback](docs/deployment.md)
-- [Homepage publishing and package smoke tests](docs/qzone-publishing.md)
-- [Homepage specification](docs/qzone-demo-spec.md) and [asset provenance](demo/ASSETS.md)
-- [Presence trial](docs/presence-trial.md), [Shortcuts recipe](docs/iphone-shortcuts-setup.md), and [security design](docs/iphone-presence-design.md)
-- [Cloudflare Static Assets routing](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/)
+Start with the [trial guide](docs/presence-trial.md) and
+[Shortcuts recipe](docs/iphone-shortcuts-setup.md). See also the
+[security design](docs/iphone-presence-design.md),
+[domain status](docs/domain-connection.md),
+[publishing guide](docs/qzone-publishing.md), and
+[homepage production audit](docs/homepage-production.md).

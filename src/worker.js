@@ -1,5 +1,8 @@
-import { handlePresence } from "./presence.js";
-import { handlePublicPresence, cleanupPresence } from "./public-presence.js";
+import {
+  handlePresence,
+  handlePublicPresence,
+  cleanupPresence,
+} from "./presence.js";
 import { handleVisitorCount, handleFlower } from "./site.js";
 
 export default {
@@ -8,14 +11,11 @@ export default {
   },
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
+    // Retired setup pages must not fall through to static assets or HTML redirects.
     if (/^\/shortcuts(?:\.html|\.css)?\/?$/.test(pathname)) {
-      return new Response(request.method === "HEAD" ? null : "Gone", {
+      return new Response(request.method === 'HEAD' ? null : 'Gone', {
         status: 410,
-        headers: {
-          "Cache-Control": "no-store",
-          "Content-Type": "text/plain; charset=utf-8",
-          "X-Content-Type-Options": "nosniff",
-        },
+        headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' },
       });
     }
     if (pathname === "/api/visitors") return handleVisitorCount(request, env);
@@ -27,13 +27,16 @@ export default {
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
     };
-    if (pathname !== "/api/visits")
+    if (pathname !== "/api/visits") {
       return Response.json({ error: "Not found" }, { status: 404, headers });
-    if (request.method !== "GET")
+    }
+    if (request.method !== "GET") {
       return Response.json(
         { error: "Method not allowed" },
         { status: 405, headers: { ...headers, Allow: "GET" } },
       );
+    }
+    // Personal plans stay private until owner and invited-friend access exists.
     return Response.json(
       { timeZone: "America/New_York", visits: [] },
       { headers },

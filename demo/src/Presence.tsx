@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useLanguage } from "./Language";
-import { NycReveal } from "./NycScene";
 
 type Report = {
   status: "in_nyc" | "not_in_nyc" | "unknown";
@@ -8,7 +7,11 @@ type Report = {
   expires_at: string | null;
 };
 
-export function Presence() {
+export function Presence({
+  renderAnswer,
+}: {
+  renderAnswer: (status: Report["status"], answer: string) => ReactNode;
+}) {
   const { t } = useLanguage();
   const [report, setReport] = useState<Report | null>(null);
   const [health, setHealth] = useState("loading");
@@ -85,7 +88,7 @@ export function Presence() {
           : t("presence.updatedEarlier");
   return (
     <section className="presence-strip" aria-label={t("presence.label")}>
-      <NycReveal key={state} status={state} answer={label} />
+      {renderAnswer(state, label)}
       {Number.isFinite(observed) || health === "error" ? (
         <div className="presence-detail">
           {Number.isFinite(observed) ? <span>{recency}</span> : null}

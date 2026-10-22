@@ -60,6 +60,7 @@ export function LunarScene({ ornaments, treasure }: SceneProps) {
       <div className="caveman-traveler">
         <Caveman />
       </div>
+      <span className="moon-caption">THE MOON IS A VERY BIG BACKYARD.</span>
       {treasure ? <span className="treasure-flag">⚑</span> : null}
     </div>
   );

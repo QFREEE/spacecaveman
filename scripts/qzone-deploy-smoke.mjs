@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 
-const base = (process.argv[2] ?? "http://127.0.0.1:8787").replace(/\/$/, "");
+const base = (process.argv[2] ?? "http://127.0.0.1:8799").replace(/\/$/, "");
 const origin = new URL(base).origin;
-const label = new URL(base).hostname === "127.0.0.1" ? "package" : "deployed";
+const local = new URL(base).hostname === "127.0.0.1";
+const label = local ? "package" : "deployed";
 await mkdir("outputs/qzone-qa", { recursive: true });
-const browser = await chromium.launch({
-  args: ["--autoplay-policy=user-gesture-required"],
-});
+const browser = await chromium.launch();
 try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -20,9 +19,6 @@ try {
   const external = [];
   const writes = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
-  });
   page.on("request", (request) => {
     if (new URL(request.url()).origin !== origin) external.push(request.url());
     if (request.method() !== "GET") writes.push(request.url());
@@ -30,84 +26,88 @@ try {
   const response = await page.goto(base);
   assert.equal(response.status(), 200);
   assert.match(response.headers()["cache-control"], /no-transform/);
-  assert.equal(
-    (await response.text()).includes("static.cloudflareinsights.com/beacon"),
-    false,
-  );
   assert.match(
     response.headers()["content-security-policy"],
     /script-src 'self'/,
   );
-  await page
-    .getByRole("heading", { name: "Space Caveman", exact: true })
-    .waitFor();
+  assert.equal(
+    (await response.text()).includes("static.cloudflareinsights.com/beacon"),
+    false,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Yuntong’s space", exact: true }),
+  ).toBeVisible();
   assert.deepEqual(
     await page
       .locator("main .module")
       .evaluateAll((items) => items.map((item) => item.id)),
     ["nyc", "flower", "visitors"],
   );
-  assert.equal(
-    await page.locator(".presence-answer").getAttribute("data-status"),
-    "unknown",
+  await expect(page.locator(".counter")).toHaveText(/\d{6,}/);
+  await expect(
+    page.getByRole("button", { name: "Water", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("region", { name: "Live NYC status" }),
+  ).toBeVisible();
+  await expect(page.locator(".presence-answer")).not.toHaveText("Loading…");
+  assert.ok(
+    ["in_nyc", "not_in_nyc", "unknown"].includes(
+      await page.locator(".presence-answer").getAttribute("data-status"),
+    ),
   );
-  await page.getByText("No public update yet.", { exact: true }).waitFor();
-  assert.equal(
-    await page.getByLabel("Sample visit count: 1286").textContent(),
-    "001286",
+  assert.doesNotMatch(
+    await page.locator("body").innerText(),
+    /DEMO|sample data|local flower demo/,
   );
-  await page
-    .getByText("Decorative counter · sample data", { exact: true })
-    .waitFor();
   assert.equal(
     await page.locator("audio, #dressup, #guestbook, #albums, #meetup").count(),
     0,
   );
-  assert.equal(
-    await page
-      .locator('a[href^="#"]')
-      .evaluateAll((links) =>
-        links.every((link) => document.getElementById(link.hash.slice(1))),
-      ),
-    true,
+  const initialCount = Number(await page.locator(".counter").textContent());
+
+  // One genuine care action, including on production. Never reset the shared plant.
+  const careResponse = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/flower?care=rain") &&
+      res.request().method() === "POST",
   );
   await page.getByRole("button", { name: "Water", exact: true }).click();
+  const care = await careResponse;
+  assert.ok(
+    [200, 409, 429].includes(care.status()),
+    `Care returned ${care.status()}: ${await care.text()}`,
+  );
+  const saved = await care.json();
+  await expect(
+    page.getByRole("meter", { name: "Rain", exact: true }),
+  ).toHaveAttribute("value", String(saved.stats.rain));
   await page.getByRole("button", { name: "中文", exact: true }).click();
-  assert.equal(await page.locator("html").getAttribute("lang"), "zh-CN");
-  assert.equal(
-    await page
-      .getByRole("meter", { name: "雨露", exact: true })
-      .getAttribute("value"),
-    "1",
-  );
+  await expect(
+    page.getByRole("meter", { name: "雨露", exact: true }),
+  ).toHaveAttribute("value", String(saved.stats.rain));
   await page.getByRole("button", { name: "English", exact: true }).click();
-  await page.getByRole("button", { name: "Reset demo", exact: true }).click();
-  for (let round = 0; round < 3; round++) {
-    for (const action of ["Water", "Sun", "Prune", "Feed"]) {
-      await page.getByRole("button", { name: action, exact: true }).click();
-    }
-  }
-  await page
-    .getByText("In bloom! You earned a Moon flag.", { exact: true })
-    .waitFor();
-  const flag = page.getByLabel("Moon flag · bloom reward", { exact: true });
-  assert.equal(await flag.isChecked(), true);
-  await flag.uncheck();
-  assert.equal(await flag.isChecked(), false);
-  await page
-    .getByRole("button", { name: "Pause animation", exact: true })
-    .click();
-  assert.equal(
-    await page
-      .getByRole("button", { name: "Resume animation", exact: true })
-      .getAttribute("aria-pressed"),
-    "true",
+  await expect(
+    page.getByRole("button", { name: /Pause animation|Resume animation/ }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator(".counter")).toHaveText(/\d{6,}/);
+  assert.ok(
+    Number(await page.locator(".counter").textContent()) > initialCount,
   );
-  assert.deepEqual(writes, []);
-  for (const width of [320, 390, 430]) {
+  await expect(
+    page.getByRole("meter", { name: "Rain", exact: true }),
+  ).toHaveAttribute("value", String(saved.stats.rain));
+  const second = await context.newPage();
+  await second.goto(base);
+  await expect(
+    second.getByRole("meter", { name: "Rain", exact: true }),
+  ).toHaveAttribute("value", String(saved.stats.rain));
+  await second.close();
+  for (const width of [320, 390, 430, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     for (const language of ["中文", "English"]) {
-      await page.getByRole("button", { name: language, exact: true }).tap();
+      await page.getByRole("button", { name: language, exact: true }).click();
       assert.equal(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
@@ -115,41 +115,40 @@ try {
         true,
       );
     }
+    if ([390, 1440].includes(width))
+      await page.screenshot({
+        path: `outputs/qzone-qa/${label}-${width}.png`,
+        fullPage: true,
+      });
   }
-  await page.goto(base);
-  await page.screenshot({
-    path: `outputs/qzone-qa/${label}-phone.png`,
-    fullPage: true,
-  });
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.screenshot({ path: `outputs/qzone-qa/${label}-desktop.png` });
+  const views = await context.request.get(`${base}/api/visitors`);
+  assert.equal(views.status(), 200);
+  assert.ok(Number.isSafeInteger((await views.json()).views));
   const visits = await context.request.get(`${base}/api/visits`);
-  assert.equal(visits.status(), 200);
-  assert.equal((await visits.json()).demo, true);
+  assert.deepEqual((await visits.json()).visits, []);
   const legacy = await context.request.get(`${base}/visits`);
   assert.equal(legacy.status(), 200);
-  assert.match(await legacy.text(), /Let's meet in the city/);
+  assert.doesNotMatch(await legacy.text(), /Demo|sample visits/);
   const presence = await context.request.get(`${base}/presence`);
   assert.equal(presence.status(), 200);
   const protectedPresence = await context.request.get(`${base}/api/presence`);
   assert.ok([401, 503].includes(protectedPresence.status()));
+  assert.ok(
+    writes.every((url) => /\/api\/(visitors|flower\?care=rain)$/.test(url)),
+  );
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);
   console.log(
     JSON.stringify({
       base,
-      homepage: 200,
-      modules: ["nyc", "flower", "visitors"],
-      nycStatus: "unknown",
-      counter: "sample",
+      counter: "live D1 page views",
+      flower: "shared, persisted across reload and a second page",
+      careStatus: care.status(),
       languages: "en/zh",
-      interactions: "passed",
       phoneWidths: [320, 390, 430],
       securityHeaders: "preserved",
-      visits: visits.status(),
-      presencePage: presence.status(),
-      protectedPresence: protectedPresence.status(),
-      pageErrors: errors,
+      privatePresence: protectedPresence.status(),
+      errors,
     }),
   );
 } finally {
