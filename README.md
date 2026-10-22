@@ -93,6 +93,10 @@ revisit setup instructions and accuracy, then record the documents inspected and
 either the updates made or why no edit is needed. The PR template and required
 **Documentation review** check enforce that record.
 
+Verified Dependabot PRs that only update immutable GitHub Action pins pass the
+documentation gate without a written record. Full CI and the normal merge rules
+still apply; workflow behavior changes require the regular review.
+
 The main-branch rules also require the **Checks** job to pass before merging;
 deployment checks are no longer the only gate for test/build failures. Agents
 start with the [engineering guide](docs/agents/engineering.md).
