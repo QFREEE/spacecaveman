@@ -1,5 +1,11 @@
 # Lunar Qzone skin
 
+This records the earlier full-homepage design and its verification. The current
+[three-module homepage](three-module-homepage.md) keeps this skin and header, but
+mounts only NYC status, flower and visitor count. Dress-up controls and the other
+content modules are retained in source; their historical tests are archived in
+`demo/previous-homepage-tests/`. The flower now contains its own flag control.
+
 Implements [issue #15](https://github.com/QFREEE/spacecaveman/issues/15). The owner
 authorized implementation and a pull request after reviewing the research. We
 proceeded with the recommended balanced black/white composition rather than a
@@ -57,7 +63,7 @@ Guestbook → Visitors. No CSS `order` or positive `tabindex` changes keyboard f
 Desktop grid places Guestbook and the decorative counter in the lower row, while
 retaining three compact columns and the original artwork.
 
-Verified locally: 44 active Chromium browser tests (desktop and touch-phone projects),
+Verified for the previous full homepage: 44 active Chromium browser tests (desktop and touch-phone projects),
 with 2 theme-switching cases skipped while the public selector is hidden,
 10 existing backend regressions, JavaScript checks, TypeScript/Vite build, website
 and isolated presence Worker dry-run packaging. Tests exercise growth thresholds,

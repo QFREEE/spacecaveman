@@ -7,11 +7,12 @@ upcoming visits; private friend access and owner administration remain planned.
 ## Current status
 
 - [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
-  Qzone-style homepage with fictional content. The lunar skin adds a four-attribute
-  flower vine, dress-up controls, a walking caveman, and an original pendant.
-  [Skin behavior and screenshots](docs/lunar-qzone.md). English is the default; the
-  English/中文 switch preserves module state. The demo guestbook stays in the
-  visitor's browser and does not send messages to the owner.
+  Qzone-style homepage with exactly three modules: **Am I in NYC?**, the flower
+  vine, and a decorative visitor counter. The public NYC card shows **Unknown**;
+  it is not connected to the private presence trial. The count is sample data.
+  [Current behavior and screenshots](docs/three-module-homepage.md). English is
+  the default; the English/中文 switch preserves flower state. The lunar header,
+  walking caveman and pendant remain.
 - The accepted lunar design is saved as `design/lunar-qzone-v1`. A typed theme
   registry and palette files support optional skins. The public style selector
   is temporarily hidden; Lunar ink stays the default. [How to extend a skin](docs/themes.md).
@@ -69,9 +70,11 @@ pnpm deploy:check
 pnpm presence:deploy:check
 ```
 
-The browser suite checks desktop and touch-enabled phone layouts, both languages,
-albums, filters, guestbook behavior, audio controls, flower growth and caps,
-duplicate-care protection, dress-up rewards, and reduced motion. Phone emulation does not
+The browser suite checks the three modules, valid navigation, keyboard order,
+desktop and touch-enabled phone layouts, both languages, flower growth and caps,
+duplicate-care protection, the flag reward, enlarged text and reduced motion.
+Historical full-homepage scenarios are retained outside the active suite in
+`demo/previous-homepage-tests/`. Phone emulation does not
 replace physical iOS/Android testing. On Linux, install Chromium dependencies with
 `pnpm exec playwright install --with-deps chromium`, as CI does. Set
 `DEMO_TEST_PORT` to an unused port if another preview already occupies port 4173.
