@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 for (const [status, english, chinese] of [
   ["in_nyc", "Yes, I’m in NYC!", "在，我在纽约！"],
-  ["not_in_nyc", "Not in NYC right now.", "现在不在纽约。"],
+  ["not_in_nyc", "No, I am in the woods.", "不在，我在树林里。"],
   ["unknown", "No update yet.", "还没有更新。"],
 ]) {
   test(`NYC ${status} copy fits in both languages`, async ({ page }) => {

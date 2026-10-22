@@ -12,7 +12,7 @@ export const zh = {
   "presence.question": "我在纽约吗？",
   "presence.label": "实时纽约状态",
   "presence.inNyc": "在，我在纽约！",
-  "presence.outsideNyc": "现在不在纽约。",
+  "presence.outsideNyc": "不在，我在树林里。",
   "presence.unknown": "还没有更新。",
   "presence.updatedMinutes": "几分钟内更新",
   "presence.updatedHour": "一小时内更新",

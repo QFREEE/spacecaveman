@@ -122,3 +122,14 @@ rollback path is documented, not exercised against production by this setup.
 - [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/)
 - [API token permission names](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
 - [Worker rollback limitations](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
+
+## Exact build verification
+
+The release check compares the public HTML title and JS/CSS paths and contents
+with the generated dist/site build, then verifies the public presence, flower,
+visitor and empty-visits contracts plus protected and retired routes. It uses
+GET only and rejects the old demo even when it responds with HTTP 200.
+
+Issue #39 tracked a release that replaced the newer uncommitted homepage with the
+older main tree. PR #41 reconciled the intended production source into main; the
+stronger verification catches stale frontend artifacts on subsequent releases.

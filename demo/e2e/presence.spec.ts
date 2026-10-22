@@ -67,7 +67,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
   await page.goto("/");
   const presence = page.getByRole("region", { name: "Live NYC status" });
   await expect(presence.getByRole("status")).toHaveText(
-    "Not in NYC right now.",
+    "No, I am in the woods.",
   );
   await expect(presence).toContainText("Updated within the last few minutes");
   await expect(presence.locator("time, [datetime]")).toHaveCount(0);
