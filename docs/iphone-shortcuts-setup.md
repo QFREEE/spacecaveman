@@ -13,11 +13,13 @@ requires strictly newer timestamps and a ten-second interval. Duplicate IDs
 still fail. This button does not classify location. The menu and automation
 recipe below is optional and collapsed on the phone guide.
 
-The phone-readable [Publish NYC Status guide](../public/shortcuts.html) is served
-at `/shortcuts.html` on the website and isolated trial after their separate
-deployments. It contains no credentials, scripts, storage, or API requests. It
-is an action recipe, not a signed/installable `.shortcut` file. The public
-homepage remains Unknown; this flow currently reports to the private viewer.
+The phone-readable [Publish NYC Status guide](iphone-shortcuts-guide/index.html)
+is retained under `docs/` for local viewing only. At the owner's request, it is
+excluded from both production asset bundles. Former `/shortcuts`,
+`/shortcuts.html`, `/shortcuts/`, and `/shortcuts.css` URLs return uncached
+410 Gone. The credential-free instructions remain in the repository and the
+owner's email. This is an action recipe, not a signed/installable `.shortcut`
+file. The public homepage remains Unknown; reports go to the private viewer.
 
 Build one **Publish NYC Status** shortcut. With no input, its menu offers In NYC,
 Not in NYC, or Unknown / clear report. With input, it uses that input without a
@@ -48,12 +50,18 @@ this checkout's `.presence-private/credentials.json`. This command never writes
 a report or prints credentials. Do not use `presence-smoke.mjs` to diagnose real
 phone reports: that older script deliberately overwrites status with test data.
 
-For the credential-free guide's packaged browser check, start `pnpm dev --port
-8798`, then run `node scripts/shortcuts-guide-smoke.mjs`. It checks actual Worker
-headers, 320/390/430/1440 widths, enlarged text, no credential fields or scripts,
-and no API requests. An explicit HTTPS origin can check the deployed guide.
-Screenshots go to ignored `outputs/iphone-shortcuts/`. This supplements
-`pnpm verify`; it does not exercise iOS Shortcuts.
+To verify the production takedown:
+
+```powershell
+node scripts/shortcuts-retirement-smoke.mjs https://spacecaveman.com
+node scripts/shortcuts-retirement-smoke.mjs https://spacecaveman-presence-trial.spacecaveman.workers.dev
+```
+
+The script checks
+GET/HEAD responses for the former URLs and confirms the homepage still responds.
+No presence report is written. For a local package check, start `pnpm dev --port
+8798` and use `http://127.0.0.1:8798` as the origin. This supplements `pnpm verify`;
+it does not exercise iOS Shortcuts.
 
 Apple's versioned iOS 17 API, travel-trigger, and automatic-execution guides
 linked below were rechecked on 2026-10-21. This establishes documented capability,

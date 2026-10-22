@@ -30,9 +30,10 @@ upcoming visits; private friend access and owner administration remain planned.
   coarse reports using scoped credentials. It is separate from the public site
   and is not automatically deployed by the website workflow. Physical iPhone
   automation testing remains outstanding.
-  A credential-free [iPhone setup guide](public/shortcuts.html) at
-  `/shortcuts.html` explains one reusable manual publisher, Unknown/clear, and
-  Arrive/Leave automation inputs. `pnpm presence:check -- <private-bundle-path>`
+  The [repository-only iPhone setup guide](docs/iphone-shortcuts-setup.md)
+  explains a manual publisher, Unknown/clear, and Arrive/Leave automation inputs.
+  Setup pages are excluded from both production sites; former `/shortcuts`
+  URLs return 410 Gone. `pnpm presence:check -- <private-bundle-path>`
   diagnoses the trial with a read-only request; it never replaces the report.
 
 The public website contains demo content, not private plans or live presence.

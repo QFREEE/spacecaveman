@@ -11,6 +11,13 @@ const visits = [
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
+    // Retired setup pages must not fall through to static assets or HTML redirects.
+    if (/^\/shortcuts(?:\.html|\.css)?\/?$/.test(pathname)) {
+      return new Response(request.method === 'HEAD' ? null : 'Gone', {
+        status: 410,
+        headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' },
+      });
+    }
     if (pathname === '/api/presence') return handlePresence(request, env);
     const headers = { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" };
     if (pathname !== "/api/visits") {
