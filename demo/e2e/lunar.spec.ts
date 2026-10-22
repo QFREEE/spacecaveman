@@ -55,7 +55,9 @@ test("shared care grows all stages and preserves progress without a flag reward"
       );
     }
   }
-  await expect(flower.getByRole("status")).toHaveText("Fed.");
+  await expect(flower.getByRole("status")).toHaveText(
+    "Our flower is in full bloom! Thank you for helping it grow.",
+  );
   await expect(page.locator(".treasure-flag")).toHaveCount(0);
   await expect(flower.getByRole("checkbox")).toHaveCount(0);
   await expect(
@@ -99,7 +101,6 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
     button.click();
     button.click();
   });
-  await expect(water).toBeDisabled();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "1");

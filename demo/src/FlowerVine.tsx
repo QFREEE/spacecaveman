@@ -98,11 +98,26 @@ export function FlowerVine() {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [pending, setPending] = useState(false);
+  const [contribution, setContribution] = useState({ generation: 0, count: 0 });
+  const [effectId, setEffectId] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(false);
   const revision = useRef(0);
+  const plantGeneration = useRef(0);
   const stage = Math.floor((Math.min(...Object.values(stats)) * 3) / 50);
   function applyPlant(plant: Plant) {
+    if (plantGeneration.current !== plant.generation) {
+      plantGeneration.current = plant.generation;
+      setNotice("");
+      setActive(null);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = null;
+    }
+    setContribution((previous) =>
+      previous.generation === plant.generation
+        ? previous
+        : { generation: plant.generation, count: 0 },
+    );
     setStats(plant.stats);
     setLoaded(true);
     setFailed(false);
@@ -145,31 +160,58 @@ export function FlowerVine() {
     try {
       const { plant, status } = await requestPlant(action.id);
       applyPlant(plant);
+      if (status === 200) {
+        setContribution((previous) => ({
+          generation: plant.generation,
+          count:
+            (previous.generation === plant.generation ? previous.count : 0) + 1,
+        }));
+      }
       setNotice(
         status === 429
           ? "flower.notice.wait"
           : status === 409
-            ? "flower.notice.full"
-            : action.response,
+            ? plant.error === "day_changed"
+              ? "flower.notice.newDay"
+              : "flower.notice.full"
+            : Object.values(plant.stats).every((value) => value === 50)
+              ? "flower.notice.bloomed"
+              : action.response,
       );
       if (
         status === 200 &&
         !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      )
+      ) {
+        if (timer.current) clearTimeout(timer.current);
         setActive(action);
+        setEffectId((id) => id + 1);
+        timer.current = setTimeout(() => {
+          setActive(null);
+          timer.current = null;
+        }, 650);
+      }
     } catch {
       setFailed(true);
       setNotice("flower.notice.unconfirmed");
     } finally {
-      // Match the server cooldown even when reduced motion is enabled.
-      timer.current = setTimeout(() => {
-        busy.current = false;
-        setPending(false);
-        setActive(null);
-        timer.current = null;
-      }, 2000);
+      busy.current = false;
+      setPending(false);
     }
   }
+
+  const ordinaryNotice =
+    !notice || actions.some((action) => action.response === notice);
+  const feedback = failed
+    ? notice === "flower.notice.unconfirmed"
+      ? notice
+      : "flower.unavailable"
+    : !loaded
+      ? "flower.loading"
+      : ordinaryNotice && contribution.count > 0 && stage === 3
+        ? "flower.notice.bloomed"
+        : ordinaryNotice && contribution.count >= 10
+          ? "flower.notice.thanks"
+          : notice;
 
   return (
     <ModuleFrame
@@ -238,6 +280,7 @@ export function FlowerVine() {
               {active ? (
                 <span
                   className={`care-effect effect-${active.id}`}
+                  key={effectId}
                   aria-hidden="true"
                 >
                   {active.effect}
@@ -247,7 +290,16 @@ export function FlowerVine() {
           ) : null}
         </div>
         {loaded ? (
-          <div className="plant-meters">
+          <div
+            className="plant-meters"
+            data-recognition={
+              contribution.count > 0 && stage === 3
+                ? "bloom"
+                : contribution.count >= 10
+                  ? "thanks"
+                  : undefined
+            }
+          >
             {actions.map((action) => (
               <div className="plant-stat" key={action.id}>
                 <span>{t(action.stat)}</span>
@@ -280,9 +332,7 @@ export function FlowerVine() {
           role="status"
           aria-label={t("flower.status")}
         >
-          {notice || failed || !loaded
-            ? t(notice || (failed ? "flower.unavailable" : "flower.loading"))
-            : ""}
+          {feedback ? t(feedback) : ""}
         </p>
         <div className="plant-tools">
           <button

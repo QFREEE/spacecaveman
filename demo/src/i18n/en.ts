@@ -37,7 +37,11 @@ export const en = {
   "flower.notice.pruned": "Pruned.",
   "flower.notice.fed": "Fed.",
   "flower.notice.full": "Already full.",
-  "flower.notice.wait": "Wait two seconds.",
+  "flower.notice.wait": "Please try again in a moment.",
+  "flower.notice.newDay": "A fresh flower for a new day. Try caring again.",
+  "flower.notice.thanks": "Thank you for giving our flower so much care!",
+  "flower.notice.bloomed":
+    "Our flower is in full bloom! Thank you for helping it grow.",
   "flower.notice.unconfirmed": "Could not confirm. Refresh and try again.",
   "flower.unavailable": "The flower is temporarily unavailable.",
   "flower.loading": "Loading the flower…",

@@ -46,7 +46,7 @@ test("storage failures show unavailable states, disable unsaved care and allow r
   await expect(page.locator(".counter")).toHaveText("000073");
 });
 
-test("failed care never invents progress and shared cooldown returns authoritative state", async ({
+test("failed care never invents progress and temporary limits return authoritative state", async ({
   page,
 }) => {
   await page.goto("/");
@@ -60,12 +60,14 @@ test("failed care never invents progress and shared cooldown returns authoritati
         log: ["rain"],
         generation: 1,
         bloomed_at: null,
-        error: "cooldown",
+        error: "temporarily_limited",
       },
     }),
   );
   await water.click();
-  await expect(page.locator("#flower")).toContainText("Wait two seconds.");
+  await expect(page.locator("#flower")).toContainText(
+    "Please try again in a moment.",
+  );
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "1");

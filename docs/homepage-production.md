@@ -6,7 +6,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | ---------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
 | Homepage badge/footer                    | Fictional/demo labels                  | Personal space copy matching real features                                       |
 | Visitor counter                          | Hardcoded 001286                       | D1 aggregate starting at zero; includes reloads; loading/error/retry states      |
-| Flower care                              | Per-page state lost on refresh         | One D1 plant shared by all visitors; atomic care, bounds and two-second cooldown |
+| Flower care                              | Per-page state lost on refresh         | One D1 plant shared by all visitors; immediate confirmed care with atomic bounds |
 | Flower reset                             | Any visitor could reset the local demo | Shared daily reset at New York midnight on the next read or care request         |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected       |
 | NYC presence                             | Static Unknown card                    | Live coarse status and approximate update age                                    |
@@ -24,9 +24,10 @@ A retry after an uncertain network failure may report another view.
 Same-origin `POST /api/flower?care=rain|sun|love|food` accepts a bodyless request.
 Only these fixed actions can select a stat. Values are bounded by the schema and
 conditional UPDATE. The response is authoritative; the browser does not invent
-successful care. A full attribute returns 409; cooldown returns 429 with a
-`Retry-After` header. Both include current state so another visitor's care appears
-immediately. Unavailable storage returns 503; the UI disables care and offers a
+successful care. There is no fixed cooldown: each atomic increment can follow
+the previous response immediately. A full attribute returns 409; an old-day
+request that crosses midnight returns 409 with `day_changed`. Both include current
+state. Unavailable storage returns 503; the UI disables care and offers a
 refresh. Each attribute is bounded from zero to fifty; the UI shows only its bar,
 without numeric progress or levels. Other tabs refresh every 30 seconds or on
 window focus.
@@ -36,6 +37,12 @@ a new generation and clears all care bars, the care log and bloom time, whether
 or not yesterday's plant bloomed. Concurrent requests reset it only once. The flower
 card shows care actions and refresh, without a details panel. Blooming changes the
 plant's appearance; there is no flag reward or saved browser unlock.
+Ten successful actions across the care buttons during the current visit show a
+thank-you message and green bars. Care that finishes all four bars shows a bloom
+message and gold bars. Full or failed attempts do not earn recognition. This count
+exists only in page memory and resets for a new generation or reload. Decorative
+care effects never delay the next request; reduced motion still receives the
+same messages and colors. No visible numeric counts are added.
 No visitor identity is required or recorded. The last twelve care action names are
 kept; no individual timestamps, names, IPs or cookies are stored by these features.
 Platform request logs follow the existing Cloudflare configuration.
@@ -43,7 +50,7 @@ Platform request logs follow the existing Cloudflare configuration.
 ## Validation
 
 Backend tests exercise real SQLite statements for concurrent counter increments,
-origin/method checks, invalid care, cooldowns, full stats, bloom timing, daily resets,
+origin/method checks, invalid care, rapid/concurrent increments, full stats, bloom timing, daily resets,
 and unavailable databases. Browser tests cover persistence, bilingual copy,
 blooming, failures and mobile layouts. The smoke script runs the built Worker with
 real D1 storage and checks a second page sees the same flower. Deployed checks are

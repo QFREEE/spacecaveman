@@ -24,7 +24,8 @@ serves it as the production homepage.
 - Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
   advance one attribute to a maximum of fifty. The interface shows bars without
   numeric counts or levels. Growth follows the lowest
-  attribute. A shared two-second cooldown rejects overlapping rapid actions.
+  attribute. Each confirmed action becomes available immediately; buttons only
+  pause while a request is pending. Atomic increments keep rapid care within the cap.
   The last twelve care actions are stored without visitor identities.
 - The flower starts fresh at midnight in New York every day, whether or not it
   bloomed. The first read or care request after midnight resets the plant, care
@@ -32,6 +33,10 @@ serves it as the production homepage.
   There is no public reset that can erase other visitors' progress.
   Flower state refreshes every 30 seconds and when the window regains focus.
 - Flower progress is saved on the server, independently of browser storage.
+- After ten successful care actions in the current visit, the bars turn green
+  with a thank-you message. Helping fill all four bars turns them gold and shows
+  a bloom message. Recognition resets for a new daily plant or page reload;
+  no visitor identity or numeric contribution count is displayed or stored.
 - The counter starts at zero when its migration is applied and counts accepted
   page-load reports, including reloads. It is an aggregate, not a count of unique
   people, and is not bot-filtered analytics. The counter stores no IP addresses,

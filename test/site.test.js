@@ -99,7 +99,7 @@ test("counter starts at zero and increments atomically, reads do not increment",
   f.sqlite.close();
 });
 
-test("shared flower validates care, cooldown, fifty-point bounds and bloom in real SQL", async () => {
+test("shared flower accepts rapid care while enforcing fifty-point bounds and bloom in real SQL", async () => {
   const f = fixture();
   let now = Date.parse("2026-10-22T12:00:00Z");
   const get = () => handleFlower(f.request("flower"), f.env, now);
@@ -123,14 +123,12 @@ test("shared flower validates care, cooldown, fifty-point bounds and bloom in re
   );
   const first = await care("rain");
   assert.equal((await first.json()).stats.rain, 1);
-  const blocked = await care("rain");
-  assert.equal(blocked.status, 429);
-  assert.equal(blocked.headers.get("Retry-After"), "2");
-  assert.equal((await blocked.json()).stats.rain, 1);
+  const rapid = await care("rain");
+  assert.equal(rapid.status, 200);
+  assert.equal((await rapid.json()).stats.rain, 2);
   for (const action of ["rain", "sun", "love", "food"].flatMap((id) =>
-    Array(id === "rain" ? 49 : 50).fill(id),
+    Array(id === "rain" ? 48 : 50).fill(id),
   )) {
-    now += 2000;
     assert.equal((await care(action)).status, 200);
   }
   const bloom = await (await get()).json();
@@ -186,7 +184,7 @@ test("daily reset follows New York midnight including DST and resets unbloomed p
     );
     assert.deepEqual(
       requests.map((response) => response.status).sort(),
-      [200, 429],
+      [200, 200],
     );
     // A late previous-day request cannot undo the new day's care.
     assert.equal(
@@ -197,16 +195,40 @@ test("daily reset follows New York midnight including DST and resets unbloomed p
           now - 1,
         )
       ).status,
-      429,
+      409,
     );
     const current = await (await get(now + 1)).json();
     assert.equal(
       Object.values(current.stats).reduce((sum, value) => sum + value, 0),
-      1,
+      2,
     );
     assert.equal(current.generation, 2);
     f.sqlite.close();
   }
+});
+
+test("concurrent care fills a bar without losing increments or exceeding its cap", async () => {
+  const f = fixture();
+  const now = Date.parse("2026-10-22T12:00:00Z");
+  const responses = await Promise.all(
+    Array.from({ length: 60 }, () =>
+      handleFlower(f.request("flower?care=rain", "POST"), f.env, now),
+    ),
+  );
+  assert.equal(
+    responses.filter((response) => response.status === 200).length,
+    50,
+  );
+  assert.equal(
+    responses.filter((response) => response.status === 409).length,
+    10,
+  );
+  const plant = await (
+    await handleFlower(f.request("flower"), f.env, now)
+  ).json();
+  assert.equal(plant.stats.rain, 50);
+  assert.equal(plant.log.length, 12);
+  f.sqlite.close();
 });
 
 test("unconfigured and failed storage return unavailable rather than fake counts or progress", async () => {
