@@ -8,7 +8,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | Visitor counter                          | Hardcoded 001286                       | D1 aggregate starting at zero; includes reloads; loading/error/retry states      |
 | Flower care                              | Per-page state lost on refresh         | One D1 plant shared by all visitors; atomic care, bounds and two-second cooldown |
 | Flower reset                             | Any visitor could reset the local demo | No public destructive reset; care starts a new plant 24 hours after bloom        |
-| Moon flag                                | Lost on reload                         | Unlocked on bloom, with visibility preference saved in browser storage           |
+| Moon flag                                | Lost on reload                         | Appears automatically on bloom and remains visible on reload           |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected       |
 | NYC presence                             | Static Unknown card                    | Live coarse status and approximate update age                                    |
 | `/api/visits`                            | Fictional named visit plans            | Empty public list until owner/invited-friend access exists                       |
@@ -31,7 +31,7 @@ immediately. Unavailable storage returns 503; the UI disables care and offers a
 refresh. Other tabs refresh every 30 seconds or on window focus.
 
 The bloom is retained for at least 24 hours. The next care action then atomically
-starts a new generation and clears only the previous plant's care log. A bloom
+starts a new generation and clears only the previous plant's care log. The flower card shows care actions and refresh, without a details panel or flag toggle. A bloom
 rewards visitors who see it, whether they supplied the final care action or not.
 No visitor identity is required or recorded. The last twelve care action names are
 kept; no individual timestamps, names, IPs or cookies are stored by these features.

@@ -9,7 +9,7 @@ the lookup key.
 Messages use semantic names grouped by purpose, such as `presence.inNyc` and
 `flower.care.water`. Keep complete sentences together. Translate labels,
 accessible names, errors, descriptions and status feedback from the same catalogs.
-Flower notices and history retain message keys and translate when rendered, so
+Flower notices retain message keys and translate when rendered, so
 switching language keeps current state and changes existing feedback too.
 
 Both small catalogs ship together for immediate switching without a translation
@@ -30,7 +30,7 @@ the runtime metadata.
 1. Find the semantic key in `demo/src/i18n/en.ts`. Edit its value and the same
    key in `demo/src/i18n/zh.ts`; keep the key stable when changing wording.
 2. For new text, add a descriptive key to both catalogs, then render it with
-   `const { t } = useLanguage()` and `t("flower.details")`. Avoid inline language
+   `const { t } = useLanguage()` and `t("flower.refresh")`. Avoid inline language
    conditionals and do not import the legacy translator into active code.
 3. Store message keys or domain IDs for feedback/history, not translated text.
    Translate at render time so existing content follows the language switch.
@@ -44,7 +44,7 @@ For example, the same call renders the matching wording in either language:
 
 ```tsx
 const { t } = useLanguage();
-return <button>{t("flower.details")}</button>;
+return <button>{t("flower.refresh")}</button>;
 ```
 
 To change the name or description, edit `site.title` or `site.description` in

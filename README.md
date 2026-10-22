@@ -20,7 +20,7 @@ serves it as the production homepage.
 - A bloom lasts at least 24 hours. The first care action after that starts the
   next plant. There is no public reset that can erase other visitors' progress.
   Flower state refreshes every 30 seconds and when the window regains focus.
-- A bloom unlocks the Moon flag. Its visibility preference is saved in the
+- A bloom automatically shows the Moon flag. The unlock is saved in the
   browser when browser storage is available. Flower progress is saved on the
   server, independently of browser storage.
 - The counter starts at zero when its migration is applied and counts accepted
@@ -61,7 +61,7 @@ pnpm verify
 ```
 
 The browser suite covers desktop and touch-enabled phone contexts, both languages,
-shared care, reload persistence, reward preferences, unavailable storage, and
+shared care, reload persistence, automatic bloom rewards, unavailable storage, and
 responsive layouts. The backend suite executes the schema and conditional SQL
 against SQLite. A dry run builds and packages the Worker without publishing it.
 

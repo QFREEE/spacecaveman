@@ -28,15 +28,10 @@ function App() {
   const { t } = useLanguage();
   const { theme } = useTheme();
   const Scene = theme.Scene;
-  const [unlocked, setUnlocked] = useState(() => readSetting("bloom") !== null);
-  const [flag, setFlag] = useState(() => readSetting("flag") === "true");
+  const [flag, setFlag] = useState(() => readSetting("bloom") !== null);
   const onBloom = useCallback((generation: number) => {
-    setUnlocked(true);
-    if (readSetting("bloom") !== String(generation)) {
-      setFlag(true);
-      saveSetting("flag", "true");
-      saveSetting("bloom", String(generation));
-    }
+    setFlag(true);
+    saveSetting("bloom", String(generation));
   }, []);
   return (
     <div data-theme={theme.id} className="space-shell wallpaper-stars">
@@ -74,24 +69,7 @@ function App() {
         </nav>
         <main className="modules home-modules">
           <NycStatus />
-          <FlowerVine
-            onBloom={onBloom}
-            reward={
-              unlocked ? (
-                <label className="ornament-toggle flower-reward">
-                  <input
-                    type="checkbox"
-                    checked={flag}
-                    onChange={(event) => {
-                      setFlag(event.target.checked);
-                      saveSetting("flag", String(event.target.checked));
-                    }}
-                  />
-                  {t("flower.showFlag")}
-                </label>
-              ) : null
-            }
-          />
+          <FlowerVine onBloom={onBloom} />
           <VisitorCounter />
         </main>
         <footer>

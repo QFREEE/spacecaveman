@@ -1,6 +1,6 @@
 import { test, expect } from "./fixtures";
 
-test("language changes translate metadata, feedback, history and accessibility without resetting state", async ({
+test("language changes translate metadata, feedback and accessibility without resetting state", async ({
   page,
 }) => {
   await page.route("**/api/presence/public", (route) =>
@@ -14,9 +14,7 @@ test("language changes translate metadata, feedback, history and accessibility w
   );
   await page.goto("/");
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await page.getByRole("button", { name: "Details", exact: true }).click();
   const flower = page.locator("#flower");
-  await expect(flower.locator(".plant-properties li")).toHaveText(["Water"]);
   await expect(flower.getByRole("status")).toHaveText("Watered.");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
@@ -38,14 +36,13 @@ test("language changes translate metadata, feedback, history and accessibility w
   await expect(flower.getByRole("status", { name: "花藤状态" })).toHaveText(
     "已浇水。",
   );
-  await expect(flower.locator(".plant-properties li")).toHaveText(["浇花"]);
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
   await expect(page.locator(".counter")).toHaveText("000001");
   await expect(
     page.getByRole("button", { name: "详情", exact: true }),
-  ).toHaveAttribute("aria-expanded", "true");
+  ).toHaveCount(0);
   expect(await page.locator("main").innerText()).not.toMatch(
     /Watered|Care log|Total page views|flower\./,
   );
@@ -56,7 +53,6 @@ test("language changes translate metadata, feedback, history and accessibility w
     "Yuntong’s space: NYC status, a flower and page views.",
   );
   await expect(flower.getByRole("status")).toHaveText("Watered.");
-  await expect(flower.locator(".plant-properties li")).toHaveText(["Water"]);
   expect(
     (await page.locator("body").innerText()).replace("中文", ""),
   ).not.toMatch(/[\u4e00-\u9fff]/);

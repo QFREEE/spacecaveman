@@ -4,7 +4,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("shared care grows all stages and preserves progress and reward preferences on reload", async ({
+test("shared care grows all stages and preserves progress and the automatic flag on reload", async ({
   page,
   isMobile,
 }) => {
@@ -36,16 +36,15 @@ test("shared care grows all stages and preserves progress and reward preferences
     }
   }
   await expect(flower.getByRole("status")).toHaveText("Flag unlocked.");
-  await page.getByLabel("Show flag").check();
   await expect(page.locator(".treasure-flag")).toBeVisible();
-  await page.getByLabel("Show flag").uncheck();
-  await expect(page.locator(".treasure-flag")).toHaveCount(0);
+  await expect(flower.getByRole("checkbox")).toHaveCount(0);
+  await expect(
+    flower.getByRole("button", { name: "Details", exact: true }),
+  ).toHaveCount(0);
   await flower.getByRole("button", { name: "Water", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "3");
-  await flower.getByRole("button", { name: "Details", exact: true }).click();
-  await expect(flower.locator(".plant-properties li")).toHaveCount(12);
   await flower
     .getByRole("button", { name: "Refresh plant", exact: true })
     .click();
@@ -53,16 +52,12 @@ test("shared care grows all stages and preserves progress and reward preferences
     "data-stage",
     "3",
   );
-  await expect(flower.locator(".plant-properties li")).toHaveCount(12);
   expect(writes.every((url) => url.includes("/api/flower?care="))).toBe(true);
   await page.reload();
-  await expect(page.getByLabel("Show flag")).not.toBeChecked();
-  await expect(page.locator(".treasure-flag")).toHaveCount(0);
+  await expect(page.locator(".treasure-flag")).toBeVisible();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "3");
-  await page.getByLabel("Show flag").check();
-  await page.reload();
   await expect(page.locator(".treasure-flag")).toBeVisible();
 });
 
@@ -104,7 +99,7 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
   await expect(flower.locator(".care-effect")).toHaveCount(0);
 });
 
-test("language preserves care and properties; keyboard and reduced motion work", async ({
+test("language preserves care; keyboard and reduced motion work", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -120,16 +115,12 @@ test("language preserves care and properties; keyboard and reduced motion work",
     "animation-name",
     "none",
   );
-  await flower.getByRole("button", { name: "Details", exact: true }).click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
   await expect(flower.getByRole("status")).toContainText("已浇水。");
-  await expect(flower.getByRole("button", { name: "详情" })).toHaveAttribute(
-    "aria-expanded",
-    "true",
-  );
+  await expect(flower.getByRole("button", { name: "详情" })).toHaveCount(0);
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
@@ -163,7 +154,6 @@ test("three modules fit phones in both languages, with practical flower touch ta
     await page.setViewportSize({ width, height: 1000 });
     for (const language of ["English", "中文"]) {
       await page.getByRole("button", { name: language, exact: true }).click();
-      await page.locator("#flower .plant-tools button").first().click();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
