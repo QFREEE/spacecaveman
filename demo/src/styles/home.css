@@ -100,9 +100,6 @@
 .counter {
   flex-wrap: wrap;
 }
-.flower-reward {
-  border-top: 1px dotted var(--skin-border-soft);
-}
 @media (min-width: 721px) and (max-width: 900px) {
   .home-modules {
     grid-template-columns: minmax(0, 1fr) 230px 190px;
@@ -117,8 +114,5 @@
   }
   .nyc-skyline svg {
     height: 104px;
-  }
-  .flower-reward {
-    font-size: 14px;
   }
 }

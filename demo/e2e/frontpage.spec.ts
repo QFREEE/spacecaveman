@@ -22,7 +22,7 @@ test("front page contains NYC, shared flower and live page views with lunar iden
       .evaluateAll((items) => items.map((item) => item.id)),
   ).toEqual(["nyc", "flower", "visitors"]);
   await expect(
-    page.getByRole("heading", { name: "Am I in NYC?", exact: true }),
+    page.getByRole("heading", { name: "Am I in NYC right now?", exact: true }),
   ).toBeVisible();
   await expect(page.locator("#nyc .presence-answer")).toContainText(
     "No update yet.",
@@ -112,7 +112,7 @@ test("public NYC status remains unknown and flower care survives language change
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Water", exact: true }).click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
-  await expect(page.getByRole("heading", { name: /我在纽约吗/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /我现在在纽约吗/ })).toBeVisible();
   await expect(page.locator(".presence-answer")).toHaveAttribute(
     "data-status",
     "unknown",
@@ -134,7 +134,7 @@ test("public NYC status remains unknown and flower care survives language change
   );
 });
 
-test("enlarged text and flower properties fit a short phone viewport", async ({
+test("enlarged text and flower controls fit a short phone viewport", async ({
   page,
 }) => {
   await page.goto("/");
@@ -143,8 +143,9 @@ test("enlarged text and flower properties fit a short phone viewport", async ({
     content:
       "p, h2, a, button, label { font-size: 200% !important; overflow-wrap: anywhere; }",
   });
-  await page.getByRole("button", { name: "Details", exact: true }).click();
-  await expect(page.getByText("Each stat needs 3/3 to bloom.")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Refresh plant", exact: true }),
+  ).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

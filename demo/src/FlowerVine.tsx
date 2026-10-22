@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./Language";
 import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
@@ -92,17 +92,13 @@ async function requestPlant(
 
 export function FlowerVine({
   onBloom,
-  reward,
 }: {
   onBloom: (generation: number) => void;
-  reward?: ReactNode;
 }) {
   const { t } = useLanguage();
   const [stats, setStats] = useState(initialStats);
   const [active, setActive] = useState<Care | null>(null);
   const [notice, setNotice] = useState<MessageKey | "">("");
-  const [log, setLog] = useState<MessageKey[]>([]);
-  const [details, setDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [pending, setPending] = useState(false);
@@ -113,9 +109,6 @@ export function FlowerVine({
   const stage = Math.min(...Object.values(stats));
   function applyPlant(plant: Plant) {
     setStats(plant.stats);
-    setLog(
-      plant.log.map((id) => actions.find((action) => action.id === id)!.label),
-    );
     setGeneration(plant.generation);
     setLoaded(true);
     setFailed(false);
@@ -255,7 +248,6 @@ export function FlowerVine({
         {active ? (
           <span
             className={`care-effect effect-${active.id}`}
-            key={log.length}
             aria-hidden="true"
           >
             {active.effect}
@@ -299,15 +291,6 @@ export function FlowerVine({
         <button
           type="button"
           className="text-button"
-          aria-expanded={details}
-          aria-controls="plant-properties"
-          onClick={() => setDetails((v) => !v)}
-        >
-          {t("flower.details")}
-        </button>
-        <button
-          type="button"
-          className="text-button"
           disabled={pending}
           onClick={async () => {
             if (busy.current) return;
@@ -331,23 +314,6 @@ export function FlowerVine({
           {t("flower.refresh")}
         </button>
       </div>
-      {details ? (
-        <div id="plant-properties" className="plant-properties">
-          <p>{t("flower.bloomRule")}</p>
-          <p>{t("flower.replantRule")}</p>
-          <h3>{t("flower.careLog")}</h3>
-          {log.length ? (
-            <ol>
-              {log.map((entry, i) => (
-                <li key={log.length - i}>{t(entry)}</li>
-              ))}
-            </ol>
-          ) : (
-            <p>{t("flower.noCare")}</p>
-          )}
-        </div>
-      ) : null}
-      {reward}
     </ModuleFrame>
   );
 }
