@@ -137,31 +137,6 @@ html[lang="en"] .masthead h1 {
   font: 8px monospace;
   letter-spacing: 1px;
 }
-.hanging-planet {
-  position: absolute;
-  right: 45px;
-  top: 0;
-  color: var(--skin-surface);
-  font:
-    55px/1 Georgia,
-    serif;
-  width: 70px;
-  text-align: center;
-  transform-origin: 50% 0;
-  animation: pendant-swing 6s ease-in-out infinite alternate;
-}
-.hanging-planet > span {
-  display: block;
-  height: 38px;
-  width: 1px;
-  background: var(--skin-border-soft);
-  margin: auto;
-}
-.hanging-planet small {
-  display: block;
-  font: 8px monospace;
-  margin-top: 4px;
-}
 .treasure-flag {
   position: absolute;
   bottom: 32px;
@@ -711,14 +686,6 @@ footer p {
     transform: rotate(12deg);
   }
 }
-@keyframes pendant-swing {
-  from {
-    transform: rotate(-5deg);
-  }
-  to {
-    transform: rotate(5deg);
-  }
-}
 @keyframes record-spin {
   to {
     transform: rotate(360deg);
@@ -743,8 +710,7 @@ footer p {
   }
 }
 .motion-off .caveman-traveler,
-.motion-off .walk-leg,
-.motion-off .hanging-planet {
+.motion-off .walk-leg {
   animation-play-state: paused;
 }
 @media (max-width: 900px) and (min-width: 721px) {
@@ -795,17 +761,6 @@ footer p {
     right: 5px;
     top: 75px;
     font-size: 12px;
-  }
-  .hanging-planet {
-    right: 7px;
-    font-size: 34px;
-    width: 40px;
-  }
-  .hanging-planet > span {
-    height: 18px;
-  }
-  .hanging-planet small {
-    font-size: 7px;
   }
   .moon-ground {
     height: 98px;
@@ -982,7 +937,6 @@ footer p {
 @media (prefers-reduced-motion: reduce) {
   .caveman-traveler,
   .walk-leg,
-  .hanging-planet,
   .record-disc,
   .equalizer i,
   .care-effect {

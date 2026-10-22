@@ -11,6 +11,9 @@ Messages use semantic names grouped by purpose, such as `presence.inNyc` and
 accessible names, errors, descriptions and status feedback from the same catalogs.
 Flower notices retain message keys and translate when rendered, so
 switching language keeps current state and changes existing feedback too.
+The combined Earth clock/calendar uses `clock.label` for its screen-reader label
+and `Intl.DateTimeFormat` for localized calendar and accessible date/time text.
+It always uses `America/New_York` (US Eastern), with no timezone selector or label.
 
 Both small catalogs ship together for immediate switching without a translation
 request. Retired diary, profile and guestbook wording lives behind
