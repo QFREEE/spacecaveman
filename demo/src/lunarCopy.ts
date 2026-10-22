@@ -28,7 +28,7 @@ export const lunarCopy: Record<string, string> = {
   "开花啦！你获得了一面月球旗。": "In bloom! You earned a Moon flag.",
   "我在纽约吗？": "Am I in NYC?",
   "在，我在纽约！": "Yes, I’m in NYC!",
-  "今天不在纽约。": "Not in NYC today.",
+  "现在不在纽约。": "Not in NYC right now.",
   "还没有更新。": "No update yet.",
   纽约状态: "NYC status",
   花藤: "Flower",

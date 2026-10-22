@@ -5,7 +5,7 @@ type NycStatusValue = "in_nyc" | "not_in_nyc" | "unknown";
 
 const answers: Record<NycStatusValue, string> = {
   in_nyc: "在，我在纽约！",
-  not_in_nyc: "今天不在纽约。",
+  not_in_nyc: "现在不在纽约。",
   unknown: "还没有更新。",
 };
 
