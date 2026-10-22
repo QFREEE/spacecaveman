@@ -1,14 +1,22 @@
 import { useLanguage } from "./Language";
 import { ModuleFrame } from "./ModuleFrame";
 
-// The existing presence feed is private. Never infer or invent a public status.
-export function NycStatus() {
+type NycStatusValue = "in_nyc" | "not_in_nyc" | "unknown";
+
+const answers: Record<NycStatusValue, string> = {
+  in_nyc: "在，我在纽约！",
+  not_in_nyc: "今天不在纽约。",
+  unknown: "还没有更新。",
+};
+
+// Public status stays unknown until an authorized public data source is connected.
+export function NycStatus({ status = "unknown" }: { status?: NycStatusValue }) {
   const { t } = useLanguage();
   return (
     <ModuleFrame
       id="nyc"
       title={t("我在纽约吗？")}
-      english="AM I IN NYC?"
+      english=""
       icon="home"
       className="nyc-status"
     >
@@ -26,12 +34,14 @@ export function NycStatus() {
           <path d="M23 26h7m-3-4v8m225-11h6m-3-3v6M8 118q75-4 144 1t140-1" />
         </svg>
       </div>
-      <p className="presence-caption">{t("当前状态")}</p>
-      <p className="presence-answer" data-status="unknown">
-        <span aria-hidden="true">?</span>
-        {t("未知")}
+      <p
+        className="presence-answer"
+        data-status={status}
+        role="status"
+        aria-atomic="true"
+      >
+        {t(answers[status])}
       </p>
-      <p className="presence-note">{t("暂无公开的近况。")}</p>
     </ModuleFrame>
   );
 }

@@ -1,0 +1,75 @@
+import { test, expect } from "@playwright/test";
+
+test("NYC answer reveals automatically and motion opt-outs show it immediately", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const answer = page.locator("#nyc").getByRole("status");
+  await expect(answer).toHaveText("No update yet.");
+  await expect(answer).toHaveAttribute("aria-atomic", "true");
+  const reveal = await answer.evaluate((node) => {
+    const animation = node.getAnimations()[0];
+    if (!animation) throw new Error("Missing NYC reveal");
+    animation.pause();
+    animation.currentTime = 0;
+    const start = Number(getComputedStyle(node).opacity);
+    animation.currentTime = 600;
+    const middle = Number(getComputedStyle(node).opacity);
+    animation.currentTime = 1200;
+    const end = Number(getComputedStyle(node).opacity);
+    return {
+      duration: animation.effect?.getTiming().duration,
+      start,
+      middle,
+      end,
+    };
+  });
+  expect(reveal.duration).toBe(1200);
+  expect(reveal.start).toBe(0.25);
+  expect(reveal.middle).toBeGreaterThan(reveal.start);
+  expect(reveal.middle).toBeLessThan(reveal.end);
+  expect(reveal.end).toBe(1);
+  await page.getByRole("button", { name: "中文", exact: true }).click();
+  await expect(answer).toHaveText("还没有更新。");
+  await expect(answer).toHaveCSS("opacity", "1");
+  await page.getByRole("button", { name: "暂停动画", exact: true }).click();
+  await expect(answer).toHaveCSS("animation-name", "none");
+  await expect(answer).toHaveCSS("opacity", "1");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(answer).toHaveCSS("animation-name", "none");
+  await expect(answer).toHaveCSS("opacity", "1");
+  await expect(answer).toHaveCSS("transform", "none");
+});
+
+for (const [status, english, chinese] of [
+  ["in_nyc", "Yes, I’m in NYC!", "在，我在纽约！"],
+  ["not_in_nyc", "Not in NYC today.", "今天不在纽约。"],
+  ["unknown", "No update yet.", "还没有更新。"],
+]) {
+  test(`NYC ${status} copy fits in both languages`, async ({ page }) => {
+    // Exercise the component's future data input without adding a public demo mode.
+    await page.route("**/src/main.tsx", async (route) => {
+      const response = await route.fetch();
+      const body = await response.text();
+      const component = /(\b\w+\(NycStatus,\s*)\{\}/;
+      expect(body).toMatch(component);
+      await route.fulfill({
+        response,
+        body: body.replace(component, `$1{status: "${status}"}`),
+      });
+    });
+    await page.goto("/");
+    const answer = page.locator("#nyc").getByRole("status");
+    await expect(answer).toHaveText(english);
+    await expect(answer).toHaveAttribute("data-status", status);
+    await page.getByRole("button", { name: "中文", exact: true }).click();
+    await expect(answer).toHaveText(chinese);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
+}
