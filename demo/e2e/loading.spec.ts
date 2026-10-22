@@ -54,7 +54,7 @@ test("initial requests show loading without a default city or flower", async ({
   );
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
-    "2",
+    "5",
   );
   await expect(flower.getByRole("meter")).toHaveCount(4);
   await expect(flower.locator(".flower-stage svg")).toBeVisible();
@@ -93,7 +93,7 @@ test("initial timeouts end loading and the flower can be retried", async ({
   await flower.getByRole("button", { name: "Refresh plant" }).click();
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
-    "1",
+    "2",
   );
   await expect(
     flower.getByRole("button", { name: "Water", exact: true }),

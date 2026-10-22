@@ -49,10 +49,23 @@ type Plant = {
 const stages = [
   "flower.stage.sprout",
   "flower.stage.leaves",
+  "flower.stage.growing",
+  "flower.stage.tall",
+  "flower.stage.smallBud",
   "flower.stage.bud",
+  "flower.stage.opening",
   "flower.stage.bloom",
+  "flower.stage.fullBloom",
 ] as const;
 const initialStats = { rain: 0, sun: 0, love: 0, food: 0 };
+const careStep = 5;
+
+function previewStats(stats: Stats, queue: readonly Care[]): Stats {
+  const next = { ...stats };
+  for (const action of queue)
+    next[action.id] = Math.min(50, next[action.id] + careStep);
+  return next;
+}
 
 async function requestPlant(
   care?: Care["id"],
@@ -100,11 +113,24 @@ export function FlowerVine() {
   const [pending, setPending] = useState(false);
   const [contribution, setContribution] = useState({ generation: 0, count: 0 });
   const [effectId, setEffectId] = useState(0);
+  const [queued, setQueued] = useState<Care[]>([]);
+  const queue = useRef<Care[]>([]);
+  const confirmed = useRef(initialStats);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(false);
   const revision = useRef(0);
   const plantGeneration = useRef(0);
-  const stage = Math.floor((Math.min(...Object.values(stats)) * 3) / 50);
+  const mounted = useRef(true);
+  const displayStats = previewStats(stats, queued);
+  const stage = Math.floor(
+    Object.values(displayStats).reduce((sum, value) => sum + value, 0) / 25,
+  );
+  const stemTop = stage <= 3 ? 82 - stage * 9 : 55 - (stage - 3) * 3;
+  const bloomScale = stage === 6 ? 0.55 : stage === 7 ? 0.8 : 1;
+  function updateQueue(next: Care[]) {
+    queue.current = next;
+    setQueued(next);
+  }
   function applyPlant(plant: Plant) {
     if (plantGeneration.current !== plant.generation) {
       plantGeneration.current = plant.generation;
@@ -112,6 +138,7 @@ export function FlowerVine() {
       setActive(null);
       if (timer.current) clearTimeout(timer.current);
       timer.current = null;
+      updateQueue([]);
     }
     setContribution((previous) =>
       previous.generation === plant.generation
@@ -119,6 +146,7 @@ export function FlowerVine() {
         : { generation: plant.generation, count: 0 },
     );
     setStats(plant.stats);
+    confirmed.current = plant.stats;
     setLoaded(true);
     setFailed(false);
   }
@@ -145,73 +173,106 @@ export function FlowerVine() {
       window.removeEventListener("focus", refresh);
     };
   }, []);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      queue.current = [];
       if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
+    };
+  }, []);
 
-  async function care(action: Care) {
+  function care(action: Care) {
+    if (!loaded || failed) return;
+    if (previewStats(confirmed.current, queue.current)[action.id] >= 50) {
+      setNotice("flower.notice.full");
+      return;
+    }
+    updateQueue([...queue.current, action]);
+    setNotice("flower.notice.caring");
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (timer.current) clearTimeout(timer.current);
+      setActive(action);
+      setEffectId((id) => id + 1);
+      timer.current = setTimeout(() => {
+        setActive(null);
+        timer.current = null;
+      }, 650);
+    }
+    void saveCare();
+  }
+
+  async function saveCare() {
     if (busy.current) return;
+    if (!queue.current.length) return;
     busy.current = true;
     setPending(true);
     ++revision.current;
     try {
-      const { plant, status } = await requestPlant(action.id);
-      applyPlant(plant);
-      if (status === 200) {
-        setContribution((previous) => ({
-          generation: plant.generation,
-          count:
-            (previous.generation === plant.generation ? previous.count : 0) + 1,
-        }));
-      }
-      setNotice(
-        status === 429
-          ? "flower.notice.wait"
-          : status === 409
-            ? plant.error === "day_changed"
-              ? "flower.notice.newDay"
-              : "flower.notice.full"
-            : Object.values(plant.stats).every((value) => value === 50)
-              ? "flower.notice.bloomed"
-              : action.response,
-      );
-      if (
-        status === 200 &&
-        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        if (timer.current) clearTimeout(timer.current);
-        setActive(action);
-        setEffectId((id) => id + 1);
-        timer.current = setTimeout(() => {
-          setActive(null);
-          timer.current = null;
-        }, 650);
+      while (queue.current.length) {
+        const action = queue.current[0];
+        const previousGeneration = plantGeneration.current;
+        const { plant, status } = await requestPlant(action.id);
+        if (!mounted.current) return;
+        updateQueue(queue.current.slice(1));
+        applyPlant(plant);
+        if (status === 200) {
+          setContribution((previous) => ({
+            generation: plant.generation,
+            count:
+              (previous.generation === plant.generation ? previous.count : 0) +
+              1,
+          }));
+        }
+        if (
+          plant.generation !== previousGeneration ||
+          plant.error === "day_changed"
+        ) {
+          updateQueue([]);
+          setNotice("flower.notice.newDay");
+          break;
+        }
+        if (status === 429) {
+          updateQueue([]);
+          setNotice("flower.notice.wait");
+          break;
+        }
+        if (status === 409) {
+          // Another visitor may have filled this bar while our clicks were queued.
+          updateQueue(queue.current.filter((entry) => entry.id !== action.id));
+          setNotice("flower.notice.full");
+        } else {
+          setNotice(action.response);
+        }
       }
     } catch {
+      if (!mounted.current) return;
+      updateQueue([]);
       setFailed(true);
       setNotice("flower.notice.unconfirmed");
     } finally {
       busy.current = false;
-      setPending(false);
+      if (mounted.current) setPending(false);
     }
   }
 
   const ordinaryNotice =
-    !notice || actions.some((action) => action.response === notice);
+    !notice ||
+    notice === "flower.notice.caring" ||
+    actions.some((action) => action.response === notice);
   const feedback = failed
     ? notice === "flower.notice.unconfirmed"
       ? notice
       : "flower.unavailable"
     : !loaded
       ? "flower.loading"
-      : ordinaryNotice && contribution.count > 0 && stage === 3
-        ? "flower.notice.bloomed"
-        : ordinaryNotice && contribution.count >= 10
-          ? "flower.notice.thanks"
-          : notice;
+      : ordinaryNotice && contribution.count >= 10
+        ? "flower.notice.thanks"
+        : ordinaryNotice && contribution.count >= 6
+          ? "flower.notice.encourage"
+          : ordinaryNotice && contribution.count >= 3
+            ? "flower.notice.growing"
+            : notice;
 
   return (
     <ModuleFrame
@@ -243,33 +304,46 @@ export function FlowerVine() {
                 <path
                   d="M76 110l5 31q20 7 39-1l5-30M73 108q25-8 54 0v8q-27 7-54 0z"
                   fill={
-                    stats.rain ? "var(--skin-wet-soil)" : "var(--skin-surface)"
+                    displayStats.rain
+                      ? "var(--skin-wet-soil)"
+                      : "var(--skin-surface)"
                   }
                 />
                 <path
-                  d={
-                    stage === 0
-                      ? "M100 105Q96 90 103 78"
-                      : "M100 105Q90 66 103 42"
-                  }
+                  d={`M100 105Q${stage === 0 ? 96 : 90} ${(105 + stemTop) / 2} 103 ${stemTop}`}
                 />
                 <path d="M98 95q-24 0-26-18 21-3 26 18m2-9q21 1 25-16-20-4-25 16" />
                 {stage >= 1 ? (
-                  <path d="M98 67q-19 0-20-15 18-2 20 15m3-10q17 1 20-12-15-4-20 12" />
+                  <path d="M99 83q-18 0-22-15 19-2 22 15m2-5q17 1 21-13-17-3-21 13" />
                 ) : null}
-                {stage === 2 ? (
-                  <path d="M103 43q-18-13-5-24l5 5 6-5q12 14-6 24z" />
+                {stage >= 2 ? (
+                  <path d="M99 72q-16 0-19-13 17-2 19 13m3-5q16 1 19-12-16-3-19 12" />
                 ) : null}
-                {stage === 3 ? (
-                  <g>
+                {stage >= 3 ? (
+                  <path d="M101 60q-14 0-17-11 15-2 17 11m2-5q14 1 17-10-14-3-17 10" />
+                ) : null}
+                {stage === 4 ? (
+                  <path d={`M103 ${stemTop}q-10-7-3-15l3 3 3-3q8 8-3 15z`} />
+                ) : null}
+                {stage === 5 ? (
+                  <path d={`M103 ${stemTop}q-18-13-5-24l5 5 6-5q12 14-6 24z`} />
+                ) : null}
+                {stage >= 6 ? (
+                  <g
+                    transform={`translate(${100 - 100 * bloomScale} ${stemTop - 41 * bloomScale}) scale(${bloomScale})`}
+                  >
                     <path d="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z" />
                     <circle cx="100" cy="41" r="11" />
-                    <path d="M95 43q5 6 10-1" />
-                    <circle cx="96" cy="38" r=".7" />
-                    <circle cx="105" cy="38" r=".7" />
+                    {stage === 8 ? (
+                      <>
+                        <path d="M95 43q5 6 10-1" />
+                        <circle cx="96" cy="38" r=".7" />
+                        <circle cx="105" cy="38" r=".7" />
+                      </>
+                    ) : null}
                   </g>
                 ) : null}
-                {stats.rain > 0 ? (
+                {displayStats.rain > 0 ? (
                   <path
                     className="wet-soil"
                     d="M84 112l6 1m8 0h6m8-1h5"
@@ -292,13 +366,7 @@ export function FlowerVine() {
         {loaded ? (
           <div
             className="plant-meters"
-            data-recognition={
-              contribution.count > 0 && stage === 3
-                ? "bloom"
-                : contribution.count >= 10
-                  ? "thanks"
-                  : undefined
-            }
+            data-recognition={contribution.count >= 10 ? "thanks" : undefined}
           >
             {actions.map((action) => (
               <div className="plant-stat" key={action.id}>
@@ -307,7 +375,8 @@ export function FlowerVine() {
                   aria-label={t(action.stat)}
                   min="0"
                   max="50"
-                  value={stats[action.id]}
+                  value={displayStats[action.id]}
+                  aria-busy={queued.some((entry) => entry.id === action.id)}
                 />
               </div>
             ))}
@@ -319,7 +388,7 @@ export function FlowerVine() {
               key={action.id}
               className="bevel"
               type="button"
-              disabled={pending || !loaded || failed}
+              disabled={!loaded || failed}
               onClick={() => care(action)}
             >
               <span aria-hidden="true">{action.icon} </span>
@@ -355,6 +424,7 @@ export function FlowerVine() {
               } finally {
                 busy.current = false;
                 setPending(false);
+                void saveCare();
               }
             }}
           >

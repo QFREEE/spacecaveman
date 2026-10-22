@@ -122,12 +122,12 @@ test("shared flower accepts rapid care while enforcing fifty-point bounds and bl
     405,
   );
   const first = await care("rain");
-  assert.equal((await first.json()).stats.rain, 1);
+  assert.equal((await first.json()).stats.rain, 5);
   const rapid = await care("rain");
   assert.equal(rapid.status, 200);
-  assert.equal((await rapid.json()).stats.rain, 2);
+  assert.equal((await rapid.json()).stats.rain, 10);
   for (const action of ["rain", "sun", "love", "food"].flatMap((id) =>
-    Array(id === "rain" ? 48 : 50).fill(id),
+    Array(id === "rain" ? 8 : 10).fill(id),
   )) {
     assert.equal((await care(action)).status, 200);
   }
@@ -144,7 +144,7 @@ test("shared flower accepts rapid care while enforcing fifty-point bounds and bl
   );
   now = Date.parse("2026-10-23T04:00:00Z");
   const replanted = await (await care("sun")).json();
-  assert.deepEqual(replanted.stats, { rain: 0, sun: 1, love: 0, food: 0 });
+  assert.deepEqual(replanted.stats, { rain: 0, sun: 5, love: 0, food: 0 });
   assert.equal(replanted.generation, 2);
   assert.equal(replanted.bloomed_at, null);
   assert.deepEqual(replanted.log, ["sun"]);
@@ -168,7 +168,7 @@ test("daily reset follows New York midnight including DST and resets unbloomed p
       f.env,
       now - 2000,
     );
-    assert.equal((await (await get(now - 1)).json()).stats.rain, 1);
+    assert.equal((await (await get(now - 1)).json()).stats.rain, 5);
     const reads = await Promise.all(Array.from({ length: 5 }, () => get(now)));
     for (const response of reads) {
       const plant = await response.json();
@@ -200,7 +200,7 @@ test("daily reset follows New York midnight including DST and resets unbloomed p
     const current = await (await get(now + 1)).json();
     assert.equal(
       Object.values(current.stats).reduce((sum, value) => sum + value, 0),
-      2,
+      10,
     );
     assert.equal(current.generation, 2);
     f.sqlite.close();
@@ -217,17 +217,41 @@ test("concurrent care fills a bar without losing increments or exceeding its cap
   );
   assert.equal(
     responses.filter((response) => response.status === 200).length,
-    50,
+    10,
   );
   assert.equal(
     responses.filter((response) => response.status === 409).length,
-    10,
+    50,
   );
   const plant = await (
     await handleFlower(f.request("flower"), f.env, now)
   ).json();
   assert.equal(plant.stats.rain, 50);
-  assert.equal(plant.log.length, 12);
+  assert.equal(plant.log.length, 10);
+  f.sqlite.close();
+});
+
+test("a larger care step caps existing partial progress and records the bloom", async () => {
+  const f = fixture();
+  const now = Date.parse("2026-10-22T12:00:00Z");
+  await handleFlower(f.request("flower"), f.env, now);
+  f.sqlite.exec(
+    "UPDATE site_flower SET rain = 48, sun = 50, love = 50, food = 50",
+  );
+  const response = await handleFlower(
+    f.request("flower?care=rain", "POST"),
+    f.env,
+    now,
+  );
+  assert.equal(response.status, 200);
+  const plant = await response.json();
+  assert.equal(plant.stats.rain, 50);
+  assert.equal(plant.bloomed_at, new Date(now).toISOString());
+  assert.equal(
+    (await handleFlower(f.request("flower?care=rain", "POST"), f.env, now))
+      .status,
+    409,
+  );
   f.sqlite.close();
 });
 

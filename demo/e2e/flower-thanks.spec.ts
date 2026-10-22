@@ -14,6 +14,9 @@ test("rapid confirmed care earns a translated thank-you without numeric counts",
       .getByRole("button", { name: buttons[i % 4], exact: true })
       .click();
   }
+  await expect(
+    flower.getByRole("button", { name: "Refresh plant" }),
+  ).toBeEnabled();
   await expect(flower.getByRole("status")).not.toContainText("Thank you");
   flowerPlant.stats.rain = 50;
   await flower.getByRole("button", { name: "Water", exact: true }).click();
@@ -48,7 +51,7 @@ test("rapid confirmed care earns a translated thank-you without numeric counts",
   );
 });
 
-test("finishing every bar shows bloom gratitude with reduced motion", async ({
+test("finishing every bar shows the last growth stage without a bloom message", async ({
   page,
   flowerPlant,
 }, testInfo) => {
@@ -60,25 +63,29 @@ test("finishing every bar shows bloom gratitude with reduced motion", async ({
   for (const name of ["Water", "Sun", "Prune", "Feed"]) {
     await flower.getByRole("button", { name, exact: true }).click();
   }
+  await expect(
+    flower.getByRole("button", { name: "Refresh plant" }),
+  ).toBeEnabled();
+  await expect(flower.locator(".flower-stage")).toHaveAttribute(
+    "data-stage",
+    "8",
+  );
   await expect(flower.getByRole("status")).toHaveText(
-    "Our flower is in full bloom! Thank you for helping it grow.",
+    "You’re helping our flower grow.",
   );
-  await expect(flower.locator(".plant-meters")).toHaveAttribute(
-    "data-recognition",
-    "bloom",
-  );
+  await expect(flower).not.toContainText("Our flower is in full bloom!");
   await expect(flower.locator(".care-effect")).toHaveCount(0);
   await flower.screenshot({
-    path: `outputs/flower-bloom-thanks-${testInfo.project.name}.png`,
+    path: `outputs/flower-final-stage-${testInfo.project.name}.png`,
   });
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(flower.getByRole("status")).toHaveText(
-    "我们的花盛开啦！谢谢你陪它长大。",
+    "你正陪着我们的花慢慢长大。",
   );
   await expect(page.locator(".treasure-flag")).toHaveCount(0);
 });
 
-test("care is protected only while its request is pending", async ({
+test("continuous clicks fill a bar immediately while saves are queued", async ({
   page,
 }) => {
   let release!: () => void;
@@ -94,11 +101,119 @@ test("care is protected only while its request is pending", async ({
   const water = page
     .locator("#flower")
     .getByRole("button", { name: "Water", exact: true });
-  await water.click();
-  await expect(water).toBeDisabled();
-  release();
   await expect(water).toBeEnabled();
+  await water.evaluate((button: HTMLButtonElement) => {
+    for (let i = 0; i < 10; i++) button.click();
+  });
+  await expect(water).toBeEnabled();
+  const rain = page.getByRole("meter", { name: "Rain", exact: true });
+  await expect(rain).toHaveAttribute("value", "50");
+  await expect(rain).toHaveAttribute("aria-busy", "true");
+  await expect(page.locator("#flower .plant-notice")).not.toContainText(
+    "Thank you",
+  );
+  release();
+  await expect(rain).toHaveAttribute("aria-busy", "false");
+  await expect(rain).toHaveAttribute("value", "50");
+  await expect(page.locator("#flower .plant-notice")).toHaveText(
+    "Thank you for giving our flower so much care!",
+  );
+});
+
+test("failed saves restore confirmed bars and discard the remaining queue", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let writes = 0;
+  await page.route("**/api/flower?care=rain", async (route) => {
+    writes++;
+    await gate;
+    await route.fulfill({ status: 503, json: { error: "Unavailable" } });
+  });
+  await page.goto("/");
+  const water = page.getByRole("button", { name: "Water", exact: true });
+  await expect(water).toBeEnabled();
+  await water.evaluate((button: HTMLButtonElement) => {
+    for (let i = 0; i < 3; i++) button.click();
+  });
+  const rain = page.getByRole("meter", { name: "Rain", exact: true });
+  await expect(rain).toHaveAttribute("value", "15");
+  release();
+  await expect(page.locator("#flower .plant-notice")).toHaveText(
+    "Could not confirm. Refresh and try again.",
+  );
+  await expect(rain).toHaveAttribute("value", "0");
+  expect(writes).toBe(1);
+  await expect(page.locator(".plant-meters")).not.toHaveAttribute(
+    "data-recognition",
+  );
+  await page.getByRole("button", { name: "Refresh plant" }).click();
+  await expect(water).toBeEnabled();
+});
+
+test("queued care from yesterday does not spill into a new daily plant", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let writes = 0;
+  await page.route("**/api/flower?care=rain", async (route) => {
+    writes++;
+    await gate;
+    await route.fulfill({
+      json: {
+        stats: { rain: 5, sun: 0, love: 0, food: 0 },
+        log: ["rain"],
+        generation: 2,
+        bloomed_at: null,
+      },
+    });
+  });
+  await page.goto("/");
+  const water = page.getByRole("button", { name: "Water", exact: true });
+  await expect(water).toBeEnabled();
+  await water.evaluate((button: HTMLButtonElement) => {
+    for (let i = 0; i < 3; i++) button.click();
+  });
+  release();
+  await expect(page.locator("#flower .plant-notice")).toHaveText(
+    "A fresh flower for a new day. Try caring again.",
+  );
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
+  expect(writes).toBe(1);
+});
+
+test("nine distinct flower stages follow total shared care", async ({
+  page,
+  flowerPlant,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const flower = page.locator("#flower");
+  const labels = new Set<string>();
+  for (let stage = 0; stage <= 8; stage++) {
+    let total = stage * 25;
+    for (const id of ["rain", "sun", "love", "food"] as const) {
+      flowerPlant.stats[id] = Math.min(50, total);
+      total = Math.max(0, total - 50);
+    }
+    await flower.getByRole("button", { name: "Refresh plant" }).click();
+    await expect(flower.locator(".flower-stage")).toHaveAttribute(
+      "data-stage",
+      String(stage),
+    );
+    labels.add(await flower.locator(".plant-label").innerText());
+    await flower.screenshot({
+      path: `outputs/flower-stage-${stage}-${testInfo.project.name}.png`,
+    });
+  }
+  expect(labels.size).toBe(9);
+  await expect(flower.locator(".plant-notice")).toBeEmpty();
 });

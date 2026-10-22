@@ -112,7 +112,9 @@ test("public NYC status remains unknown and flower care survives language change
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Water", exact: true }).click();
   await page.getByRole("button", { name: "中文", exact: true }).click();
-  await expect(page.getByRole("heading", { name: /我现在在纽约吗/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /我现在在纽约吗/ }),
+  ).toBeVisible();
   await expect(page.locator(".presence-answer")).toHaveAttribute(
     "data-status",
     "unknown",
@@ -120,15 +122,15 @@ test("public NYC status remains unknown and flower care survives language change
   await expect(page.locator(".presence-answer")).toContainText("还没有更新。");
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await page.reload();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await expect(page.locator(".presence-answer")).toContainText(
     "No update yet.",
   );

@@ -4,90 +4,62 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("shared care grows all stages and preserves progress without a flag reward", async ({
+test("continuous care grows nine stages and persists without a flag or bloom message", async ({
   page,
   isMobile,
-  flowerPlant,
 }) => {
-  test.setTimeout(60000);
-  // Saved rewards from older releases must not bring back the flag.
   await page.evaluate(() => localStorage.setItem("spacecaveman:bloom", "1"));
   await page.reload();
   await page.emulateMedia({ reducedMotion: "reduce" });
   const flower = page.locator("#flower");
-  const writes: string[] = [];
-  page.on("request", (req) => {
-    if (!["GET", "HEAD"].includes(req.method())) writes.push(req.url());
-  });
-  for (const [level, threshold] of [
-    [1, 17],
-    [2, 34],
-    [3, 50],
-  ]) {
-    // Other visitors have cared for the shared plant up to the next stage.
-    flowerPlant.stats = {
-      rain: threshold - 1,
-      sun: threshold - 1,
-      love: threshold - 1,
-      food: threshold - 1,
-    };
-    await flower.getByRole("button", { name: "Refresh plant" }).click();
-    for (const [action, stat] of [
-      ["Water", "Rain"],
-      ["Sun", "Sunlight"],
-      ["Prune", "Love"],
-      ["Feed", "Nutrition"],
-    ]) {
-      const control = flower.getByRole("button", { name: action, exact: true });
-      if (isMobile) await control.tap();
-      else await control.click();
+  const pairs = [
+    ["Water", "Rain"],
+    ["Sun", "Sunlight"],
+    ["Prune", "Love"],
+    ["Feed", "Nutrition"],
+  ];
+  for (let round = 0; round < 10; round++) {
+    for (let index = 0; index < pairs.length; index++) {
+      const [action, stat] = pairs[index];
+      const button = flower.getByRole("button", { name: action, exact: true });
+      if (isMobile) await button.tap();
+      else await button.click();
       await expect(
         flower.getByRole("meter", { name: stat, exact: true }),
-      ).toHaveAttribute("value", String(threshold));
-      await expect(
-        flower.getByRole("meter", { name: stat, exact: true }),
-      ).toHaveAttribute("max", "50");
-      await expect(flower).not.toContainText(/\d/);
-      // Overall growth waits for the least cared-for attribute.
+      ).toHaveAttribute("value", String((round + 1) * 5));
       await expect(flower.locator(".flower-stage")).toHaveAttribute(
         "data-stage",
-        String(action === "Feed" ? level : level - 1),
+        String(Math.floor((round * 4 + index + 1) / 5)),
       );
+      await expect(flower).not.toContainText(/\d/);
     }
   }
   await expect(flower.getByRole("status")).toHaveText(
-    "Our flower is in full bloom! Thank you for helping it grow.",
+    "Thank you for giving our flower so much care!",
   );
+  await expect(flower).not.toContainText("Our flower is in full bloom!");
   await expect(page.locator(".treasure-flag")).toHaveCount(0);
   await expect(flower.getByRole("checkbox")).toHaveCount(0);
   await expect(
     flower.getByRole("button", { name: "Details", exact: true }),
   ).toHaveCount(0);
-  await flower.getByRole("button", { name: "Water", exact: true }).click();
   await expect(
-    flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "50");
-  await flower
-    .getByRole("button", { name: "Refresh plant", exact: true })
-    .click();
+    flower.getByRole("button", { name: "Refresh plant" }),
+  ).toBeEnabled();
+  await page.reload();
+  for (const [, stat] of pairs) {
+    await expect(
+      flower.getByRole("meter", { name: stat, exact: true }),
+    ).toHaveAttribute("value", "50");
+  }
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
-    "3",
+    "8",
   );
-  expect(
-    writes
-      .filter((url) => !url.includes("/api/visitors"))
-      .every((url) => url.includes("/api/flower?care=")),
-  ).toBe(true);
-  await page.reload();
-  await expect(page.locator(".treasure-flag")).toHaveCount(0);
-  await expect(
-    flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "50");
-  await expect(page.locator(".treasure-flag")).toHaveCount(0);
+  await expect(flower.locator(".plant-notice")).toBeEmpty();
 });
 
-test("watering gives visible feedback without stage growth, rejects burst clicks and reports full attributes", async ({
+test("continuous watering gives immediate feedback and reports full attributes", async ({
   page,
   flowerPlant,
 }) => {
@@ -95,7 +67,7 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
   const flower = page.locator("#flower");
   const water = flower.getByRole("button", { name: "Water", exact: true });
   await expect(water).toBeEnabled();
-  // A burst in one event turn must not count as multiple care actions.
+  // Every click in the same event turn contributes to the queue.
   await water.evaluate((button: HTMLButtonElement) => {
     button.click();
     button.click();
@@ -103,13 +75,15 @@ test("watering gives visible feedback without stage growth, rejects burst clicks
   });
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "15");
   await expect(flower.locator(".wet-soil")).toBeVisible();
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
     "0",
   );
-  await expect(flower.getByRole("status")).toContainText("Watered.");
+  await expect(flower.getByRole("status")).toContainText(
+    "You’re helping our flower grow.",
+  );
   await expect(water).toBeEnabled();
   flowerPlant.stats.rain = 50;
   await water.click();
@@ -132,7 +106,7 @@ test("language preserves care; keyboard and reduced motion work", async ({
   await page.keyboard.press("Enter");
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await expect(flower.locator(".care-effect")).toHaveCount(0);
   await expect(page.locator(".caveman-traveler")).toHaveCSS(
     "animation-name",
@@ -141,13 +115,13 @@ test("language preserves care; keyboard and reduced motion work", async ({
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await expect(flower.getByRole("status")).toContainText("已浇水。");
   await expect(flower.getByRole("button", { name: "详情" })).toHaveCount(0);
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "1");
+  ).toHaveAttribute("value", "5");
   await expect(flower.getByRole("status")).toContainText("Watered.");
 });
 

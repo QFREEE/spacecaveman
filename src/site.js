@@ -103,10 +103,10 @@ export async function handleFlower(request, env, now = Date.now()) {
       const row = await db
         .prepare(
           `UPDATE site_flower SET
-        ${action} = ${action} + 1,
+        ${action} = MIN(50, ${action} + 5),
         log = json_insert(CASE WHEN json_array_length(log) >= 12 THEN json_remove(log, '$[0]') ELSE log END, '$[#]', ?),
         bloomed_at = CASE
-          WHEN ${careIds.map((id) => `${id} = ${id === action ? 49 : 50}`).join(" AND ")} THEN ? ELSE bloomed_at END,
+          WHEN ${careIds.map((id) => (id === action ? `${id} >= 45` : `${id} = 50`)).join(" AND ")} THEN ? ELSE bloomed_at END,
         updated_at = ?
         WHERE id = 1 AND day_key = ? AND ${action} < 50
         RETURNING *`,

@@ -517,9 +517,6 @@ meter::-moz-meter-bar {
 .plant-meters[data-recognition="thanks"] {
   --plant-fill: var(--skin-care-thanks);
 }
-.plant-meters[data-recognition="bloom"] {
-  --plant-fill: var(--skin-care-bloom);
-}
 .plant-meters[data-recognition] meter::-webkit-meter-optimum-value {
   background: var(--plant-fill);
 }
