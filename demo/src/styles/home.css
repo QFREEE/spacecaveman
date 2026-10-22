@@ -60,6 +60,19 @@
   overflow-wrap: anywhere;
   animation: nyc-answer-reveal 1.2s ease-out both;
 }
+.nyc-loading-scene {
+  display: grid;
+  place-items: center;
+  height: 140px;
+  margin-bottom: 12px;
+  border-bottom: 1px dotted var(--skin-border-soft);
+  color: var(--skin-muted);
+  font-size: 28px;
+}
+.presence-loading p {
+  margin: 0;
+  color: var(--skin-muted);
+}
 @keyframes nyc-answer-reveal {
   from {
     opacity: 0.25;

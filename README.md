@@ -7,6 +7,8 @@ serves it as the production homepage.
 
 ## Homepage behavior
 
+- NYC and flower widgets show loading feedback until their first response, without
+  flashing a default scene or plant. Later refreshes keep the last confirmed state.
 - NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
   reports presence; the homepage refreshes every minute and shows the latest answer.
   Update age is approximate: within a few minutes (under five), within an hour,

@@ -14,6 +14,7 @@ export const zh = {
   "presence.inNyc": "在，我在纽约！",
   "presence.outsideNyc": "不在，我在树林里。",
   "presence.unknown": "还没有更新。",
+  "presence.loading": "正在确认我在不在纽约…",
   "presence.updatedMinutes": "几分钟内更新",
   "presence.updatedHour": "一小时内更新",
   "presence.updatedThreeHours": "三小时内更新",
