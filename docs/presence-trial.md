@@ -12,9 +12,14 @@ Deployed 2026-10-20 to the existing Cloudflare account, separately from the publ
 
 Open the local `.presence-private/iphone-setup.txt` file for your credentials. It is ignored by Git and outside the deployed `public/` directory. Do not paste it into chat or share a populated shortcut. The credentials expire January 18, 2027 at approximately 10:54 p.m. Eastern.
 
+The original bundle may be in the parent workspace rather than this publishing
+checkout. Reuse that file; do not generate a replacement just because a checkout
+has no bundle. The credential-free `/shortcuts.html` guide gives a reusable manual
+publisher and Arrive/Leave wiring. It is a setup recipe, not an installed shortcut.
+
 1. Follow [the action recipe](iphone-shortcuts-setup.md): Date → Format Date (ISO 8601 with time zone) → fresh event ID → URL → Get Contents of URL.
 2. Use the API URL above, method **POST**, JSON body, and the **Authorization** header from the private file. Use the write credential only.
-3. Supply exactly `status`, `observed_at`, and `event_id`. Start with a manual `not_in_nyc` report; confirm the response is `{"accepted":true}`. Use your actual current state when reporting real presence.
+3. Supply exactly `status`, `observed_at`, and `event_id`. Choose your actual state: `in_nyc`, `not_in_nyc`, or `unknown` to clear the report; confirm the response is `{"accepted":true}`. The reusable shortcut returns its `accepted` Boolean.
 4. Open the viewer and enter the separate read credential. Confirm the report and time. Credentials stay in tab memory; there is no localStorage, cookie session, or token in the URL.
 5. Attach the action sequence to **Arrive** and **Leave** for the same chosen circle; use `in_nyc` on arrival and `not_in_nyc` on departure. Enable automatic execution. Check the circle on the phone before calling it NYC.
 6. Test crossing that boundary with the phone locked. Follow the recipe's offline, reboot, and long-visit checks. These tests have not been performed from Windows.
@@ -24,6 +29,7 @@ This is a private owner trial. The public visits remain fictional; full invited-
 ## Implemented contract
 
 - `POST /api/presence`: write credential only, acknowledgment only. At most 1 KiB JSON, exactly three fields; unexpected fields are rejected. Event IDs are 1–128 ASCII letters, digits, underscore, period, colon, plus or minus.
+- `unknown` clears the visible status without deleting its ordering watermark. All reports share observation-time precedence: older automation cannot undo a manual clear, but a later real observation can. Clearing uses the same 10-second interval and deduplication rules; it is not a persistent manual override.
 - `GET /api/presence`: separate read credential only; returns status and report/expiry timestamps, or Unknown. Never accepts the write credential.
 - Observation timestamps include a timezone; at most five minutes old or one minute ahead. Only newer observations can replace status. Reused event IDs are rejected within the acceptance window; old timestamps remain rejected after that window.
 - Successful writes are at least ten seconds apart. Rejected duplicate/old/rate/revoked races return 409; do not fabricate a fresh timestamp to retry an old geofence event.
@@ -55,6 +61,12 @@ node scripts/presence-smoke.mjs
 ```
 
 Validation completed: nine Node/SQLite tests, Wrangler dry run, actual local Workers runtime smoke tests, deployed HTTPS smoke tests, and visual inspection of the private viewer. The HTTPS smoke test used a synthetic report, which was cleared afterward. No iPhone delivery or geofence test has run yet. Smoke tests write synthetic presence; use them only before real phone testing or when deliberately replacing the trial report.
+
+For ongoing phone diagnosis use `pnpm presence:check -- <private-bundle-path>`.
+It performs only an authenticated GET against the isolated trial, validates the
+response and prints coarse status/timestamps. It never writes or prints a token.
+The nine-test result above is the original 2026-10-20 trial record; current CI
+also covers Unknown clearing, ordering and credential separation.
 
 ## Revoke access
 

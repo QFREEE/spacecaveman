@@ -2,6 +2,56 @@
 
 Researched 2026-10-20 for the previously supplied iOS 17 device. The protected server trial is now deployed; see [the live trial and private credential setup](presence-trial.md). The action recipe still needs testing on the actual phone. Full invited-friend access is not implemented.
 
+## Reusable publisher (2026-10-21)
+
+The phone-readable [Publish NYC Status guide](../public/shortcuts.html) is served
+at `/shortcuts.html` on the website and isolated trial after their separate
+deployments. It contains no credentials, scripts, storage, or API requests. It
+is an action recipe, not a signed/installable `.shortcut` file. The public
+homepage remains Unknown; this flow currently reports to the private viewer.
+
+Build one **Publish NYC Status** shortcut. With no input, its menu offers In NYC,
+Not in NYC, or Unknown / clear report. With input, it uses that input without a
+menu. Each execution captures a fresh date once, formats it with a timezone,
+generates an event ID, POSTs exactly the existing three JSON fields, and returns
+the `accepted` Boolean. The guide spells out the action order and variable
+wiring. Do not type variable names as literal values.
+
+Arrive and Leave automations contain **Text** (`in_nyc` or `not_in_nyc`) followed
+by **Run Shortcut → Publish NYC Status**, with Input explicitly set to that Text
+output. This shares the HTTP recipe while keeping unattended execution free of
+menus. Run manually first to resolve permissions and verify actual acceptance.
+
+The write API now also accepts `status: "unknown"`. It clears visibility while
+retaining the observation watermark and existing duplicate/rate protections.
+A delayed arrival cannot undo that clear; a genuinely later automation report
+can. All manual and automated reports use observation time ordering, not a
+persistent manual override. No schema migration or credential rotation is needed.
+
+For a read-only check after phone setup, run from the checkout:
+
+```powershell
+pnpm presence:check -- 'C:\path\to\.presence-private\credentials.json'
+```
+
+The optional path selects the existing private bundle; omitted, it defaults to
+this checkout's `.presence-private/credentials.json`. This command never writes
+a report or prints credentials. Do not use `presence-smoke.mjs` to diagnose real
+phone reports: that older script deliberately overwrites status with test data.
+
+For the credential-free guide's packaged browser check, start `pnpm dev --port
+8798`, then run `node scripts/shortcuts-guide-smoke.mjs`. It checks actual Worker
+headers, 320/390/430/1440 widths, enlarged text, no credential fields or scripts,
+and no API requests. An explicit HTTPS origin can check the deployed guide.
+Screenshots go to ignored `outputs/iphone-shortcuts/`. This supplements
+`pnpm verify`; it does not exercise iOS Shortcuts.
+
+Apple's versioned iOS 17 API, travel-trigger, and automatic-execution guides
+linked below were rechecked on 2026-10-21. This establishes documented capability,
+not the exact action picker labels, variable wiring, or execution on the owner's
+phone. Manual, locked-device, offline, reboot and lease tests remain outstanding
+in [issue #7](https://github.com/QFREEE/spacecaveman/issues/7).
+
 ## Feasibility decision
 
 Proceed with a small phone trial. Apple documents automatic Arrive and Leave automations on iOS 17, and Get Contents of URL supports POST with a JSON body. This is enough to send a coarse presence event directly to an HTTPS Cloudflare Worker. It does not require opening Safari on every event. [Automatic execution](https://support.apple.com/en-euro/guide/shortcuts/apd602971e63/7.0/ios/17.0), [API requests](https://support.apple.com/en-euro/guide/shortcuts/apd58d46713f/7.0/ios/17.0).

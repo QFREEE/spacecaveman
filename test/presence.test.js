@@ -115,3 +115,23 @@ test('writer expiry bounds lease and deletion invalidates stored presence', asyn
   f.sqlite.prepare("DELETE FROM presence_credentials WHERE scope = 'presence:write'").run();
   assert.equal(f.sqlite.prepare('SELECT status FROM presence').get().status, null);
 });
+
+test('a manual Unknown report clears status and preserves ordering, scope and deduplication', async () => {
+  const f = await fixture();
+  await f.request('POST', f.tokens.write, f.event());
+  const clearedAt = f.now + 10_000;
+  const clear = f.event({ status: 'unknown', event_id: 'manual-clear', observed_at: new Date(clearedAt).toISOString() });
+  assert.equal((await f.request('POST', f.tokens.read, clear, clearedAt)).status, 401);
+  assert.deepEqual(await (await f.request('POST', f.tokens.write, clear, clearedAt)).json(), { accepted: true });
+  assert.deepEqual(await (await f.request('GET', f.tokens.read, null, clearedAt)).json(), {
+    status: 'unknown', observed_at: null, expires_at: null,
+  });
+  assert.equal(f.sqlite.prepare('SELECT observed_at FROM presence').get().observed_at, clearedAt);
+  assert.equal((await f.request('POST', f.tokens.write, clear, clearedAt + 10_000)).status, 409);
+  assert.equal((await f.request('POST', f.tokens.write, f.event({ event_id: 'delayed-arrival' }), clearedAt + 10_000)).status, 409);
+  const later = clearedAt + 20_000;
+  assert.equal((await f.request('POST', f.tokens.write, f.event({
+    status: 'not_in_nyc', event_id: 'new-report', observed_at: new Date(later).toISOString(),
+  }), later)).status, 200);
+  assert.equal((await (await f.request('GET', f.tokens.read, null, later)).json()).status, 'not_in_nyc');
+});

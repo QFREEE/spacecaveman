@@ -77,7 +77,7 @@ export async function handlePresence(request, env, now = Date.now()) {
     const event = body.value;
     if (!event || Array.isArray(event) || typeof event !== 'object' ||
         Object.keys(event).sort().join(',') !== 'event_id,observed_at,status' ||
-        !['in_nyc', 'not_in_nyc'].includes(event.status) ||
+        !['in_nyc', 'not_in_nyc', 'unknown'].includes(event.status) ||
         typeof event.event_id !== 'string' || !/^[A-Za-z0-9_.:+-]{1,128}$/.test(event.event_id) ||
         typeof event.observed_at !== 'string' ||
         !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(event.observed_at)) {
@@ -96,7 +96,9 @@ export async function handlePresence(request, env, now = Date.now()) {
         AND NOT EXISTS (SELECT 1 FROM presence_events WHERE digest = ?)
         AND EXISTS (SELECT 1 FROM presence_credentials WHERE id = ? AND digest = ?
           AND scope = 'presence:write' AND revoked = 0 AND expires_at > ?)`)
-        .bind(event.status, observed, expires, now, credential.id, observed, now - MIN_INTERVAL,
+        // Clearing visibility retains the observation watermark: a delayed arrival
+        // must not restore a status that the owner has just cleared.
+        .bind(event.status === 'unknown' ? null : event.status, observed, expires, now, credential.id, observed, now - MIN_INTERVAL,
           eventDigest, credential.id, credential.digest, now),
       db.prepare('INSERT INTO presence_events (digest, expires_at) SELECT ?, ? WHERE changes() = 1')
         .bind(eventDigest, now + FRESHNESS + 60_000),
