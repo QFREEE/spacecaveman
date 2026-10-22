@@ -25,8 +25,15 @@ export const lunarCopy: Record<string, string> = {
   "加了月球肥料，根部闪了一下。": "Moon compost added. The roots sparkle!",
   "这一项已经满了，试试其他照料。":
     "This attribute is full. Try another kind of care.",
-  "开花啦！月球旗已放进我的物品。":
-    "In bloom! A Moon flag is waiting in My items.",
+  "开花啦！你获得了一面月球旗。": "In bloom! You earned a Moon flag.",
+  "我在纽约吗？": "Am I in NYC?",
+  纽约状态: "NYC status",
+  花藤: "Flower",
+  当前状态: "Current status",
+  未知: "Unknown",
+  "暂无公开的近况。": "No public update yet.",
+  "Qzone 风格小站 · 花藤为本地演示 · 计数为样本数据":
+    "Qzone-inspired space · local flower demo · sample visitor count",
   "重新种好啦。小芽等你来照料。":
     "Planted again. A little sprout awaits your care.",
   "月球土壤 · 认真乱养": "MOON SOIL · AMATEUR GARDENER",

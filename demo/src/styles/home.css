@@ -1,0 +1,77 @@
+/* Three-module home. The full set of Qzone modules stays reusable in source. */
+.home-modules {
+  grid-template-columns: minmax(0, 1fr) 250px 220px;
+}
+.home-modules > .module {
+  grid-column: auto;
+  grid-row: auto;
+}
+.nyc-status .module-body {
+  padding: 14px;
+}
+.nyc-skyline {
+  color: var(--skin-ink);
+  border-bottom: 1px dotted var(--skin-border-soft);
+  margin-bottom: 12px;
+}
+.nyc-skyline svg {
+  display: block;
+  width: 100%;
+  height: 140px;
+}
+.presence-caption {
+  font-size: 10px;
+  color: var(--skin-muted);
+}
+.presence-answer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font:
+    22px/1.8 Georgia,
+    SimSun,
+    serif;
+  color: var(--skin-text-strong);
+}
+.presence-answer > span {
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  font:
+    16px/23px Tahoma,
+    sans-serif;
+  border: 1px dotted var(--skin-border);
+}
+.presence-note {
+  color: var(--skin-muted);
+  font-size: 12px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px dotted var(--skin-border-soft);
+}
+.flower-reward {
+  border-top: 1px dotted var(--skin-border-soft);
+}
+@media (min-width: 721px) and (max-width: 900px) {
+  .home-modules {
+    grid-template-columns: minmax(0, 1fr) 230px 190px;
+  }
+}
+@media (max-width: 720px) {
+  .home-navigation a:last-of-type {
+    grid-column: auto;
+  }
+  .nyc-status .module-body {
+    padding: 12px;
+  }
+  .nyc-skyline svg {
+    height: 104px;
+  }
+  .presence-caption,
+  .presence-note {
+    font-size: 14px;
+  }
+  .flower-reward {
+    font-size: 14px;
+  }
+}

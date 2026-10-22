@@ -165,8 +165,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       ?.setAttribute(
         "content",
         language === "en"
-          ? "A fictional lunar Qzone with a flower vine, dress-up toys and a wandering caveman."
-          : "月球洞口：花藤、装扮和闲逛的穴居人。虚构 Qzone 风格演示。",
+          ? "Space Caveman: NYC status, a lunar flower vine and a visitor counter."
+          : "月球洞口：纽约状态、花藤和访客计数。",
       );
   }, [language]);
 
