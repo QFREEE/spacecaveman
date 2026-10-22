@@ -117,101 +117,85 @@
   }
 }
 
-/* A small pair of instruments in the lunar sky. */
+/* Earth as seen from the lunar surface, with time and date on one dial. */
 .space-time {
   position: absolute;
   z-index: 3;
-  top: 18px;
-  right: 24px;
-  color: var(--skin-surface);
-  width: 132px;
-  font: 10px/1.2 monospace;
+  top: 14px;
+  right: 28px;
+  width: 108px;
+  height: 108px;
+  color: var(--skin-text-strong);
+  font: normal 10px/1.2 var(--space-font);
 }
-.space-time-location {
+.earth-dial {
+  position: relative;
   display: block;
-  margin-bottom: 6px;
-  text-align: center;
-  letter-spacing: 1px;
-}
-.space-time-instruments {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  width: 100%;
+  height: 100%;
 }
 .space-clock {
   display: block;
-  width: 72px;
-  height: 72px;
-  flex: none;
-  background: var(--skin-sky);
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.earth-continents {
+  opacity: 0.25;
+}
+.clock-numerals {
+  font:
+    8px Georgia,
+    serif;
 }
 .space-calendar {
-  position: relative;
-  display: grid;
-  width: 46px;
-  flex: none;
-  text-align: center;
-  color: var(--skin-sky);
-  background: var(--skin-surface);
-  border: 1px solid currentColor;
-  box-shadow: 2px 3px 0 var(--skin-sky-muted);
-  transform: rotate(3deg);
-}
-.space-calendar::before,
-.space-calendar::after {
-  content: "";
   position: absolute;
-  top: -4px;
-  width: 2px;
-  height: 6px;
+  top: 66%;
+  left: 27%;
+  width: 46%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 3px;
+  color: var(--skin-text-strong);
   background: var(--skin-surface);
-  border: 1px solid var(--skin-sky);
-}
-.space-calendar::before {
-  left: 9px;
-}
-.space-calendar::after {
-  right: 9px;
+  text-align: center;
+  font-style: normal;
+  line-height: 1.1;
 }
 .calendar-month {
-  padding: 4px 2px 3px;
-  border-bottom: 1px dashed currentColor;
-  text-transform: uppercase;
   font-size: 9px;
 }
 .calendar-day {
   font:
-    25px/1.1 Georgia,
+    12px/1 Georgia,
     serif;
-  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
 .calendar-weekday {
-  font-size: 9px;
-  padding: 2px 0 4px;
+  flex-basis: 100%;
+  font-size: 8px;
+  margin-top: 1px;
 }
 @media (max-width: 720px) {
+  .caveman-traveler {
+    right: calc(40% + 40px);
+  }
   .space-time {
-    top: 65px;
+    top: 59px;
     right: 14px;
-    width: 108px;
+    width: 84px;
+    height: 84px;
   }
-  .space-time-location {
-    font-size: 9px;
-    margin-bottom: 3px;
-  }
-  .space-time-instruments {
-    gap: 8px;
-  }
-  .space-clock {
-    width: 56px;
-    height: 56px;
-  }
-  .space-calendar {
-    width: 40px;
+  .calendar-month {
+    font-size: 8px;
   }
   .calendar-day {
-    font-size: 22px;
+    font-size: 10px;
+  }
+  .calendar-weekday {
+    font-size: 7px;
   }
 }

@@ -7,8 +7,9 @@ serves it as the production homepage.
 
 ## Homepage behavior
 
-- The header clock and tear-off calendar show New York time and date, including
-  daylight-saving changes. They update each minute and when returning to the tab.
+- The header Earth dial combines an analog clock and calendar in one drawing.
+  It always shows US Eastern time and date, including daylight-saving changes.
+  It updates each minute and when returning to the tab.
   The accessible date/time and visible calendar follow the language selector.
 
 - NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
