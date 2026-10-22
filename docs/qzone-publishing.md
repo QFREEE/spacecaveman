@@ -2,8 +2,9 @@
 
 The main `spacecaveman` Worker serves the English-default Qzone homepage at
 https://spacecaveman.com/ and https://spacecaveman.spacecaveman.workers.dev/.
-The English/中文 switch and all demo content remain client-side. Guestbook
-messages are never stored on the server.
+The English/中文 switch and flower demo remain client-side. The homepage contains
+NYC status (Unknown), flower and sample visitor count; other modules remain in
+source but are not mounted. See the [current composition](three-module-homepage.md).
 
 ## Build and verify
 
@@ -27,9 +28,10 @@ pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
 node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
 ```
 
-The smoke test checks the real security headers, local-only guestbook actions,
-both languages, albums, audio, phone layouts, and preserved routes. Its guestbook
-message exists only in the test browser. It does not write to any API.
+The smoke test checks the real security headers, exactly three modules, Unknown
+status, sample counter labeling, bilingual flower state, growth/flag controls,
+animation pause, phone layouts, and preserved visits/presence routes. Flower
+actions exist only in the test browser. It sends no API writes or credentials.
 
 ## Deploy
 

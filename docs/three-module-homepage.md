@@ -52,3 +52,7 @@ real Tab order, care stages/caps/reward/reset, burst protection, pause/reduced
 motion, enlarged text and overflow at 320/390/430/720/1440px. Screenshots above
 were inspected at desktop and 390px phone widths. Physical iOS/Android testing
 remains outstanding. Existing Worker checks and deployment packaging remain in CI.
+
+`node scripts/qzone-deploy-smoke.mjs <base-url>` also checks the complete Worker
+package's security headers, three modules, bilingual flower interactions and
+preserved routes; follow the [publishing guide](qzone-publishing.md) to start it.
