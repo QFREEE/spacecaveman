@@ -4,7 +4,9 @@ This records the earlier full-homepage design and its verification. The current
 [three-module homepage](three-module-homepage.md) keeps this skin and header, but
 mounts only NYC status, flower and visitor count. Dress-up controls and the other
 content modules are retained in source; their historical tests are archived in
-`demo/previous-homepage-tests/`. The flower now contains its own flag control.
+`demo/previous-homepage-tests/`. Current flower behavior is documented in
+[the production guide](homepage-production.md): daily resets, bars without
+numeric progress, and no flag reward. The gadget descriptions below are historical.
 
 Implements [issue #15](https://github.com/QFREEE/spacecaveman/issues/15). The owner
 authorized implementation and a pull request after reviewing the research. We

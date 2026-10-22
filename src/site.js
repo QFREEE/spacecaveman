@@ -2,8 +2,20 @@ const headers = {
   "Cache-Control": "no-store",
   "X-Content-Type-Options": "nosniff",
 };
-const day = 86400_000;
 const careIds = ["rain", "sun", "love", "food"];
+const flowerDay = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/New_York",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function dayKey(now) {
+  const parts = flowerDay.formatToParts(now);
+  return ["year", "month", "day"]
+    .map((type) => parts.find((part) => part.type === type).value)
+    .join("-");
+}
 
 function sameOrigin(request) {
   return (
@@ -72,40 +84,34 @@ export async function handleFlower(request, env, now = Date.now()) {
   if (!env?.PRESENCE_DB) return unavailable("flower");
   try {
     const db = env.PRESENCE_DB;
+    const today = dayKey(now);
+    // Only advance the day: an older request must never reset a newer plant.
+    // Reads also reset, so an unbloomed plant refreshes without a care action.
+    await db
+      .prepare(
+        `UPDATE site_flower SET
+      rain = 0, sun = 0, love = 0, food = 0, updated_at = 0,
+      bloomed_at = NULL, log = '[]',
+      generation = generation + CASE WHEN day_key = '' THEN 0 ELSE 1 END,
+      day_key = ? WHERE id = 1 AND day_key < ? RETURNING id`,
+      )
+      .bind(today, today)
+      .first();
     if (request.method === "POST") {
       // The column is selected from a fixed allowlist, never arbitrary input.
       // Each conditional UPDATE is atomic, including the shared cooldown.
-      const resetAt = now - day;
-      const reset = `bloomed_at IS NOT NULL AND bloomed_at <= ?`;
-      const setters = careIds.map(
-        (id) =>
-          `${id} = CASE WHEN ${reset} THEN ${id === action ? 1 : 0} ELSE ${id}${id === action ? " + 1" : ""} END`,
-      );
       const row = await db
         .prepare(
           `UPDATE site_flower SET
-        ${setters.join(", ")},
-        generation = generation + CASE WHEN ${reset} THEN 1 ELSE 0 END,
-        log = CASE WHEN ${reset} THEN json_array(?) ELSE
-          json_insert(CASE WHEN json_array_length(log) >= 12 THEN json_remove(log, '$[0]') ELSE log END, '$[#]', ?) END,
-        bloomed_at = CASE WHEN ${reset} THEN NULL
-          WHEN ${careIds.map((id) => `${id} ${id === action ? "= 2" : "= 3"}`).join(" AND ")} THEN ? ELSE bloomed_at END,
+        ${action} = ${action} + 1,
+        log = json_insert(CASE WHEN json_array_length(log) >= 12 THEN json_remove(log, '$[0]') ELSE log END, '$[#]', ?),
+        bloomed_at = CASE
+          WHEN ${careIds.map((id) => `${id} = ${id === action ? 49 : 50}`).join(" AND ")} THEN ? ELSE bloomed_at END,
         updated_at = ?
-        WHERE id = 1 AND updated_at <= ? AND (${action} < 3 OR (${reset}))
+        WHERE id = 1 AND day_key = ? AND updated_at <= ? AND ${action} < 50
         RETURNING *`,
         )
-        .bind(
-          ...careIds.map(() => resetAt),
-          resetAt,
-          resetAt,
-          action,
-          action,
-          resetAt,
-          now,
-          now,
-          now - 2000,
-          resetAt,
-        )
+        .bind(action, now, now, today, now - 2000)
         .first();
       if (row) return Response.json(flowerResponse(row), { headers });
       const current = await db
@@ -113,9 +119,7 @@ export async function handleFlower(request, env, now = Date.now()) {
         .bind()
         .first();
       if (!current) throw new Error("Missing flower");
-      const full =
-        current[action] === 3 &&
-        (current.bloomed_at === null || current.bloomed_at > resetAt);
+      const full = current[action] === 50;
       return Response.json(
         { ...flowerResponse(current), error: full ? "full" : "cooldown" },
         {

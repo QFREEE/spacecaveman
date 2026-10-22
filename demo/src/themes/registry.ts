@@ -3,11 +3,10 @@ import { LunarScene } from "../LunarScene";
 import "./lunar.css";
 import "./blue-hour.css";
 
-export type SceneProps = { ornaments: boolean; treasure: boolean };
 type SpaceTheme = {
   id: string;
   label: string;
-  Scene: ComponentType<SceneProps>;
+  Scene: ComponentType;
   portrait: { src: string; alt: string };
 };
 

@@ -40,7 +40,6 @@ export const lunarCopy: Record<string, string> = {
   "已修剪。": "Pruned.",
   "已施肥。": "Fed.",
   "此项已满。": "Already full.",
-  "旗帜已解锁。": "Flag unlocked.",
   "我在纽约吗？": "Am I in NYC?",
   纽约状态: "NYC status",
   花藤: "Flower",
@@ -71,10 +70,6 @@ export const lunarCopy: Record<string, string> = {
   星空: "Stars",
   白纸: "Paper",
   土星挂件: "Saturn pendant",
-  我的物品: "My items",
-  显示旗帜: "Show flag",
-  "照料花藤开花，领取一面月球旗。":
-    "Grow a bloom to collect a little Moon flag.",
   恢复默认装扮: "Restore default skin",
   暂停动画: "Pause animation",
   继续动画: "Resume animation",

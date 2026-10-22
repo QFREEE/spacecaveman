@@ -7,8 +7,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | Homepage badge/footer                    | Fictional/demo labels                  | Personal space copy matching real features                                       |
 | Visitor counter                          | Hardcoded 001286                       | D1 aggregate starting at zero; includes reloads; loading/error/retry states      |
 | Flower care                              | Per-page state lost on refresh         | One D1 plant shared by all visitors; atomic care, bounds and two-second cooldown |
-| Flower reset                             | Any visitor could reset the local demo | No public destructive reset; care starts a new plant 24 hours after bloom        |
-| Moon flag                                | Lost on reload                         | Appears automatically on bloom and remains visible on reload           |
+| Flower reset                             | Any visitor could reset the local demo | Shared daily reset at New York midnight on the next read or care request         |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected       |
 | NYC presence                             | Static Unknown card                    | Live coarse status and approximate update age                                    |
 | `/api/visits`                            | Fictional named visit plans            | Empty public list until owner/invited-friend access exists                       |
@@ -28,11 +27,15 @@ conditional UPDATE. The response is authoritative; the browser does not invent
 successful care. A full attribute returns 409; cooldown returns 429 with a
 `Retry-After` header. Both include current state so another visitor's care appears
 immediately. Unavailable storage returns 503; the UI disables care and offers a
-refresh. Other tabs refresh every 30 seconds or on window focus.
+refresh. Each attribute is bounded from zero to fifty; the UI shows only its bar,
+without numeric progress or levels. Other tabs refresh every 30 seconds or on
+window focus.
 
-The bloom is retained for at least 24 hours. The next care action then atomically
-starts a new generation and clears only the previous plant's care log. The flower card shows care actions and refresh, without a details panel or flag toggle. A bloom
-rewards visitors who see it, whether they supplied the final care action or not.
+At midnight in `America/New_York`, the next read or care request atomically starts
+a new generation and clears all care bars, the care log and bloom time, whether
+or not yesterday's plant bloomed. Concurrent requests reset it only once. The flower
+card shows care actions and refresh, without a details panel. Blooming changes the
+plant's appearance; there is no flag reward or saved browser unlock.
 No visitor identity is required or recorded. The last twelve care action names are
 kept; no individual timestamps, names, IPs or cookies are stored by these features.
 Platform request logs follow the existing Cloudflare configuration.
@@ -40,8 +43,12 @@ Platform request logs follow the existing Cloudflare configuration.
 ## Validation
 
 Backend tests exercise real SQLite statements for concurrent counter increments,
-origin/method checks, invalid care, cooldowns, full stats, bloom timing, replanting,
+origin/method checks, invalid care, cooldowns, full stats, bloom timing, daily resets,
 and unavailable databases. Browser tests cover persistence, bilingual copy,
-rewards, failures and mobile layouts. The smoke script runs the built Worker with
+blooming, failures and mobile layouts. The smoke script runs the built Worker with
 real D1 storage and checks a second page sees the same flower. Deployed checks are
 recorded on issue #31. Phone emulation is not physical-device testing.
+
+Migration `0004_daily_flower.sql` widens the database bounds and adds the New York
+day key. Apply it before releasing this version. The first request starts a fresh
+daily plant. See the deployment guide for the migration command.

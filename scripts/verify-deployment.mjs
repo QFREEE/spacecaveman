@@ -97,7 +97,7 @@ export async function verifyDeployment(
         assert.ok(
           Number.isInteger(body.stats[stat]) &&
             body.stats[stat] >= 0 &&
-            body.stats[stat] <= 3,
+            body.stats[stat] <= 50,
         );
       assert.ok(Array.isArray(body.log));
     } else {

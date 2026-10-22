@@ -7,7 +7,11 @@ import { handleFlower } from "../src/site.js";
 
 function fixture() {
   const sqlite = new DatabaseSync(":memory:");
-  for (const name of ["0002_site_counter", "0003_shared_flower"]) {
+  for (const name of [
+    "0002_site_counter",
+    "0003_shared_flower",
+    "0004_daily_flower",
+  ]) {
     sqlite.exec(
       readFileSync(
         new URL(`../migrations/${name}.sql`, import.meta.url),
@@ -42,6 +46,33 @@ function fixture() {
   };
 }
 
+test("daily-flower migration preserves the old row while widening care bounds", () => {
+  const sqlite = new DatabaseSync(":memory:");
+  sqlite.exec(
+    readFileSync(
+      new URL("../migrations/0003_shared_flower.sql", import.meta.url),
+      "utf8",
+    ),
+  );
+  sqlite.exec(
+    "UPDATE site_flower SET rain = 3, generation = 4, log = '[\"rain\"]'",
+  );
+  sqlite.exec(
+    readFileSync(
+      new URL("../migrations/0004_daily_flower.sql", import.meta.url),
+      "utf8",
+    ),
+  );
+  const migrated = sqlite.prepare("SELECT * FROM site_flower").get();
+  assert.equal(migrated.rain, 3);
+  assert.equal(migrated.generation, 4);
+  assert.equal(migrated.log, '["rain"]');
+  assert.equal(migrated.day_key, "");
+  sqlite.exec("UPDATE site_flower SET rain = 50");
+  assert.throws(() => sqlite.exec("UPDATE site_flower SET sun = 51"), /CHECK/);
+  sqlite.close();
+});
+
 test("counter starts at zero and increments atomically, reads do not increment", async () => {
   const f = fixture();
   assert.deepEqual(await (await f.fetch("visitors")).json(), { views: 0 });
@@ -68,9 +99,9 @@ test("counter starts at zero and increments atomically, reads do not increment",
   f.sqlite.close();
 });
 
-test("shared flower validates care, cooldown, bounds, bloom and next-day replant in real SQL", async () => {
+test("shared flower validates care, cooldown, fifty-point bounds and bloom in real SQL", async () => {
   const f = fixture();
-  let now = 2_000_000;
+  let now = Date.parse("2026-10-22T12:00:00Z");
   const get = () => handleFlower(f.request("flower"), f.env, now);
   const care = (action) =>
     handleFlower(f.request(`flower?care=${action}`, "POST"), f.env, now);
@@ -96,30 +127,24 @@ test("shared flower validates care, cooldown, bounds, bloom and next-day replant
   assert.equal(blocked.status, 429);
   assert.equal(blocked.headers.get("Retry-After"), "2");
   assert.equal((await blocked.json()).stats.rain, 1);
-  for (const action of [
-    "rain",
-    "rain",
-    "sun",
-    "sun",
-    "sun",
-    "love",
-    "love",
-    "love",
-    "food",
-    "food",
-    "food",
-  ]) {
+  for (const action of ["rain", "sun", "love", "food"].flatMap((id) =>
+    Array(id === "rain" ? 49 : 50).fill(id),
+  )) {
     now += 2000;
     assert.equal((await care(action)).status, 200);
   }
   const bloom = await (await get()).json();
-  assert.deepEqual(bloom.stats, { rain: 3, sun: 3, love: 3, food: 3 });
+  assert.deepEqual(bloom.stats, { rain: 50, sun: 50, love: 50, food: 50 });
   assert.equal(bloom.log.length, 12);
   assert.equal(bloom.bloomed_at, new Date(now).toISOString());
   assert.equal(bloom.generation, 1);
-  now += 86400_000 - 1;
+  now += 2000;
   assert.equal((await care("rain")).status, 409);
-  now++;
+  assert.throws(
+    () => f.sqlite.exec("UPDATE site_flower SET rain = 51"),
+    /CHECK/,
+  );
+  now = Date.parse("2026-10-23T04:00:00Z");
   const replanted = await (await care("sun")).json();
   assert.deepEqual(replanted.stats, { rain: 0, sun: 1, love: 0, food: 0 });
   assert.equal(replanted.generation, 2);
@@ -127,6 +152,61 @@ test("shared flower validates care, cooldown, bounds, bloom and next-day replant
   assert.deepEqual(replanted.log, ["sun"]);
   assert.equal((await (await get()).json()).generation, 2);
   f.sqlite.close();
+});
+
+test("daily reset follows New York midnight including DST and resets unbloomed plants on reads", async () => {
+  for (const midnight of [
+    "2026-03-08T05:00:00Z",
+    "2026-03-09T04:00:00Z",
+    "2026-11-01T04:00:00Z",
+    "2026-11-02T05:00:00Z",
+  ]) {
+    const f = fixture();
+    const now = Date.parse(midnight);
+    const get = (time) => handleFlower(f.request("flower"), f.env, time);
+    await get(now - 3000);
+    await handleFlower(
+      f.request("flower?care=rain", "POST"),
+      f.env,
+      now - 2000,
+    );
+    assert.equal((await (await get(now - 1)).json()).stats.rain, 1);
+    const reads = await Promise.all(Array.from({ length: 5 }, () => get(now)));
+    for (const response of reads) {
+      const plant = await response.json();
+      assert.deepEqual(plant.stats, { rain: 0, sun: 0, love: 0, food: 0 });
+      assert.equal(plant.generation, 2);
+      assert.deepEqual(plant.log, []);
+      assert.equal(plant.bloomed_at, null);
+    }
+    const requests = await Promise.all(
+      ["rain", "sun"].map((care) =>
+        handleFlower(f.request(`flower?care=${care}`, "POST"), f.env, now),
+      ),
+    );
+    assert.deepEqual(
+      requests.map((response) => response.status).sort(),
+      [200, 429],
+    );
+    // A late previous-day request cannot undo the new day's care.
+    assert.equal(
+      (
+        await handleFlower(
+          f.request("flower?care=food", "POST"),
+          f.env,
+          now - 1,
+        )
+      ).status,
+      429,
+    );
+    const current = await (await get(now + 1)).json();
+    assert.equal(
+      Object.values(current.stats).reduce((sum, value) => sum + value, 0),
+      1,
+    );
+    assert.equal(current.generation, 2);
+    f.sqlite.close();
+  }
 });
 
 test("unconfigured and failed storage return unavailable rather than fake counts or progress", async () => {

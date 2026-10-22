@@ -21,7 +21,7 @@ test("initial requests show loading without a default city or flower", async ({
     await gate;
     await route.fulfill({
       json: {
-        stats: { rain: 2, sun: 2, love: 2, food: 2 },
+        stats: { rain: 34, sun: 34, love: 34, food: 34 },
         log: [],
         generation: 2,
         bloomed_at: null,
@@ -83,7 +83,7 @@ test("initial timeouts end loading and the flower can be retried", async ({
   await page.route("**/api/flower*", (route) =>
     route.fulfill({
       json: {
-        stats: { rain: 1, sun: 1, love: 1, food: 1 },
+        stats: { rain: 17, sun: 17, love: 17, food: 17 },
         log: [],
         generation: 1,
         bloomed_at: null,
