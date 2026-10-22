@@ -1,6 +1,7 @@
 import { useLanguage, LanguageProvider, LanguageSwitch } from "./Language";
 import { createRoot } from "react-dom/client";
 import { StrictMode, useCallback, useState } from "react";
+import { SpaceTime } from "./SpaceTime";
 import { FlowerVine } from "./FlowerVine";
 import { ThemeProvider, useTheme } from "./themes/ThemeProvider";
 import { NycStatus } from "./NycStatus";
@@ -50,6 +51,7 @@ function App() {
             <h1 lang="en">{t("site.title")}</h1>
           </div>
           <Scene ornaments treasure={flag} />
+          <SpaceTime />
         </header>
         <nav className="navigation home-navigation" aria-label={t("nav.label")}>
           {[

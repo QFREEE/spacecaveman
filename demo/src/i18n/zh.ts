@@ -3,6 +3,7 @@ import type { Messages } from "./en";
 export const zh = {
   "site.title": "Yuntong’s space",
   "site.description": "Yuntong’s space：纽约状态、花藤和访问次数。",
+  "clock.location": "纽约时间",
   "language.label": "语言",
   "nav.label": "空间导航",
   "nav.home": "主页",

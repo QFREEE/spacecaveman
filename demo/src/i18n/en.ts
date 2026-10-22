@@ -1,6 +1,7 @@
 export const en = {
   "site.title": "Yuntong’s space",
   "site.description": "Yuntong’s space: NYC status, a flower and page views.",
+  "clock.location": "New York",
   "language.label": "Language",
   "nav.label": "Space navigation",
   "nav.home": "Home",

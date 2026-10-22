@@ -11,6 +11,8 @@ Messages use semantic names grouped by purpose, such as `presence.inNyc` and
 accessible names, errors, descriptions and status feedback from the same catalogs.
 Flower notices retain message keys and translate when rendered, so
 switching language keeps current state and changes existing feedback too.
+The header clock uses `clock.location` for its label and `Intl.DateTimeFormat`
+for localized calendar and accessible date/time text in `America/New_York`.
 
 Both small catalogs ship together for immediate switching without a translation
 request. Retired diary, profile and guestbook wording lives behind

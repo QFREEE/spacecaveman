@@ -31,15 +31,10 @@ export function Caveman({ className = "" }: { className?: string }) {
   );
 }
 
-export function LunarScene({ ornaments, treasure }: SceneProps) {
+export function LunarScene({ treasure }: SceneProps) {
   return (
     <div className="lunar-scene" aria-hidden="true">
       <span className="scene-stars">·　+　　　.　　　　+　　　·</span>
-      {ornaments ? (
-        <div className="hanging-planet">
-          <span />♄<small>07</small>
-        </div>
-      ) : null}
       <svg
         className="moon-ground"
         viewBox="0 0 960 130"
