@@ -27,7 +27,7 @@ export function ModuleFrame({
         <h2 id={`${id}-heading`}>
           <span className={`pixel-icon icon-${icon}`} aria-hidden="true" />
           {title}
-          <small>{english}</small>
+          {english ? <small>{english}</small> : null}
         </h2>
         {extra}
       </div>

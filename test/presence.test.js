@@ -1,8 +1,9 @@
+import worker from '../src/worker.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
-import { handlePresence, digest } from '../src/presence.js';
+import { handlePresence, handlePublicPresence, cleanupPresence, digest } from '../src/presence.js';
 
 // Execute real schema, conditional SQL and triggers in SQLite, using D1's API shape.
 async function fixture() {
@@ -143,4 +144,74 @@ test('a manual Unknown report clears status and preserves ordering, scope and de
     status: 'not_in_nyc', event_id: 'new-report', observed_at: new Date(later).toISOString(),
   }), later)).status, 200);
   assert.equal((await (await f.request('GET', f.tokens.read, null, later)).json()).status, 'not_in_nyc');
+});
+
+test('main public status reads the phone database without exposing credentials or allowing writes', async t => {
+  const f = await fixture();
+  t.mock.method(Date, 'now', () => f.now);
+  const get = () => worker.fetch(new Request('https://example.com/api/presence/public'), f.env);
+  assert.equal((await get()).status, 404);
+  f.env.PRESENCE_PUBLIC_READ = 'true';
+  assert.equal((await (await get()).json()).status, 'unknown');
+  await f.request('POST', f.tokens.write, f.event());
+  const response = await get();
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('Cache-Control'), 'no-store');
+  const body = await response.json();
+  assert.equal(body.status, 'in_nyc');
+  assert.deepEqual(Object.keys(body).sort(), ['expires_at', 'observed_at', 'status']);
+  assert.equal((await worker.fetch(new Request('https://example.com/api/presence/public', { method: 'POST' }), f.env)).status, 405);
+  f.sqlite.prepare('UPDATE presence SET expires_at = ?').run(Date.now() - 1);
+  assert.equal((await (await get()).json()).status, 'unknown');
+  f.sqlite.prepare('UPDATE presence SET expires_at = ?').run(Date.now() + 60_000);
+  f.sqlite.prepare("UPDATE presence_credentials SET revoked = 1 WHERE scope = 'presence:write'").run();
+  assert.equal((await (await get()).json()).status, 'unknown');
+  assert.equal((await f.request('GET', null)).status, 401);
+});
+
+
+test('stale reports retain last-updated time until the exact 30-day cutoff on the public read route', async () => {
+  const f = await fixture();
+  f.env.PRESENCE_PUBLIC_READ = 'true';
+  await f.request('POST', f.tokens.write, f.event());
+  const ttl = 30 * 86400_000;
+  for (const age of [6 * 3600_000, ttl - 1, ttl, ttl + 1]) {
+    const at = f.now + age;
+    const expected = age < ttl
+      ? { status: 'unknown', observed_at: new Date(f.now).toISOString(), expires_at: new Date(f.now + 6 * 3600_000).toISOString() }
+      : { status: 'unknown', observed_at: null, expires_at: null };
+    assert.deepEqual(await (await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, at)).json(), expected);
+  }
+});
+
+test('scheduled cleanup clears expired report data and hashes without deleting credentials or the singleton', async t => {
+  const f = await fixture();
+  await f.request('POST', f.tokens.write, f.event());
+  const expiry = f.now + 30 * 86400_000;
+  await cleanupPresence(f.env, expiry - 1);
+  assert.equal(f.sqlite.prepare('SELECT status FROM presence').get().status, 'in_nyc');
+  f.sqlite.prepare('INSERT INTO presence_events (digest, expires_at) VALUES (?, ?)').run('still-valid', expiry + 1);
+  t.mock.method(Date, 'now', () => expiry);
+  await worker.scheduled({}, f.env);
+  assert.deepEqual({ ...f.sqlite.prepare('SELECT * FROM presence').get() }, {
+    id: 1, status: null, observed_at: 0, expires_at: 0, received_at: 0, credential_id: null,
+  });
+  assert.equal(f.sqlite.prepare('SELECT count(*) AS total FROM presence_credentials').get().total, 2);
+  assert.equal(f.sqlite.prepare('SELECT count(*) AS total FROM presence_events').get().total, 1);
+  const body = f.event({ observed_at: new Date(expiry).toISOString() });
+  assert.equal((await f.request('POST', f.tokens.write, body, expiry)).status, 200);
+  await cleanupPresence(f.env, expiry);
+  assert.equal((await (await f.request('GET', f.tokens.read, null, expiry)).json()).status, 'in_nyc');
+});
+
+test('revoked or expired writer credentials hide retained timestamps', async () => {
+  for (const revoke of [true, false]) {
+    const f = await fixture();
+    f.env.PRESENCE_PUBLIC_READ = 'true';
+    await f.request('POST', f.tokens.write, f.event());
+    if (revoke) f.sqlite.prepare("UPDATE presence_credentials SET revoked = 1 WHERE scope = 'presence:write'").run();
+    else f.sqlite.prepare("UPDATE presence_credentials SET expires_at = ? WHERE scope = 'presence:write'").run(f.now);
+    const expected = { status: 'unknown', observed_at: null, expires_at: null };
+    assert.deepEqual(await (await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, f.now)).json(), expected);
+  }
 });

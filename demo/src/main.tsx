@@ -1,6 +1,6 @@
 import { useLanguage, LanguageProvider, LanguageSwitch } from "./Language";
 import { createRoot } from "react-dom/client";
-import { StrictMode, useState } from "react";
+import { StrictMode, useCallback, useState } from "react";
 import { FlowerVine } from "./FlowerVine";
 import { ThemeProvider, useTheme } from "./themes/ThemeProvider";
 import { NycStatus } from "./NycStatus";
@@ -9,56 +9,59 @@ import "./styles/qzone.css";
 import "./styles/space.css";
 import "./styles/home.css";
 
+function readSetting(key: string) {
+  try {
+    return localStorage.getItem(`spacecaveman:${key}`);
+  } catch {
+    return null;
+  }
+}
+function saveSetting(key: string, value: string) {
+  try {
+    localStorage.setItem(`spacecaveman:${key}`, value);
+  } catch {
+    /* Optional browser preference. */
+  }
+}
+
 function App() {
   const { t } = useLanguage();
   const { theme } = useTheme();
   const Scene = theme.Scene;
-  const [motion, setMotion] = useState(true);
-  const [unlocked, setUnlocked] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const [unlocked, setUnlocked] = useState(() => readSetting("bloom") !== null);
+  const [flag, setFlag] = useState(() => readSetting("flag") === "true");
+  const onBloom = useCallback((generation: number) => {
+    setUnlocked(true);
+    if (readSetting("bloom") !== String(generation)) {
+      setFlag(true);
+      saveSetting("flag", "true");
+      saveSetting("bloom", String(generation));
+    }
+  }, []);
   return (
-    <div
-      data-theme={theme.id}
-      className={`space-shell wallpaper-stars ${motion ? "" : "motion-off"}`}
-    >
+    <div data-theme={theme.id} className="space-shell wallpaper-stars">
       <div className="topbar">
         <div>
-          <a href="#home" className="top-brand">
+          <a href="#home" className="top-brand" lang="en">
             <span className="pixel-icon icon-home" aria-hidden="true" />
-            {t("月球洞口")}
+            {t("site.title")}
           </a>
-          <span className="top-tag">{t("一页旧时光")}</span>
           <LanguageSwitch />
-          <span className="demo-badge">{t("虚构空间 · DEMO")}</span>
         </div>
       </div>
       <div className="site" id="home">
         <header className="masthead">
           <div className="masthead-copy">
-            <div className="site-number">PERSONAL SPACE / NO. 00816 / 2007</div>
-            <h1>{t("月球洞口")}</h1>
-            <p>{t("一小步。大部分时候在闲逛。")}</p>
-            <span className="space-url">
-              spacecaveman.com / my little Qzone
-            </span>
+            <h1 lang="en">{t("site.title")}</h1>
           </div>
           <Scene ornaments treasure={flag} />
-          <div className="skin-toolbar">
-            <button
-              className="bevel"
-              aria-pressed={!motion}
-              onClick={() => setMotion((v) => !v)}
-            >
-              {motion ? t("暂停动画") : t("继续动画")}
-            </button>
-          </div>
         </header>
-        <nav className="navigation home-navigation" aria-label={t("空间导航")}>
+        <nav className="navigation home-navigation" aria-label={t("nav.label")}>
           {[
-            ["home", t("主页")],
-            ["nyc", t("纽约状态")],
-            ["flower", t("花藤")],
-            ["visitors", t("小站足迹")],
+            ["home", t("nav.home")],
+            ["nyc", t("nav.nyc")],
+            ["flower", t("flower.title")],
+            ["visitors", t("nav.visitors")],
           ].map(([id, label], index) => (
             <a
               key={id}
@@ -68,28 +71,23 @@ function App() {
               {label}
             </a>
           ))}
-          <span className="nav-note">{t("欢迎光临我的空间")}</span>
         </nav>
-        <div className="welcome">
-          <span className="pixel-icon icon-note" aria-hidden="true" />
-          <span>{t("小站公告：来都来了，给我的月球花浇点水吧。")}</span>
-        </div>
         <main className="modules home-modules">
           <NycStatus />
           <FlowerVine
-            onBloom={() => {
-              setUnlocked(true);
-              setFlag(true);
-            }}
+            onBloom={onBloom}
             reward={
               unlocked ? (
                 <label className="ornament-toggle flower-reward">
                   <input
                     type="checkbox"
                     checked={flag}
-                    onChange={(event) => setFlag(event.target.checked)}
+                    onChange={(event) => {
+                      setFlag(event.target.checked);
+                      saveSetting("flag", String(event.target.checked));
+                    }}
                   />
-                  {t("月球旗 · 开花奖励")}
+                  {t("flower.showFlag")}
                 </label>
               ) : null
             }
@@ -97,9 +95,7 @@ function App() {
           <VisitorCounter />
         </main>
         <footer>
-          <a href="#home">{t("回到顶部")}</a>
-          <span>{t("月球洞口 · 留下一点脚印")}</span>
-          <p>{t("Qzone 风格小站 · 花藤为本地演示 · 计数为样本数据")}</p>
+          <a href="#home">{t("nav.backToTop")}</a>
         </footer>
       </div>
     </div>
