@@ -1,16 +1,21 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
-test("front page contains exactly NYC, flower and sample visitor count, without errors or API requests", async ({
+test("front page contains NYC, shared flower and live page views with lunar identity", async ({
   page,
   baseURL,
 }) => {
+  await page.route("**/api/presence/public", (route) =>
+    route.fulfill({
+      json: { status: "unknown", observed_at: null, expires_at: null },
+    }),
+  );
   const errors: string[] = [];
   const requests: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", (request) => requests.push(request.url()));
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page).toHaveTitle("Space Caveman · My little Qzone");
+  await expect(page).toHaveTitle("Yuntong’s space");
   expect(
     await page
       .locator("main .module")
@@ -19,18 +24,11 @@ test("front page contains exactly NYC, flower and sample visitor count, without 
   await expect(
     page.getByRole("heading", { name: "Am I in NYC?", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("#nyc").getByRole("status")).toHaveText(
+  await expect(page.locator("#nyc .presence-answer")).toContainText(
     "No update yet.",
   );
-  await expect(
-    page.locator("#nyc .presence-caption, #nyc .presence-note"),
-  ).toHaveCount(0);
-  await expect(page.getByLabel("Sample visit count: 1286")).toHaveText(
-    "001286",
-  );
-  await expect(
-    page.getByText("Decorative counter · sample data"),
-  ).toBeVisible();
+  await expect(page.locator("#nyc .presence-detail")).toHaveCount(0);
+  await expect(page.locator(".counter")).toHaveText("000001");
   await expect(
     page.locator(
       "#profile, #diary, #meetup, #albums, #music, #dressup, #guestbook",
@@ -57,10 +55,17 @@ test("front page contains exactly NYC, flower and sample visitor count, without 
     ),
   ).toEqual([]);
   expect(
-    requests.some(
-      (url) => url.includes("/api/") || url.includes("presence-trial"),
-    ),
-  ).toBe(false);
+    [...new Set(requests.filter((url) => url.includes("/api/")))].sort(),
+  ).toEqual([
+    `${baseURL}/api/flower`,
+    `${baseURL}/api/presence/public`,
+    `${baseURL}/api/visitors`,
+  ]);
+  await expect(page.locator("body")).not.toContainText(
+    /DEMO|sample data|local flower demo/,
+  );
+  await page.reload();
+  await expect(page.locator(".counter")).toHaveText("000002");
 });
 
 test("navigation and keyboard follow the three-module reading order on phones and desktop", async ({
@@ -116,7 +121,6 @@ test("public NYC status remains unknown and flower care survives language change
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "1");
-  await expect(page.getByText("装饰计数器 · 样本数据")).toBeVisible();
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
@@ -124,7 +128,7 @@ test("public NYC status remains unknown and flower care survives language change
   await page.reload();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "0");
+  ).toHaveAttribute("value", "1");
   await expect(page.locator(".presence-answer")).toContainText(
     "No update yet.",
   );
@@ -139,12 +143,8 @@ test("enlarged text and flower properties fit a short phone viewport", async ({
     content:
       "p, h2, a, button, label { font-size: 200% !important; overflow-wrap: anywhere; }",
   });
-  await page
-    .getByRole("button", { name: "Properties / log", exact: true })
-    .click();
-  await expect(
-    page.getByText("Growth follows the lowest of the four values."),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "Details", exact: true }).click();
+  await expect(page.getByText("Each stat needs 3/3 to bloom.")).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

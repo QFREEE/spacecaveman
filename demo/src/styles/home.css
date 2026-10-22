@@ -106,3 +106,21 @@
     font-size: 14px;
   }
 }
+
+.presence-detail {
+  border-top: 1px dotted var(--skin-border-soft);
+  margin-top: 8px;
+  padding-top: 8px;
+  color: var(--skin-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.presence-detail small {
+  display: block;
+  margin-top: 6px;
+  font-size: inherit;
+}
+
+.counter {
+  flex-wrap: wrap;
+}

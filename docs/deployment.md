@@ -28,8 +28,10 @@ checks on `main`, the official Cloudflare Wrangler action deploys the Worker nam
 also supported from `main` and runs the same checks before deployment.
 
 The isolated `spacecaveman-presence-trial` Worker is bundled during checks but is
-not automatically deployed. Its D1 database, credentials and migrations remain
-separate. The React homepage is built and browser-tested before deployment. The
+not automatically deployed. The main website now binds its existing D1 database
+for the public coarse-status read, shared flower and aggregate counter. The phone
+write handler and credentials remain unchanged. Database migrations remain an
+explicit operation; the deployment script does not reset live data. The React homepage is built and browser-tested before deployment. The
 existing visits and presence pages are retained by the site build. Deployment
 keeps existing dashboard variables. Do not enable another deploy-on-push
 integration for the same Worker.
@@ -95,9 +97,10 @@ serially, and an in-progress production upload is not cancelled by another push.
 ## Verification and rollback
 
 Inspect the GitHub Actions run and the Cloudflare deployment history. The deploy
-job performs read-only HTTPS checks of the homepage and sample visits API; a failed
-check marks the job failed but does not automatically undo a deployment. The API
-may correctly return an empty visits list after the fictional dates pass.
+job compares the public frontend assets with the exact build and performs read-only
+checks of public status, flower, count and protected routes. A failed check marks
+the job failed but does not automatically undo a deployment. The visits list stays
+empty until owner/friend authorization exists.
 
 For an exceptional manual upload, authenticate locally with
 `pnpm exec wrangler login`, verify the target with `pnpm exec wrangler whoami`,
@@ -120,3 +123,10 @@ rollback path is documented, not exercised against production by this setup.
 - [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/)
 - [API token permission names](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
 - [Worker rollback limitations](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
+
+## Homepage source protection
+
+The release smoke check compares the public HTML and hashed assets with the exact
+build in dist/site and verifies the public status, shared plant and count APIs.
+It rejects the former fictional demo even if it returns HTTP 200. See
+[the source restoration record](three-module-homepage.md#deployment-regression-and-verification).

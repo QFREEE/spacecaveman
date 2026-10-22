@@ -1,4 +1,4 @@
-import { useLanguage } from "./Language";
+import { useLegacyLanguage as useLanguage } from "./legacy/Language";
 import { useRef, useState } from "react";
 import { ModuleFrame } from "./ModuleFrame";
 

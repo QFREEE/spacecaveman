@@ -8,8 +8,9 @@ upcoming visits; private friend access and owner administration remain planned.
 
 - [Live homepage](https://spacecaveman.com/): bilingual React + Vite + TypeScript
   Qzone-style homepage with exactly three modules: **Am I in NYC?**, the flower
-  vine, and a decorative visitor counter. The public NYC card shows **No update yet.**
-  and is not connected to the private presence trial. The count is sample data.
+  vine shared by visitors, and a real aggregate page-view counter. The public NYC
+  card reads coarse status from the existing phone database without browser
+  credentials; missing, expired or revoked reports show **No update yet.**
   [Current behavior and screenshots](docs/three-module-homepage.md). English is
   the default; the English/中文 switch preserves flower state. The lunar header,
   walking caveman and pendant remain.
@@ -17,8 +18,8 @@ upcoming visits; private friend access and owner administration remain planned.
   registry and palette files support optional skins. The public style selector
   is temporarily hidden; Lunar ink stays the default. [How to extend a skin](docs/themes.md).
 - [Visits page](https://spacecaveman.com/visits): the earlier minimal frontend,
-  backed by `/api/visits` with fictional upcoming visits. Past visits are omitted;
-  the list becomes empty when the sample dates have passed.
+  backed by an empty public `/api/visits` list. Real plans remain private until
+  invited-friend authorization is implemented.
 - Deployment is automated: pull request → checks → merge to `main` → checks →
   deploy the homepage, supporting assets, and Worker API together. The
   [first successful production run](https://github.com/QFREEE/spacecaveman/actions/runs/39596511494)
@@ -36,9 +37,8 @@ upcoming visits; private friend access and owner administration remain planned.
   URLs return 410 Gone. `pnpm presence:check -- <private-bundle-path>`
   diagnoses the trial with a read-only request; it never replaces the report.
 
-The public website contains demo content, not private plans or live presence.
-Invited-friend authentication, persistent visits, owner editing, and integration
-of current presence are tracked in [GitHub Issues](https://github.com/QFREEE/spacecaveman/issues).
+The public website shows coarse NYC status, a shared flower and aggregate views.
+Invited-friend authentication, persistent visits and owner editing are tracked in [GitHub Issues](https://github.com/QFREEE/spacecaveman/issues).
 
 ## Local development
 
@@ -60,8 +60,8 @@ For the faster frontend-only preview:
 pnpm demo:dev
 ```
 
-Open http://127.0.0.1:4173/. This preview uses fictional local data; it does not run
-the Worker. `pnpm demo:preview` serves the frontend production build on port 4174.
+Open http://127.0.0.1:4173/. This preview does not run the Worker; live features
+show unavailable or unknown without their APIs. Use `pnpm dev` for the full package. `pnpm demo:preview` serves the frontend production build on port 4174.
 
 ## Checks
 
@@ -89,7 +89,7 @@ complete Worker package and [visual QA](design-qa.md) for the frontend review.
 
 Use a pull request for changes. After its checks pass, merge to `main`; GitHub
 Actions deploys through the official Wrangler action and checks the live homepage
-and sample visits API. The production secret is configured. See the
+and public API contracts against the current build. The production secret is configured. See the
 [deployment guide](docs/deployment.md) for the workflow, exact credential settings,
 rotation, manual recovery, and rollback limits.
 
@@ -115,7 +115,9 @@ credentials, or D1 migrations require their separate workflow and verification.
 with `public/` in generated `dist/site/`, preserving the earlier homepage as
 `visits.html`, the presence viewer, and security headers. Workers Static Assets
 serves those files; only `/api/*` uses Worker-first routing. The public Worker has
-no presence database binding; the trial uses its own D1 binding and credentials.
+a binding to the existing D1 database for the public status read, shared flower
+and aggregate counter. The phone trial remains a separate deployment; its
+authenticated handler and credentials are unchanged by the restoration.
 
 - [Deployment and rollback](docs/deployment.md)
 - [Homepage publishing and package smoke tests](docs/qzone-publishing.md)

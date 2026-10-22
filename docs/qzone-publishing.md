@@ -1,60 +1,46 @@
-# Publishing the Qzone demo
+# Publishing the Space Caveman homepage
 
-The main `spacecaveman` Worker serves the English-default Qzone homepage at
-https://spacecaveman.com/ and https://spacecaveman.spacecaveman.workers.dev/.
-The English/中文 switch and flower demo remain client-side. The homepage contains
-NYC status (Unknown), flower and sample visitor count; other modules remain in
-source but are not mounted. See the [current composition](three-module-homepage.md).
+The `spacecaveman` Worker serves https://spacecaveman.com/. The release source is
+current `main`: the bilingual personal homepage, shared flower, real aggregate
+counter, public coarse NYC read API and supporting assets.
 
-## Build and verify
+## Verify locally
 
-```powershell
+```sh
 pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
+pnpm exec wrangler d1 migrations apply spacecaveman-presence-trial --local
 pnpm verify
 ```
 
-`build:site` combines the React production build with the existing static assets
-in `dist/site/`. It preserves `_headers`, `/presence`, and the API routing, and
-retains the earlier homepage at `/visits`. The source files in `public/` remain
-intact. The separate protected presence-trial Worker is not redeployed.
+The full Worker package can be checked with two terminals:
 
-For a test of the exact Worker package, run the following in separate terminals:
-
-```powershell
+```sh
 pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
-node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
+node scripts/verify-deployment.mjs http://127.0.0.1:8799
 ```
 
-The smoke test checks the real security headers, exactly three modules, Unknown
-status, sample counter labeling, bilingual flower state, growth/flag controls,
-animation pause, phone layouts, and preserved visits/presence routes. Flower
-actions exist only in the test browser. It sends no API writes or credentials.
+The second command checks exact built assets and API contracts using GET only.
+Browser tests use independent API fixtures. `pnpm demo:dev` alone does not run D1
+or the Worker APIs.
 
-## Deploy
+## Release
 
-Open a pull request and merge to `main` after checks pass. GitHub Actions builds
-and deploys the homepage and Worker API, preserving existing dashboard variables.
-The [deployment guide](deployment.md) is the source for credentials, manual
-recovery, and rollback. The first automated production deployment passed on
-October 21, 2026; its run is linked in that guide.
+Open a PR, wait for **Checks** and **Documentation review**, and merge to `main`.
+GitHub Actions rebuilds and deploys the website, then runs the exact-build and API
+verification. Follow the [deployment guide](deployment.md) for credentials and
+rollback. Use manual Wrangler deployment only when explicitly requested.
 
-The CI smoke check verifies HTTPS for the homepage and sample visits API. For the
-broader browser smoke check described above, run:
+The website binds the existing `spacecaveman-presence-trial` D1 database. Migrations
+0002 and 0003 create the aggregate counter and shared flower and must exist before
+those APIs can work. They are additive and were introduced with the production
+homepage. Do not reset or seed the live counter or shared plant during validation.
+The restoration does not change the separate phone Worker or its credentials.
 
-```powershell
-node scripts/qzone-deploy-smoke.mjs https://spacecaveman.com
-```
+`build:site` combines the frontend with supporting pages in generated `dist/site`.
+It preserves `/presence` and `/visits`, security headers and Worker-first APIs.
+The retired `/shortcuts` routes stay 410 Gone. The homepage uses `no-transform`
+to prevent injected analytics scripts.
 
-The configuration pins the existing account and domain. Secrets are managed
-separately and are never committed.
-
-The homepage sends `Cache-Control: public, no-cache, no-transform` so edge
-optimizations do not inject an analytics beacon into its HTML. The existing
-Content Security Policy remains unchanged. Cloudflare's documented behavior:
-https://developers.cloudflare.com/web-analytics/get-started/.
-
-Before this homepage deployment, the main Worker version was
-`b4e60ab3-e2f4-4a6e-bc70-85a4fa2d203c`. Keep deployment/version history available
-when investigating a regression. Local tools, credentials, downloaded historical
-references, test reports, and generated output are excluded from Git.
+Do not re-run obsolete deployment jobs to release current work. Verify the merged
+revision and the actual live build. An older queued run can show a stale overall
+status even after its deployment job has been cancelled.
