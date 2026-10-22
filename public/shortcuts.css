@@ -4,6 +4,8 @@ body { margin: 0; padding: 20px 12px; font-size: 16px; line-height: 1.6; }
 main { max-width: 720px; margin: auto; border: 1px solid #888; background: #fff; }
 header, section, footer { padding: 18px 22px; }
 section, footer { border-top: 1px dotted #aaa; }
+summary { cursor: pointer; padding: 16px 22px; border-top: 1px dotted #aaa; font-weight: bold; }
+summary:focus-visible { outline: 2px solid #174b8c; outline-offset: -4px; }
 h1 { font-size: 25px; margin: 5px 0; }
 h2 { font-size: 19px; margin: 0 0 12px; }
 p { margin: 10px 0; }

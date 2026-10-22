@@ -4,6 +4,15 @@ Researched 2026-10-20 for the previously supplied iOS 17 device. The protected s
 
 ## Reusable publisher (2026-10-21)
 
+For first setup, the guide starts with an easier four-action **Update NYC
+Status** button: Current Date → Format Date (ISO 8601) → URL → Get Contents of
+URL (POST/JSON). Its status is a literal actual `in_nyc` or `not_in_nyc`; both
+`observed_at` and `event_id` use the same Formatted Date variable. For this
+single-phone flow, the timestamp identifies an observation: the server already
+requires strictly newer timestamps and a ten-second interval. Duplicate IDs
+still fail. This button does not classify location. The menu and automation
+recipe below is optional and collapsed on the phone guide.
+
 The phone-readable [Publish NYC Status guide](../public/shortcuts.html) is served
 at `/shortcuts.html` on the website and isolated trial after their separate
 deployments. It contains no credentials, scripts, storage, or API requests. It

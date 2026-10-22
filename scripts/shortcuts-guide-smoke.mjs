@@ -18,7 +18,7 @@ try {
   assert.ok(response.headers()['content-security-policy']?.includes("connect-src 'self'"));
   assert.equal(await page.locator('h1').innerText(), 'Publish NYC Status');
   assert.equal(await page.locator('input, script, form').count(), 0);
-  assert.ok((await page.locator('body').innerText()).includes('Unknown / clear report'));
+  assert.ok((await page.locator('body').innerText()).includes('Easy start: four actions'));
   assert.ok((await page.locator('body').innerText()).includes('Private trial.'));
   assert.ok(!(await page.content()).match(/[a-f0-9]{32}\.[A-Za-z0-9_-]{43}/));
   await mkdir('outputs/iphone-shortcuts', { recursive: true });
@@ -26,6 +26,10 @@ try {
     await page.setViewportSize({ width, height: 900 });
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow at ${width}`);
     await page.screenshot({ path: `outputs/iphone-shortcuts/guide-${width}.png`, fullPage: true });
+    await page.locator('summary').click();
+    assert.ok((await page.locator('body').innerText()).includes('Unknown / clear report'));
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Expanded overflow at ${width}`);
+    await page.locator('summary').click();
   }
   await page.setViewportSize({ width: 320, height: 844 });
   await page.evaluate(() => {
@@ -33,6 +37,9 @@ try {
     sheet.insertRule('body { font-size: 200%; }', sheet.cssRules.length);
     sheet.insertRule('table { font-size: inherit; }', sheet.cssRules.length);
   });
+  await page.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('details').getAttribute('open'), '');
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Enlarged text overflow');
   assert.deepEqual(errors, []);
   assert.ok(requests.every(request => request.method === 'GET' && new URL(request.url).origin === base.origin && !new URL(request.url).pathname.startsWith('/api/')));

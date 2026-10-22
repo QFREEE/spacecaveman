@@ -12,7 +12,7 @@
     <header>
       <p class="eyebrow">SPACE CAVEMAN · SHORTCUTS</p>
       <h1>Publish NYC Status</h1>
-      <p>One shortcut for a manual report, with optional Arrive and Leave automations.</p>
+      <p>Start with a four-action manual button. Add automations after it works.</p>
       <p class="notice"><strong>Private trial.</strong> Reports go to the protected viewer. The public homepage still shows Unknown. This guide contains no credentials and makes no API requests.</p>
     </header>
 
@@ -22,8 +22,30 @@
       <p>Never put either credential in a URL, this guide, a screenshot, or a shared shortcut. Anyone who can inspect a populated shortcut can use its credential. Reusable shortcuts may sync through iCloud.</p>
     </section>
 
+    <section aria-labelledby="quick">
+      <h2 id="quick">2. Easy start: four actions</h2>
+      <p>In <strong>Shortcuts → Shortcuts → +</strong>, name it <strong>Update NYC Status</strong>. Add:</p>
+      <ol>
+        <li><strong>Date</strong> → Current Date.</li>
+        <li><strong>Format Date</strong> → ISO 8601, including time and time zone.</li>
+        <li><strong>URL</strong> → <code class="endpoint">https://spacecaveman-presence-trial.spacecaveman.workers.dev/api/presence</code></li>
+        <li><strong>Get Contents of URL</strong> → expand options, choose <strong>POST</strong> and <strong>JSON</strong>. Add Headers: <code>Authorization</code> = <code>Bearer </code> followed by your private write credential, and <code>Content-Type</code> = <code>application/json</code>.
+          <table><caption>Add three Text fields to the JSON body</caption><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>
+            <tr><td><code>status</code></td><td><code>in_nyc</code> if actually in NYC; otherwise <code>not_in_nyc</code></td></tr>
+            <tr><td><code>observed_at</code></td><td>Formatted Date variable</td></tr>
+            <tr><td><code>event_id</code></td><td>The same Formatted Date variable</td></tr>
+          </tbody></table>
+        </li>
+      </ol>
+      <p>Tap <strong>▶</strong>. Success returns <code>{"accepted":true}</code>. Confirm the status and report time in the private viewer using your separate read credential.</p>
+      <p>Select the date <strong>variable</strong>; do not type “Formatted Date”. This simple single-phone recipe uses the fresh timestamp as its event ID. The API requires strictly newer timestamps and at least 10 seconds between reports. Never reuse a timestamp to make a new report.</p>
+      <p>To clear a report, change <code>status</code> to <code>unknown</code> and run again after 10 seconds. No coordinates are sent. The four-action button reports only the status you put in it; it does not detect your location.</p>
+    </section>
+
+    <details>
+      <summary>Optional: reusable menu and Arrive/Leave automation</summary>
     <section aria-labelledby="build">
-      <h2 id="build">2. Build the reusable shortcut</h2>
+      <h2 id="build">Build the reusable version</h2>
       <p>In <strong>Shortcuts → Shortcuts → +</strong>, name it <strong>Publish NYC Status</strong>. Add the actions below in order. Names can vary by iOS version; the original trial targets iOS 17.</p>
       <ol>
         <li>Add <strong>If</strong>: <em>Shortcut Input has any value</em>. Inside, use <strong>Set Variable</strong> to set <code>ReportStatus</code> to <em>Shortcut Input</em>.</li>
@@ -84,6 +106,7 @@
       </dl>
       <p>Revocation: on your computer, use the dedicated trial's private <code>revoke.sql</code> with the documented Wrangler command. Revocation clears the current report. Do not share a populated shortcut to obtain support.</p>
     </section>
+    </details>
     <footer>
       <p>Recipe checked against <a href="https://support.apple.com/guide/shortcuts/apd58d46713f/7.0/ios/17.0">Apple's API actions</a>, <a href="https://support.apple.com/guide/shortcuts/apd8ebfc4e8e/7.0/ios/17.0">travel triggers</a>, and <a href="https://support.apple.com/en-euro/guide/shortcuts/apd602971e63/7.0/ios/17.0">automatic execution</a>. Device testing is still required.</p>
       <a href="/">Back to the space</a>

@@ -116,6 +116,15 @@ test('writer expiry bounds lease and deletion invalidates stored presence', asyn
   assert.equal(f.sqlite.prepare('SELECT status FROM presence').get().status, null);
 });
 
+test('the four-action phone recipe accepts one formatted date as observation and event ID', async () => {
+  const f = await fixture();
+  const formattedDate = '2026-10-20T19:00:00-04:00';
+  const report = f.event({ observed_at: formattedDate, event_id: formattedDate });
+  assert.deepEqual(await (await f.request('POST', f.tokens.write, report)).json(), { accepted: true });
+  assert.equal((await (await f.request('GET', f.tokens.read)).json()).status, 'in_nyc');
+  assert.equal((await f.request('POST', f.tokens.write, report, f.now + 10_000)).status, 409);
+});
+
 test('a manual Unknown report clears status and preserves ordering, scope and deduplication', async () => {
   const f = await fixture();
   await f.request('POST', f.tokens.write, f.event());
