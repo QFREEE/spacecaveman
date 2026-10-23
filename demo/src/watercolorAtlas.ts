@@ -72,6 +72,8 @@ async function createAtlas(
               preserveDrawingBuffer: true,
               antialias: true,
             });
+            // Each batch owns a new canvas; reset the brush target before drawing.
+            brush.load();
             p.noLoop();
           } catch (error) {
             finish(error);
