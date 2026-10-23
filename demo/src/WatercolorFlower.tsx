@@ -1,4 +1,5 @@
-import { useId } from "react";
+import { useEffect, useRef, useState } from "react";
+import { loadWatercolorAtlas, type PaintAtlas } from "./watercolorAtlas";
 
 // Sketch and pigment stay separate: transparent flat-brush marks may cross ink edges.
 const petals = [
@@ -89,98 +90,99 @@ const ink = [
   "M104 50C105 56 95 56 95 50C95 44 104 44 104 50",
   "M12 141Q28 135 44 140M43 137Q58 130 77 136M123 136Q142 132 151 139M151 141Q169 136 185 142",
 ];
-// Thin, irregular pigment sheets build tone like watercolor glazing.
-// Fixed variation keeps the paper marks stable across care updates.
-const washContour = [
-  [0, -0.43],
-  [0.15, -0.47],
-  [0.34, -0.44],
-  [0.56, -0.46],
-  [0.78, -0.43],
-  [0.98, -0.45],
-  [1.01, -0.22],
-  [0.98, 0.02],
-  [1, 0.23],
-  [0.97, 0.44],
-  [0.78, 0.46],
-  [0.57, 0.43],
-  [0.37, 0.47],
-  [0.16, 0.44],
-  [0.01, 0.42],
-  [-0.01, 0.19],
-  [0.01, -0.1],
-];
-const pigmentSheets = Array.from({ length: 8 }, (_, layer) => {
-  const points = washContour.map(([x, y], vertex) => {
-    const variation = Math.sin((layer + 1) * 19.7 + vertex * 7.3);
-    const drift = Math.cos((layer + 2) * 11.1 + vertex * 9.7);
-    return `${(x + variation * 0.025).toFixed(3)},${(y + drift * 0.055).toFixed(3)}`;
-  });
-  return `M${points.join("L")}Z`;
-});
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
-function Wash({
-  progress,
-  x,
-  y,
-  angle,
-  length,
-  width,
-  color,
-  texture,
-}: {
-  progress: number;
+type Mark = {
   x: number;
   y: number;
   angle: number;
   length: number;
   width: number;
   color: string;
-  texture: string;
+};
+
+function PaintLayer({
+  atlas,
+  progress,
+  fallback,
+}: {
+  atlas: PaintAtlas | null;
+  progress: number[];
+  fallback: boolean;
 }) {
-  const id = useId();
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [, pot, greenery, flower] = progress;
+  useEffect(() => {
+    const context = canvas.current?.getContext("2d");
+    if (!context) return;
+    context.setTransform(3, 0, 0, 3, 0, 0);
+    context.clearRect(0, 0, 200, 153);
+    context.globalCompositeOperation = "multiply";
+    function wash(mark: Mark, amount: number) {
+      if (amount <= 0) return;
+      context!.save();
+      context!.translate(mark.x, mark.y);
+      context!.rotate((mark.angle * Math.PI) / 180);
+      context!.beginPath();
+      context!.rect(
+        -0.12 * mark.length,
+        -0.8 * mark.width,
+        clamp(amount) * 1.4 * mark.length,
+        1.6 * mark.width,
+      );
+      context!.clip();
+      if (atlas)
+        context!.drawImage(
+          atlas[mark.color],
+          -0.12 * mark.length,
+          -0.8 * mark.width,
+          1.4 * mark.length,
+          1.6 * mark.width,
+        );
+      else if (fallback) {
+        context!.globalAlpha = 0.55;
+        context!.fillStyle = mark.color;
+        context!.fillRect(0, -0.45 * mark.width, mark.length, 0.9 * mark.width);
+      }
+      context!.restore();
+    }
+    [0, 1, 2, 3, 4].forEach((row) =>
+      wash(
+        {
+          x: row % 2 ? 125 : 74,
+          y: 111 + row * 6.8,
+          angle: row % 2 ? 180 : 0,
+          length: row === 0 ? 54 : 51 - row * 2,
+          width: 9,
+          color: "#b96f49",
+        },
+        pot * 5 - row,
+      ),
+    );
+    leaves.forEach((leaf, index) =>
+      wash(leaf, greenery * leaves.length - index),
+    );
+    petals.forEach((petal, index) => wash(petal, flower * 5.5 - index));
+    context.save();
+    context.beginPath();
+    context.arc(100, 50, 4.4, 0, Math.PI * 2);
+    context.clip();
+    wash(
+      { x: 95, y: 50, angle: 0, length: 10, width: 10, color: "#d8ad50" },
+      flower * 11 - 10,
+    );
+    context.restore();
+  }, [atlas, pot, greenery, flower, fallback]);
   return (
-    <g className="flower-watercolor-mark" filter={`url(#${texture}-paper)`}>
-      <g
-        transform={`translate(${x} ${y}) rotate(${angle}) scale(${length} ${width})`}
-      >
-        <defs>
-          <clipPath id={id}>
-            <rect
-              className="flower-wash-window"
-              x="-.03"
-              y="-.6"
-              width={progress * 1.1}
-              height="1.2"
-            />
-          </clipPath>
-        </defs>
-        <g clipPath={`url(#${id})`}>
-          {pigmentSheets.map((path, index) => (
-            <path
-              key={index}
-              className="flower-pigment-sheet"
-              d={path}
-              fill={color}
-              opacity={0.09 + (index % 3) * 0.012}
-            />
-          ))}
-          <path
-            className="flower-pigment-sheet"
-            d="M.02-.34Q.3-.49 .6-.36T.98-.35L.97-.25Q.58-.35 .28-.28L.03-.23Z"
-            fill={color}
-            opacity=".13"
-          />
-          <path
-            className="flower-pigment-sheet"
-            d="M.04 .29Q.48 .4 .97 .28L.98 .43Q.5 .53 .03 .43Z"
-            fill={color}
-            opacity=".17"
-          />
-        </g>
-      </g>
-    </g>
+    <foreignObject x="0" y="0" width="200" height="153">
+      <canvas
+        data-watercolor="p5.brush"
+        ref={canvas}
+        width="600"
+        height="459"
+        style={{ width: 200, height: 153, display: "block" }}
+      />
+    </foreignObject>
   );
 }
 
@@ -189,7 +191,21 @@ export function WatercolorFlower({
 }: {
   stats: Record<"rain" | "sun" | "love" | "food", number>;
 }) {
-  const id = useId();
+  const [atlas, setAtlas] = useState<PaintAtlas | null>(null);
+  const [paintFailed, setPaintFailed] = useState(false);
+  useEffect(() => {
+    let current = true;
+    loadWatercolorAtlas()
+      .then((image) => {
+        if (current) setAtlas(image);
+      })
+      .catch(() => {
+        if (current) setPaintFailed(true);
+      });
+    return () => {
+      current = false;
+    };
+  }, []);
   // Bar identities do not choose layers: the leading bar draws first.
   const [sketch, pot, greenery, flower] = Object.values(stats)
     .map((value) => clamp(value / 50))
@@ -200,76 +216,18 @@ export function WatercolorFlower({
       aria-hidden="true"
       fill="none"
       className="watercolor-flower"
+      data-renderer={
+        atlas ? "p5.brush" : paintFailed ? "unavailable" : "loading"
+      }
     >
-      <defs>
-        <filter
-          id={`${id}-paper`}
-          x="-12%"
-          y="-12%"
-          width="124%"
-          height="124%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency=".7"
-            numOctaves="3"
-            seed="8"
-            result="paper"
-          />
-          <feColorMatrix
-            in="paper"
-            type="matrix"
-            values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1   .3 .3 .3 0 .2"
-            result="grain"
-          />
-          <feComposite in="SourceGraphic" in2="grain" operator="in" />
-        </filter>
-      </defs>
-      <g className="flower-watercolor" stroke="none">
-        <g data-paint="pot" data-progress={pot}>
-          {[0, 1, 2, 3, 4].map((row) => (
-            <Wash
-              key={row}
-              texture={id}
-              progress={clamp(pot * 5 - row)}
-              x={row % 2 ? 125 : 74}
-              y={111 + row * 6.8}
-              angle={row % 2 ? 180 : 0}
-              length={row === 0 ? 54 : 51 - row * 2}
-              width={9}
-              color="#b96f49"
-            />
-          ))}
-        </g>
-        <g data-paint="leaves" data-progress={greenery}>
-          {leaves.map((leaf, index) => (
-            <Wash
-              key={index}
-              texture={id}
-              {...leaf}
-              progress={clamp(greenery * leaves.length - index)}
-            />
-          ))}
-        </g>
-        <g data-paint="petals" data-progress={flower}>
-          {petals.map((petal, index) => (
-            <Wash
-              key={index}
-              texture={id}
-              {...petal}
-              progress={clamp(flower * 5.5 - index)}
-            />
-          ))}
-          <circle
-            cx="100"
-            cy="50"
-            r="4.4"
-            fill="#d8ad50"
-            opacity={clamp(flower * 11 - 10) * 0.6}
-          />
-        </g>
-      </g>
+      <PaintLayer
+        atlas={atlas}
+        fallback={paintFailed}
+        progress={[sketch, pot, greenery, flower]}
+      />
+      <g data-paint="pot" data-progress={pot} />
+      <g data-paint="leaves" data-progress={greenery} />
+      <g data-paint="petals" data-progress={flower} />
       <g
         data-paint="sketch"
         data-progress={sketch}

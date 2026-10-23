@@ -197,6 +197,13 @@ test("four care bars progressively complete separate drawing layers", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   const flower = page.locator("#flower");
+  await expect(flower.locator(".watercolor-flower")).toHaveAttribute(
+    "data-renderer",
+    "p5.brush",
+    { timeout: 20000 },
+  );
+  await expect(page.locator("[data-p5-painter]")).toHaveCount(0);
+  await expect(flower.locator("canvas[data-watercolor]")).toHaveCount(1);
   const labels = new Set<string>();
   for (let stage = 0; stage <= 8; stage++) {
     let total = stage * 25;
@@ -226,6 +233,27 @@ test("four care bars progressively complete separate drawing layers", async ({
       path: `outputs/flower-stage-${stage}-${testInfo.project.name}.png`,
     });
   }
+  await expect(flower.locator(".watercolor-flower")).toHaveAttribute(
+    "data-renderer",
+    "p5.brush",
+    { timeout: 20000 },
+  );
+  // Check actual exported pigments, including high-density screens' crop offsets.
+  const pigments = await flower
+    .locator("canvas[data-watercolor]")
+    .evaluate((canvas: HTMLCanvasElement) => {
+      const context = canvas.getContext("2d")!;
+      return [
+        [102, 20],
+        [87, 99],
+        [100, 125],
+      ].map(([x, y]) =>
+        Array.from(context.getImageData(x * 3, y * 3, 1, 1).data),
+      );
+    });
+  expect(pigments[0][0]).toBeGreaterThan(pigments[0][1]);
+  expect(pigments[1][1]).toBeGreaterThan(pigments[1][0]);
+  expect(pigments[2][0]).toBeGreaterThan(pigments[2][1]);
   expect(labels.size).toBe(5);
   await expect(flower.locator(".plant-notice")).toBeEmpty();
 });

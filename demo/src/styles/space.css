@@ -472,22 +472,11 @@ input[type="range"] {
   font-size: 10px;
   color: var(--skin-muted);
 }
-.flower-watercolor {
-  isolation: isolate;
-}
-.flower-watercolor-mark,
-.flower-pigment-sheet {
-  mix-blend-mode: multiply;
-}
 .flower-ink-stroke {
   transition: stroke-dashoffset 180ms ease-out;
 }
-.flower-wash-window {
-  transition: width 220ms ease-out;
-}
 @media (prefers-reduced-motion: reduce) {
-  .flower-ink-stroke,
-  .flower-wash-window {
+  .flower-ink-stroke {
     transition: none;
   }
 }

@@ -64,17 +64,17 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
-`WatercolorFlower.tsx` supplies separate sketch, terracotta pot, green leaf,
-and coral/peach petal layers. Transparent irregular rectangular SVG washes sit
-under the ink contours. Each wash builds up from eight stable irregular pigment
-sheets, with extra pigment along its edges and a paper-grain filter per mark.
-Multiply blending darkens overlapping sheets and separate strokes. This SVG
-implementation takes inspiration from the bleed/texture/border controls in
-[p5.brush](https://github.com/acamposuribe/p5.brush); it does not install or bundle
-the library. Shapes are generated once so clicking does not reshuffle their texture.
-The pigment group is isolated to keep blending inside the illustration. The illustration's watercolor palette is shared between
-themes; its ink uses the active skin text color. `space.css` controls the short
-progress transitions and disables them for reduced motion.
+`WatercolorFlower.tsx` places and progressively reveals watercolor marks painted by
+[p5](https://p5js.org/) and [p5.brush](https://github.com/acamposuribe/p5.brush).
+`watercolorAtlas.ts` dynamically loads both libraries and uses a seeded, hidden
+WebGL sketch to paint a transparent color atlas once per page. It exports the
+result to offscreen 2D canvas tiles, removes the WebGL canvas and stops the sketch. Care clicks reveal
+cached marks on a visible 2D canvas without rerunning the painting simulation. SVG retains the black
+contours above it; directional canvas clips reveal the textures and multiply
+blending deepens overlaps. If initialization fails, basic translucent
+canvas washes keep shared progress usable. No remote CDN or image requests are
+needed. No data-image URL or CSP expansion is required. The illustration palette is shared between themes; its ink follows the
+active skin. `space.css` disables reveal transitions for reduced motion.
 
 Use a named React component with no required props. It renders **decoration only** inside the reserved header
 region. It can read the active CSS tokens and supply theme-scoped selectors.

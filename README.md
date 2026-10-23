@@ -29,6 +29,8 @@ serves it as the production homepage.
   Any bar can finish first; the first full bar completes the sketch, the second
   the pot, the third the leaves, and the fourth the flower. Partial bars reveal
   their ranked layer progressively, so switching the leading action is seamless.
+  p5 and p5.brush paint the watercolor textures once on first use. The sketch
+  stops after exporting its textures; clicks reveal cached brush marks.
   Loose rectangular transparent watercolor washes cross the outlines while black
   lines remain visible above the pigment. Reduced motion applies progress
   immediately. Every click has immediate visual feedback; saves queue while the
