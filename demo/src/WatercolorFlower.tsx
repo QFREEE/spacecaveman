@@ -58,9 +58,24 @@ function PaintLayer({
     design.pot.forEach((mark, index) =>
       wash(mark, pot * design.pot.length - index),
     );
-    design.leaves.forEach((mark, index) =>
-      wash(mark, greenery * design.leaves.length - index),
-    );
+    design.leaves.forEach((mark, index) => {
+      const amount = greenery * design.leaves.length - index;
+      context.save();
+      context.globalAlpha = [0.88, 0.72, 0.96][index % 3];
+      wash(mark, amount);
+      context.globalAlpha = [0.34, 0.46, 0.28][index % 3];
+      wash(
+        {
+          ...mark,
+          y: mark.y + 0.8,
+          angle: mark.angle + (index % 2 === 0 ? 7 : -6),
+          length: mark.length * 0.91,
+          width: mark.width * 0.58,
+        },
+        amount * 1.6 - 0.6,
+      );
+      context.restore();
+    });
     const bloomUnits = design.flowers.length + (design.center ? 0.5 : 0);
     const anchor = design.center ?? { x: 100, y: 50 };
     design.flowers.forEach((petal, index) => {

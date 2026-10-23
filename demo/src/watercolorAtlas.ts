@@ -105,20 +105,35 @@ async function createAtlas(
               brush.fill(color, isPetal ? 205 : 115);
               // Broad, blunt-ended flat-brush geometry, with space for bleed.
               brush.beginShape(0.08);
-              [
-                [12, 20],
-                [37, 17],
-                [65, 21],
-                [91, 18],
-                [113, 22],
-                [115, 40],
-                [111, 61],
-                [84, 59],
-                [59, 62],
-                [33, 58],
-                [13, 61],
-                [10, 40],
-              ].forEach(([dx, dy]) => brush.vertex(x + dx, y + dy));
+              (role === "leaf"
+                ? [
+                    [11, 38],
+                    [28, 26],
+                    [52, 20],
+                    [78, 23],
+                    [101, 30],
+                    [115, 39],
+                    [101, 48],
+                    [80, 56],
+                    [54, 59],
+                    [29, 51],
+                    [13, 43],
+                  ]
+                : [
+                    [12, 20],
+                    [37, 17],
+                    [65, 21],
+                    [91, 18],
+                    [113, 22],
+                    [115, 40],
+                    [111, 61],
+                    [84, 59],
+                    [59, 62],
+                    [33, 58],
+                    [13, 61],
+                    [10, 40],
+                  ]
+              ).forEach(([dx, dy]) => brush.vertex(x + dx, y + dy));
               brush.endShape(true);
               if (role === "petal") {
                 // A reverse glaze deposits pigment at the outward end, not only the root.
@@ -176,6 +191,38 @@ async function createAtlas(
                     context.globalCompositeOperation = "destination-in";
                     context.fillStyle = wetness;
                     context.fillRect(0, 0, cellWidth, cellHeight);
+                  }
+                  if (role === "leaf") {
+                    // The brush shader exports opaque RGB, even for watery pigment.
+                    // Restore a broken, translucent wash before layering leaf passes.
+                    const pixels = context.getImageData(
+                      0,
+                      0,
+                      cellWidth,
+                      cellHeight,
+                    );
+                    for (let y = 0; y < cellHeight; y++) {
+                      for (let x = 0; x < cellWidth; x++) {
+                        const offset = (y * cellWidth + x) * 4;
+                        const grain =
+                          (Math.sin(x * 0.31 + y * 0.19) +
+                            Math.sin(x * 0.13 - y * 0.37)) *
+                          0.035;
+                        const belly = Math.exp(
+                          -Math.pow((y - 38 - 3 * Math.sin(x * 0.06)) / 13, 2),
+                        );
+                        const opacity = 0.84 - 0.34 * belly + grain;
+                        // Remove the shader's white paper so transparency does not
+                        // bleach the chosen green when composited onto the page.
+                        for (let channel = 0; channel < 3; channel++) {
+                          pixels.data[offset + channel] =
+                            255 -
+                            (255 - pixels.data[offset + channel]) / opacity;
+                        }
+                        pixels.data[offset + 3] *= opacity;
+                      }
+                    }
+                    context.putImageData(pixels, 0, 0);
                   }
                   textures[color] = crop;
                 });

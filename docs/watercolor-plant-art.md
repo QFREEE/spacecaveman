@@ -8,8 +8,10 @@ Hydrangea and Lily of the valley.
 ## Visual rules
 
 - Draw modest, slightly irregular black contours. Keep the ink visible above paint.
-- Use transparent, blunt-ended, roughly rectangular flat-brush marks. Do not mask
-  paint precisely into petal or leaf silhouettes. A little overshoot is intentional.
+- Use transparent flat-brush marks with irregular edges. Petals keep broad,
+  blunt-ended washes; leaf washes taper at the ends and overlap with a narrower,
+  lighter angled pass. Do not mask paint precisely into the ink silhouettes.
+  A little overshoot is intentional.
 - Leaves point outward from their stem attachment, with curved, varied contours.
 - Use a distinct combination of leaf and blossom shades for each plant. Alternate
   related pigments within each bloom. Leaves range from olive and sage to emerald
@@ -53,7 +55,10 @@ seed order. Pixel-density-aware canvas cropping keeps colors in their own tiles.
 Current petal settings are fill texture 0.65, border intensity 0.95, pigment 205,
 and reverse tip glaze 135. After rendering, a varying alpha mask leaves the belly
 more transparent than the rims. Other roles keep pigment 115 and texture/border
-0.42/0.55. These are art parameters, not care rules.
+0.42/0.55. Leaf tiles also restore uneven alpha after the brush shader's opaque
+export, removing its white backing to preserve pigment strength. Each leaf uses
+slightly different main/secondary opacity so overlaps remain visible. These are
+art parameters, not care rules.
 
 The engine loads dynamically, batches colors needed by visible flowers, crops into offscreen canvas tiles,
 then removes the WebGL sketch. New plants reuse cached pigments and render only missing colors; batches run serially because p5.brush has global state. A visible 2D canvas composites those cached marks
