@@ -23,7 +23,7 @@ belong to the retained full-homepage implementation.
 | Available skins, label, scene and portrait            | `demo/src/themes/registry.ts`                       |
 | Theme selection state                                 | `demo/src/themes/ThemeProvider.tsx`                 |
 | Shared responsive space composition and gadgets       | `demo/src/styles/space.css`                         |
-| Current three-module composition and NYC card          | `demo/src/styles/home.css`                          |
+| Current three-module composition and NYC card         | `demo/src/styles/home.css`                          |
 | Shared Qzone typography, controls and module defaults | `demo/src/styles/qzone.css`                         |
 | New translated labels                                 | `demo/src/lunarCopy.ts`                             |
 
@@ -64,10 +64,11 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
-The flower's muted brushstroke uses `--skin-flower-paint` in the active palette.
-`PaintedFlowerHead.tsx` supplies one textured SVG pigment mark under the ink;
-`space.css` controls its strength across the bud and opening stages and its
-reduced-motion behavior.
+`WatercolorFlower.tsx` supplies separate sketch, terracotta pot, green leaf,
+and coral/peach petal layers. Transparent irregular rectangular SVG washes sit
+under the ink contours. The illustration's watercolor palette is shared between
+themes; its ink uses the active skin text color. `space.css` controls the short
+progress transitions and disables them for reduced motion.
 
 Use a named React component with no required props. It renders **decoration only** inside the reserved header
 region. It can read the active CSS tokens and supply theme-scoped selectors.

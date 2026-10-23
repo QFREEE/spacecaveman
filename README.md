@@ -23,10 +23,14 @@ serves it as the production homepage.
   available for up to 30 days. No phone credentials are sent to the browser.
 - Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
   advance one attribute by five to a maximum of fifty: ten clicks fill a bar.
-  The interface shows bars without numeric counts or levels. Total shared care
-  drives nine growth stages, changing about every five clicks.
-  The bud and petals gradually take on a single textured coral brushstroke,
-  softly fading into color as the flower opens. Reduced motion shows the color
+  The interface shows bars without numeric counts or levels. Bar progress is
+  ranked from highest to lowest: the leading bar draws the ink sketch, the next
+  paints the terracotta pot, then green leaves, then petals and the ochre center.
+  Any bar can finish first; the first full bar completes the sketch, the second
+  the pot, the third the leaves, and the fourth the flower. Partial bars reveal
+  their ranked layer progressively, so switching the leading action is seamless.
+  Loose rectangular transparent watercolor washes cross the outlines while black
+  lines remain visible above the pigment. Reduced motion applies progress
   immediately. Every click has immediate visual feedback; saves queue while the
   buttons stay available.
   Failed saves discard unsaved queued care and restore confirmed progress.

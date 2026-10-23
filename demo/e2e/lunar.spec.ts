@@ -4,7 +4,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("continuous care grows nine stages and persists without a flag or bloom message", async ({
+test("continuous care fills four drawing layers and persists without a flag or bloom message", async ({
   page,
   isMobile,
 }) => {
@@ -76,7 +76,10 @@ test("continuous watering gives immediate feedback and reports full attributes",
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "15");
-  await expect(flower.locator(".wet-soil")).toBeVisible();
+  await expect(flower.locator('[data-paint="sketch"]')).toHaveAttribute(
+    "data-progress",
+    "0.3",
+  );
   await expect(flower.locator(".flower-stage")).toHaveAttribute(
     "data-stage",
     "0",

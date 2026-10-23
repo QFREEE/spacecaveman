@@ -190,7 +190,7 @@ test("queued care from yesterday does not spill into a new daily plant", async (
   expect(writes).toBe(1);
 });
 
-test("nine distinct flower stages follow total shared care", async ({
+test("four care bars progressively complete separate drawing layers", async ({
   page,
   flowerPlant,
 }, testInfo) => {
@@ -210,10 +210,65 @@ test("nine distinct flower stages follow total shared care", async ({
       String(stage),
     );
     labels.add(await flower.locator(".plant-label").innerText());
+    const progress = Object.values(flowerPlant.stats).sort((a, b) => b - a);
+    for (const [index, layer] of [
+      "sketch",
+      "pot",
+      "leaves",
+      "petals",
+    ].entries()) {
+      await expect(flower.locator(`[data-paint="${layer}"]`)).toHaveAttribute(
+        "data-progress",
+        String(progress[index] / 50),
+      );
+    }
     await flower.screenshot({
       path: `outputs/flower-stage-${stage}-${testInfo.project.name}.png`,
     });
   }
-  expect(labels.size).toBe(9);
+  expect(labels.size).toBe(5);
   await expect(flower.locator(".plant-notice")).toBeEmpty();
+});
+
+test("any bar can finish first and progress rank always chooses drawing order", async ({
+  page,
+  flowerPlant,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const flower = page.locator("#flower");
+  const layers = ["sketch", "pot", "leaves", "petals"];
+  const actions = ["rain", "sun", "love", "food"] as const;
+  for (let first = 0; first < 4; first++) {
+    flowerPlant.stats = { rain: 0, sun: 0, love: 0, food: 0 };
+    for (let finished = 0; finished < 4; finished++) {
+      flowerPlant.stats[actions[(first + finished) % 4]] = 50;
+      await flower.getByRole("button", { name: "Refresh plant" }).click();
+      for (const [index, layer] of layers.entries()) {
+        await expect(flower.locator(`[data-paint="${layer}"]`)).toHaveAttribute(
+          "data-progress",
+          index <= finished ? "1" : "0",
+        );
+      }
+    }
+  }
+  // Reassigning which bar is ahead preserves the same partial painting.
+  for (const stats of [
+    { rain: 5, sun: 40, love: 20, food: 30 },
+    { rain: 30, sun: 20, love: 40, food: 5 },
+    { rain: 20, sun: 30, love: 5, food: 40 },
+  ]) {
+    flowerPlant.stats = stats;
+    await flower.getByRole("button", { name: "Refresh plant" }).click();
+    for (const [index, layer] of layers.entries()) {
+      await expect(flower.locator(`[data-paint="${layer}"]`)).toHaveAttribute(
+        "data-progress",
+        String([0.8, 0.6, 0.4, 0.1][index]),
+      );
+    }
+  }
+  await expect(flower.locator(".flower-ink-stroke").first()).toHaveCSS(
+    "transition-duration",
+    "0s",
+  );
 });

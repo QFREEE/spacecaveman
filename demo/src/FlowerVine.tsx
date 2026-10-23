@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./Language";
 import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
-import { PaintedFlowerHead } from "./PaintedFlowerHead";
+import { WatercolorFlower } from "./WatercolorFlower";
 
 const actions = [
   {
@@ -47,17 +47,6 @@ type Plant = {
   bloomed_at: string | null;
   error?: string;
 };
-const stages = [
-  "flower.stage.sprout",
-  "flower.stage.leaves",
-  "flower.stage.growing",
-  "flower.stage.tall",
-  "flower.stage.smallBud",
-  "flower.stage.bud",
-  "flower.stage.opening",
-  "flower.stage.bloom",
-  "flower.stage.fullBloom",
-] as const;
 const initialStats = { rain: 0, sun: 0, love: 0, food: 0 };
 const careStep = 5;
 
@@ -126,8 +115,19 @@ export function FlowerVine() {
   const stage = Math.floor(
     Object.values(displayStats).reduce((sum, value) => sum + value, 0) / 25,
   );
-  const stemTop = stage <= 3 ? 82 - stage * 9 : 55 - (stage - 3) * 3;
-  const bloomScale = stage === 6 ? 0.55 : stage === 7 ? 0.8 : 1;
+  const completedBars = Object.values(displayStats).filter(
+    (value) => value === 50,
+  ).length;
+  const drawingLabel: MessageKey =
+    completedBars === 0
+      ? "flower.paint.sketch"
+      : completedBars === 1
+        ? "flower.paint.pot"
+        : completedBars === 2
+          ? "flower.paint.leaves"
+          : completedBars === 3
+            ? "flower.paint.petals"
+            : "flower.paint.complete";
   function updateQueue(next: Care[]) {
     queue.current = next;
     setQueued(next);
@@ -291,72 +291,8 @@ export function FlowerVine() {
         >
           {loaded ? (
             <>
-              <span className="plant-label">{t(stages[stage])}</span>
-              <svg
-                viewBox="0 0 200 153"
-                aria-hidden="true"
-                fill="var(--skin-surface)"
-                stroke="var(--skin-text-strong)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M8 139q22-5 41 0m107 0 28 1M49 136q49-12 101 0" />
-                <path
-                  d="M76 110l5 31q20 7 39-1l5-30M73 108q25-8 54 0v8q-27 7-54 0z"
-                  fill={
-                    displayStats.rain
-                      ? "var(--skin-wet-soil)"
-                      : "var(--skin-surface)"
-                  }
-                />
-                <path
-                  d={`M100 105Q${stage === 0 ? 96 : 90} ${(105 + stemTop) / 2} 103 ${stemTop}`}
-                />
-                <path d="M98 95q-24 0-26-18 21-3 26 18m2-9q21 1 25-16-20-4-25 16" />
-                {stage >= 1 ? (
-                  <path d="M99 83q-18 0-22-15 19-2 22 15m2-5q17 1 21-13-17-3-21 13" />
-                ) : null}
-                {stage >= 2 ? (
-                  <path d="M99 72q-16 0-19-13 17-2 19 13m3-5q16 1 19-12-16-3-19 12" />
-                ) : null}
-                {stage >= 3 ? (
-                  <path d="M101 60q-14 0-17-11 15-2 17 11m2-5q14 1 17-10-14-3-17 10" />
-                ) : null}
-                {stage === 4 ? (
-                  <PaintedFlowerHead
-                    path={`M103 ${stemTop}q-10-7-3-15l3 3 3-3q8 8-3 15z`}
-                  />
-                ) : null}
-                {stage === 5 ? (
-                  <PaintedFlowerHead
-                    path={`M103 ${stemTop}q-18-13-5-24l5 5 6-5q12 14-6 24z`}
-                  />
-                ) : null}
-                {stage >= 6 ? (
-                  <g
-                    transform={`translate(${100 - 100 * bloomScale} ${stemTop - 41 * bloomScale}) scale(${bloomScale})`}
-                  >
-                    <PaintedFlowerHead path="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z">
-                      <circle cx="100" cy="41" r="11" />
-                      {stage === 8 ? (
-                        <>
-                          <path d="M95 43q5 6 10-1" />
-                          <circle cx="96" cy="38" r=".7" />
-                          <circle cx="105" cy="38" r=".7" />
-                        </>
-                      ) : null}
-                    </PaintedFlowerHead>
-                  </g>
-                ) : null}
-                {displayStats.rain > 0 ? (
-                  <path
-                    className="wet-soil"
-                    d="M84 112l6 1m8 0h6m8-1h5"
-                    strokeWidth="3"
-                  />
-                ) : null}
-              </svg>
+              <span className="plant-label">{t(drawingLabel)}</span>
+              <WatercolorFlower stats={displayStats} />
               {active ? (
                 <span
                   className={`care-effect effect-${active.id}`}

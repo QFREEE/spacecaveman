@@ -31,15 +31,22 @@ discard unsaved queued actions and restore confirmed progress. A full attribute 
 request that crosses midnight returns 409 with `day_changed`. Both include current
 state. Unavailable storage returns 503; the UI disables care and offers a
 refresh. Each attribute is bounded from zero to fifty; the UI shows only its bar,
-without numeric progress or levels. Total care drives nine visual growth stages,
-from sprout through leaves and buds to a full flower. Each stage spans 25 points,
-about five accepted actions. Other tabs refresh every 30 seconds or on
-window focus.
+without numeric progress or levels. Progress values are ranked from highest to
+lowest, independently of action identity. The leading value draws the ink sketch,
+the second paints the terracotta pot, the third paints the leaves, and the last
+paints the petals and small ochre center. Any first full bar completes the sketch;
+two full bars complete the pot, three complete the leaves, and four complete the
+flower. Partial values progressively reveal each ranked layer. Switching which
+action leads does not reset or change the drawing order; ties need no identity
+tracking because their progress is equal. This is derived from shared stats and
+requires no extra completion-order storage. Other tabs refresh every 30 seconds
+or on window focus.
 
-The bud and petals take on a single broad coral brushstroke with an irregular
-edge, bristle gaps and uneven pigment. Color softly fades in and strengthens
-through the later stages while the original ink outline stays visible.
-Reduced motion shows the pigment immediately; the fade does not block care.
+The transparent watercolor marks have irregular rectangular ends. Petal marks
+point away from the center and leaf marks point from the stem outward. Washes
+can cross the contours; the black sketch renders above all color so lines stay
+visible. Each click reveals more of its corresponding layer without delaying
+input. Reduced motion applies progress immediately.
 
 At midnight in `America/New_York`, the next read or care request atomically starts
 a new generation and clears all care bars, the care log and bloom time, whether
