@@ -33,7 +33,7 @@ const actions = [
     id: "food",
     label: "flower.care.feed",
     stat: "flower.stat.food",
-    icon: "💩",
+    icon: "⋄",
     effect: "✧ · ✧",
     response: "flower.notice.fed",
   },
