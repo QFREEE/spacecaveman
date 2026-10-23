@@ -157,6 +157,8 @@ export function WatercolorFlower({
   const [sketch, pot, greenery, flower] = Object.values(stats)
     .map((value) => clamp(value / 50))
     .sort((a, b) => b - a);
+  const growth = clamp((sketch - 0.16) / 0.84);
+  const growingInk = design.ink.slice(2);
   return (
     <svg
       viewBox="0 0 200 153"
@@ -164,6 +166,7 @@ export function WatercolorFlower({
       fill="none"
       className="watercolor-flower"
       data-plant={design.id}
+      data-growth={sketch === 0 ? "seed" : growth === 0 ? "sprout" : "growing"}
       data-renderer={
         atlas ? "p5.brush" : paintFailed ? "unavailable" : "loading"
       }
@@ -185,8 +188,38 @@ export function WatercolorFlower({
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {design.ink.map((path, index) => {
-          const progress = clamp(sketch * design.ink.length - index);
+        <g data-paint="initial-pot">
+          {design.ink.slice(0, 2).map((path, index) => (
+            <path key={index} d={path} />
+          ))}
+        </g>
+        {sketch === 0 ? (
+          <g data-paint="seed">
+            <path d="M96 110Q91 104 97 100Q105 101 104 107Q102 111 96 110Z" />
+            <path d="M97 108Q98 104 101 102M84 112l3-1m24 0 4 1" />
+          </g>
+        ) : null}
+        {growth === 0 ? (
+          <g data-paint="sprout">
+            {[
+              "M100 110Q98 101 101 92",
+              "M100 102Q90 101 89 94Q98 93 100 102",
+              "M100 98Q102 89 110 89Q110 97 100 98",
+            ].map((path, index) => (
+              <path
+                key={index}
+                className="flower-ink-stroke"
+                d={path}
+                pathLength="1"
+                strokeDasharray="1 1"
+                strokeDashoffset={sketch > 0 ? 0 : 1}
+                opacity={sketch > 0 ? 1 : 0}
+              />
+            ))}
+          </g>
+        ) : null}
+        {growingInk.map((path, index) => {
+          const progress = clamp(growth * growingInk.length - index);
           return (
             <path
               key={index}

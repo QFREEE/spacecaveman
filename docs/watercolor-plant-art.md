@@ -30,6 +30,10 @@ A mark gives position, angle in degrees, length, width and pigment color. An
 optional `outline` contributes a sketch path; `cross: false` avoids the secondary
 petal wash for tiny lavender flowers or narrow folded details. The design helper
 assembles pot, stem, leaf, bloom, center and ground paths in drawing order.
+The first two ink paths are the always-visible pot. At zero care the renderer
+adds a seed; the first care step draws a shared sprout. Above 16% leading-bar
+progress, the remaining ink paths progressively replace the sprout. All paths
+finish when the leading bar reaches its maximum.
 `leaf()` and `petal()` convert local contour coordinates to sketch paths.
 
 `WatercolorFlower({ stats, plantId })` is the drawing interface. It ranks the four
@@ -62,7 +66,7 @@ clicks never restart p5 or block waiting for a painting frame.
    y=110–145; keep new stems connected and avoid stray branches.
 4. Declare its stems, green marks and blossom marks. Mark colors are discovered
    automatically. Use an optional center only where the flower needs one.
-5. Inspect blank, sketch-only, pot-only, leaves and full-color stages. Verify
+5. Inspect seed, sprout, sketch-only, pot-only, leaves and full-color stages. Verify
    stroke direction, ink visibility, overlap and phone scale.
 6. Run `pnpm verify`. Add the ID to the six-design browser gallery as the collection
    grows, and compare silhouettes, not just different colors of the same flower.
