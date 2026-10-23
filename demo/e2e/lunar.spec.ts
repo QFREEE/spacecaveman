@@ -90,7 +90,7 @@ test("continuous watering gives immediate feedback and reports full attributes",
   await expect(water).toBeEnabled();
   flowerPlant.stats.rain = 50;
   await water.click();
-  await expect(flower.getByRole("status")).toHaveText("Already full.");
+  await expect(flower.getByRole("status")).not.toContainText("Already full.");
   await flower.getByRole("button", { name: "Sun", exact: true }).click();
   await flower
     .getByRole("button", { name: "Refresh plant", exact: true })

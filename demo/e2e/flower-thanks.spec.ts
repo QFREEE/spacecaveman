@@ -21,7 +21,7 @@ test("rapid confirmed care earns a translated thank-you without numeric counts",
   await expect(flower.getByRole("status")).not.toContainText("Thank you");
   flowerPlant.stats.rain = 50;
   await flower.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(flower.getByRole("status")).toHaveText("Already full.");
+  await expect(flower.getByRole("status")).not.toContainText("Already full.");
   await expect(flower.locator(".plant-meters")).not.toHaveAttribute(
     "data-recognition",
     "thanks",
@@ -256,6 +256,8 @@ test("four care bars progressively complete separate drawing layers", async ({
   expect(pigments[1][1]).toBeGreaterThan(pigments[1][0]);
   expect(pigments[2][0]).toBeGreaterThan(pigments[2][1]);
   expect(labels.size).toBe(5);
+  await expect(flower.locator(".plant-label")).toBeEmpty();
+  await expect(flower).not.toContainText("In full color");
   await expect(flower.locator(".plant-notice")).toBeEmpty();
 });
 

@@ -144,7 +144,7 @@ export function FlowerVine() {
   const completedBars = Object.values(displayStats).filter(
     (value) => value === 50,
   ).length;
-  const drawingLabel: MessageKey =
+  const drawingLabel: MessageKey | "" =
     completedBars === 0
       ? "flower.paint.sketch"
       : completedBars === 1
@@ -153,7 +153,7 @@ export function FlowerVine() {
           ? "flower.paint.leaves"
           : completedBars === 3
             ? "flower.paint.petals"
-            : "flower.paint.complete";
+            : "";
   function updateQueue(next: Care[]) {
     queue.current = next;
     setQueued(next);
@@ -212,7 +212,6 @@ export function FlowerVine() {
   function care(action: Care) {
     if (!loaded || failed) return;
     if (previewStats(confirmed.current, queue.current)[action.id] >= 50) {
-      setNotice("flower.notice.full");
       return;
     }
     updateQueue([...queue.current, action]);
@@ -267,7 +266,7 @@ export function FlowerVine() {
         if (status === 409) {
           // Another visitor may have filled this bar while our clicks were queued.
           updateQueue(queue.current.filter((entry) => entry.id !== action.id));
-          setNotice("flower.notice.full");
+          setNotice("");
         } else {
           setNotice(action.response);
         }
@@ -317,7 +316,9 @@ export function FlowerVine() {
         >
           {loaded ? (
             <>
-              <span className="plant-label">{t(drawingLabel)}</span>
+              <span className="plant-label">
+                {drawingLabel ? t(drawingLabel) : ""}
+              </span>
               <WatercolorFlower stats={displayStats} />
               {active ? (
                 <span
