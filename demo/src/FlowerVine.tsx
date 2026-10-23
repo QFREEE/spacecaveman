@@ -53,7 +53,7 @@ function ScissorsIcon({ size = 15 }: { size?: number }) {
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      style={{ verticalAlign: "-2px" }}
+      style={{ width: size, height: size, marginTop: 0, verticalAlign: "-2px" }}
     >
       <circle cx="5" cy="5" r="2.8" />
       <circle cx="5" cy="17" r="2.8" />
@@ -168,7 +168,7 @@ export function FlowerVine() {
             {active.id === "food" ? (
               <FertilizerBagIcon size={28} />
             ) : active.id === "love" ? (
-              <ScissorsIcon size={28} />
+              <ScissorsIcon size={18} />
             ) : (
               active.effect
             )}
