@@ -156,7 +156,7 @@ function PaintLayer({
           y: 111 + row * 6.8,
           angle: row % 2 ? 180 : 0,
           length: row === 0 ? 54 : 51 - row * 2,
-          width: 9,
+          width: 13,
           color: "#b96f49",
         },
         pot * 5 - row,
