@@ -32,7 +32,7 @@ serves it as the production homepage.
 - p5 and p5.brush generate seeded watercolor textures on first use, then stop and
   release the hidden WebGL sketch. Cached canvas tiles retain transparent pigment,
   darker edges, crossing washes and visible black ink. Meters stay monochrome.
-- Encouragement appears after three and six actions; ten earn a personal thank-you.
+- Care updates the illustration and bars without encouragement or thank-you messages.
   New plant clears it. The fertilizer bag is used in both the Feed button and effect.
 - [Watercolor plant art guide](docs/watercolor-plant-art.md) records the approved
   method and explains how to add designs without changing rendering or care.

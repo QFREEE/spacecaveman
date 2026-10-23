@@ -24,13 +24,13 @@ test("language preserves care; keyboard and reduced motion work", async ({
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "6");
-  await expect(flower.getByRole("status")).toContainText("已浇水。");
+  await expect(flower.getByRole("status")).toHaveCount(0);
   await expect(flower.getByRole("button", { name: "详情" })).toHaveCount(0);
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", "6");
-  await expect(flower.getByRole("status")).toContainText("Watered.");
+  await expect(flower.getByRole("status")).toHaveCount(0);
 });
 
 test("animation has no pause control and follows the device motion preference", async ({

@@ -39,8 +39,8 @@ are silent. There is no In full color label or separate bloom notice.
 **New plant** (新植物) replaces Refresh plant. It cycles through Cosmos, Tulip,
 Sunflower, Poppy, Lavender and Calla lily, clears care and feedback, and saves the
 new selection. Reload preserves selection and progress. Nothing resets at midnight.
-Three/six accepted actions encourage the visitor; ten show a thank-you. The care
-count belongs to the local plant, survives reload, and clears with New plant.
+Care shows no encouragement, thank-you or action-status messages. Progress is
+communicated through the drawing and bars.
 Animation respects reduced motion. Feed uses a drawn fertilizer bag in its button
 and floating effect.
 

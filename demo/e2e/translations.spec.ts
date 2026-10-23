@@ -15,7 +15,7 @@ test("language changes translate metadata, feedback and accessibility without re
   await page.goto("/");
   await page.getByRole("button", { name: "Water", exact: true }).click();
   const flower = page.locator("#flower");
-  await expect(flower.getByRole("status")).toHaveText("Watered.");
+  await expect(flower.getByRole("status")).toHaveCount(0);
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await expect(page).toHaveTitle("Yuntong’s space");
@@ -33,9 +33,7 @@ test("language changes translate metadata, feedback and accessibility without re
   await expect(
     page.getByRole("region", { name: "实时纽约状态" }).getByRole("status"),
   ).toHaveText("在，我在纽约！");
-  await expect(flower.getByRole("status", { name: "花藤状态" })).toHaveText(
-    "已浇水。",
-  );
+  await expect(flower.getByRole("status")).toHaveCount(0);
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
   ).toHaveAttribute("value", "6");
@@ -52,7 +50,7 @@ test("language changes translate metadata, feedback and accessibility without re
     "content",
     "Yuntong’s space: NYC status, a flower and page views.",
   );
-  await expect(flower.getByRole("status")).toHaveText("Watered.");
+  await expect(flower.getByRole("status")).toHaveCount(0);
   expect(
     (await page.locator("body").innerText()).replace("中文", ""),
   ).not.toMatch(/[\u4e00-\u9fff]/);

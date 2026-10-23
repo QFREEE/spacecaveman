@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./Language";
-import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
 import { WatercolorFlower } from "./WatercolorFlower";
 import {
@@ -17,7 +16,6 @@ const actions = [
     stat: "flower.stat.rain",
     icon: "♧",
     effect: "﹅ ﹅ ﹅",
-    response: "flower.notice.watered",
   },
   {
     id: "sun",
@@ -25,7 +23,6 @@ const actions = [
     stat: "flower.stat.sun",
     icon: "☼",
     effect: "☼",
-    response: "flower.notice.sunAdded",
   },
   {
     id: "love",
@@ -33,7 +30,6 @@ const actions = [
     stat: "flower.stat.love",
     icon: "✂",
     effect: "✂",
-    response: "flower.notice.pruned",
   },
   {
     id: "food",
@@ -41,7 +37,6 @@ const actions = [
     stat: "flower.stat.food",
     icon: "⋄",
     effect: "✧ · ✧",
-    response: "flower.notice.fed",
   },
 ] as const;
 type Care = (typeof actions)[number];
@@ -76,7 +71,6 @@ export function FlowerVine() {
   const [plant, setPlant] = useState(readLocalPlant);
   const current = useRef(plant);
   const [active, setActive] = useState<Care | null>(null);
-  const [notice, setNotice] = useState<MessageKey | "">("");
   const [effectId, setEffectId] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -108,7 +102,6 @@ export function FlowerVine() {
       },
       careCount: Math.min(32, before.careCount + 1),
     });
-    setNotice(action.response);
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       if (timer.current) clearTimeout(timer.current);
       setActive(action);
@@ -123,18 +116,8 @@ export function FlowerVine() {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     setActive(null);
-    setNotice("");
     commit(nextLocalPlant(current.current));
   }
-  const feedback: MessageKey | "" = !notice
-    ? ""
-    : plant.careCount >= 10
-      ? "flower.notice.thanks"
-      : plant.careCount >= 6
-        ? "flower.notice.encourage"
-        : plant.careCount >= 3
-          ? "flower.notice.growing"
-          : notice;
   return (
     <ModuleFrame
       id="flower"
@@ -196,9 +179,6 @@ export function FlowerVine() {
           </button>
         ))}
       </div>
-      <p className="plant-notice" role="status" aria-label={t("flower.status")}>
-        {feedback ? t(feedback) : ""}
-      </p>
       <div className="plant-tools">
         <button type="button" className="text-button" onClick={newPlant}>
           {t("flower.newPlant")}

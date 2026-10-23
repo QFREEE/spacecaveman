@@ -22,9 +22,7 @@ test("local care is instant, capped, persistent, and makes no flower requests", 
     "value",
     "50",
   );
-  await expect(flower.getByRole("status")).toHaveText(
-    "A little more care makes a big difference.",
-  );
+  await expect(flower.getByRole("status")).toHaveCount(0);
   await expect(flower).not.toContainText(/Already full|In full color|\d/);
   await page.reload();
   await expect(flower.getByRole("meter").first()).toHaveAttribute(
@@ -93,7 +91,7 @@ test("every plant has its own complete drawing and New plant cycles and resets",
     await flower.getByRole("button", { name: "New plant" }).click();
     for (const meter of await flower.getByRole("meter").all())
       await expect(meter).toHaveAttribute("value", "0");
-    await expect(flower.locator(".plant-notice")).toBeEmpty();
+    await expect(flower.locator(".plant-notice")).toHaveCount(0);
   }
   expect(silhouettes.size).toBe(6);
   await expect(flower.locator(".watercolor-flower")).toHaveAttribute(

@@ -22,7 +22,7 @@ test("presence waits for its request while local care is immediately usable", as
   const flower = page.locator("#flower");
   await expect(nyc.getByRole("status")).toHaveText("Checking if I’m in NYC…");
   await expect(nyc.locator("[data-scene]")).toHaveCount(0);
-  await expect(flower.locator(".plant-notice")).toBeEmpty();
+  await expect(flower.locator(".plant-notice")).toHaveCount(0);
   await expect(flower.locator(".watercolor-flower")).toBeVisible();
   await expect(flower.getByRole("meter")).toHaveCount(4);
   await expect(flower).not.toContainText("Level 1");
@@ -35,7 +35,7 @@ test("presence waits for its request while local care is immediately usable", as
   });
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(nyc.getByRole("status")).toHaveText("正在确认我在不在纽约…");
-  await expect(flower.locator(".plant-notice")).toBeEmpty();
+  await expect(flower.locator(".plant-notice")).toHaveCount(0);
   release();
   await expect(nyc.locator("[data-scene]")).toHaveAttribute(
     "data-scene",
