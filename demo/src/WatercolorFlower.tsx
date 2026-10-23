@@ -53,29 +53,29 @@ const petals = [
 ];
 const leaves = [
   {
-    outline: "M98 106C82 109 65 103 60 91C72 93 87 94 98 106",
-    x: 97,
-    y: 104,
-    angle: -160,
-    length: 39,
-    width: 13,
+    outline: "M101 105C89 108 77 104 73 96C84 93 96 97 101 105",
+    x: 100,
+    y: 103,
+    angle: -161,
+    length: 29,
+    width: 12,
     color: "#739a70",
   },
   {
-    outline: "M104 99C114 85 129 85 147 83C142 96 122 104 104 99",
+    outline: "M103 97C108 87 122 84 134 85C131 96 116 102 103 97",
     x: 105,
-    y: 98,
+    y: 96,
     angle: -22,
-    length: 44,
-    width: 15,
+    length: 31,
+    width: 13,
     color: "#a4ab58",
   },
   {
-    outline: "M100 88C88 91 75 85 72 78C84 76 96 81 100 88",
-    x: 99,
-    y: 87,
+    outline: "M102 87C92 90 82 85 79 78C89 76 98 80 102 87",
+    x: 101,
+    y: 86,
     angle: -157,
-    length: 30,
+    length: 24,
     width: 11,
     color: "#8da58a",
   },
@@ -84,7 +84,6 @@ const ink = [
   "M75 112L80 140Q100 147 121 139L126 112",
   "M73 110Q99 104 128 110L127 117Q101 122 73 116Z",
   "M100 109C107 91 100 76 100 57",
-  "M101 102L95 102M103 99Q108 87 114 83M102 91L97 86",
   ...leaves.map((leaf) => leaf.outline),
   ...petals.map((petal) => petal.outline),
   "M104 50C105 56 95 56 95 50C95 44 104 44 104 50",
@@ -128,16 +127,16 @@ function Wash({
         </clipPath>
       </defs>
       <g clipPath={`url(#${id})`}>
-        <path d={flatWash} fill={color} opacity=".44" />
+        <path d={flatWash} fill={color} opacity=".56" />
         <path
           d="M.02-.32Q.32-.44 .59-.32T.98-.33L.96-.2Q.6-.29 .3-.22L.03-.19Z"
           fill={color}
-          opacity=".09"
+          opacity=".12"
         />
         <path
           d="M.12 .28Q.5 .36 .96 .24L.98 .39Q.55 .49 .1 .4Z"
           fill={color}
-          opacity=".12"
+          opacity=".16"
         />
       </g>
     </g>
