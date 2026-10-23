@@ -83,12 +83,20 @@ export function Presence({
   const age = Math.max(0, now - observed);
   const recency =
     age < 5 * 60_000
-      ? t("presence.updatedMinutes")
-      : age < 60 * 60_000
-        ? t("presence.updatedHour")
-        : age < 180 * 60_000
-          ? t("presence.updatedThreeHours")
-          : t("presence.updatedEarlier");
+      ? t("presence.updatedJustNow")
+      : age < 15 * 60_000
+        ? t("presence.updatedMinutes")
+        : age < 30 * 60_000
+          ? t("presence.updatedHalfHour")
+          : age < 60 * 60_000
+            ? t("presence.updatedHour")
+            : age < 120 * 60_000
+              ? t("presence.updatedOneHour")
+              : age < 180 * 60_000
+                ? t("presence.updatedTwoHours")
+                : age < 240 * 60_000
+                  ? t("presence.updatedThreeHours")
+                  : t("presence.updatedEarlier");
   return (
     <section
       className="presence-strip"
