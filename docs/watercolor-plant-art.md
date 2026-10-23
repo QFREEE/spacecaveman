@@ -101,16 +101,20 @@ caches palette-specific designs and discovers their pigments in the shared atlas
 New plants save a `paletteId` in the existing versioned local record. Missing or
 invalid palette metadata keeps the original colors without losing care.
 The local gallery compares rose, iris and hydrangea by default, with a selector
-for any species or all 29 active variants. Stage buttons and incremental care demonstrate
+for any species or all 30 active variants. Stage buttons and incremental care demonstrate
 the existing seed-to-ink-to-watercolor progression.
 
-Near-duplicate review IDs 02, 08, 14, 15, 29, 30 and 36 are retired from new
+Near-duplicate review IDs 08, 14, 15, 29, 30 and 36 are retired from new
 plant choices and the gallery. Existing saves retain their palette and care.
 Reference numbers stay fixed, with gaps for retired options. Palette 16 uses
 deeper apricot pigment.
 
 Review 35 now depicts Bluebell, using a dedicated silhouette and bilingual name.
 Its historical `lily-of-the-valley:ivory` key is retained for saved-care compatibility.
-The twelve shuffle slots therefore cover thirteen depicted species across 29 active
+The twelve shuffle slots therefore cover thirteen depicted species across 30 active
 choices. Sunflowers use pointed curved petals, warm darker disks with sparse
 crosshatching, and double-line stems. The review gallery keeps its original numbers.
+
+Review 02 restores the original five-color coral/peach/pink cosmos and its original
+leaf pigments. It is available to new plants as well as preserved legacy saves.
+

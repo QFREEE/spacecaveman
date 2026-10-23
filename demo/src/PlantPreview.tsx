@@ -49,11 +49,11 @@ function PlantPreview() {
         <p className="eyebrow">THE LITTLE GARDEN / NATURAL COLOR STUDIES</p>
         <h1>
           {selection === "all"
-            ? "花朵配色总览 · 29 款"
+            ? "花朵配色总览 · 30 款"
             : "Same seed. A different bloom."}
         </h1>
         <p className="intro">
-          Thirteen plants, 29 distinct palettes. Original reference numbers stay
+          Thirteen plants, 30 distinct palettes. Original reference numbers stay
           fixed; gaps mark retired colors.
         </p>
         <nav aria-label="Preview controls">

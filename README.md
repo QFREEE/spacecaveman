@@ -133,7 +133,7 @@ Start with the [trial guide](docs/presence-trial.md) and
 [publishing guide](docs/qzone-publishing.md), and
 [homepage production audit](docs/homepage-production.md).
 
-Each new plant selects a coordinated natural palette from its species (29 active palettes across thirteen depicted species).
+Each new plant selects a coordinated natural palette from its species (30 active palettes across thirteen depicted species).
 The palette is saved with care progress. Existing saves without a palette retain
 their original colors. Preview all varieties locally at `/plant-preview.html`.
 

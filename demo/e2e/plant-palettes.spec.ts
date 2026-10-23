@@ -36,14 +36,14 @@ test("palette gallery renders natural varieties and grows without overflow", asy
   await page
     .getByRole("combobox", { name: "Plants", exact: true })
     .selectOption("all");
-  await expect(paintings).toHaveCount(29);
+  await expect(paintings).toHaveCount(30);
   const bluebell = page.locator('[data-reference="35"]');
   await expect(bluebell.locator("h2")).toHaveText("Deep blue bluebell");
   await expect(bluebell.locator(".watercolor-flower")).toHaveAttribute(
     "data-species",
     "bluebell",
   );
-  await expect(page.locator('[data-renderer="p5.brush"]')).toHaveCount(29);
+  await expect(page.locator('[data-renderer="p5.brush"]')).toHaveCount(30);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

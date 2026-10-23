@@ -30,7 +30,13 @@ export const plantPalettes: Readonly<Record<string, readonly PlantPalette[]>> =
   {
     cosmos: [
       palette("pink", "Rose pink", ["#e34287", "#f47faa"], sage),
-      palette("white", "Soft pink", ["#e78ba4", "#cb557f"], green),
+      palette(
+        "white",
+        "Original warm mix",
+        ["#f18b65", "#ed6688", "#ed685b", "#f29d7c", "#ee736a"],
+        ["#739a70", "#a4ab58", "#8da58a"],
+        { center: "#d8ad50" },
+      ),
       palette("wine", "Deep rose", ["#a83b66", "#cc6688"], deepGreen),
     ],
     tulip: [
@@ -121,7 +127,7 @@ const references = new Map(
     )
     .map((id, index) => [id, String(index + 1).padStart(2, "0")]),
 );
-const retiredReferences = new Set(["02", "08", "14", "15", "29", "30", "36"]);
+const retiredReferences = new Set(["08", "14", "15", "29", "30", "36"]);
 export function getPaletteReference(
   plantId: string,
   paletteId: string,
