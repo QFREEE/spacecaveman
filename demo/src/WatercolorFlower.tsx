@@ -165,7 +165,36 @@ function PaintLayer({
     leaves.forEach((leaf, index) =>
       wash(leaf, greenery * leaves.length - index),
     );
-    petals.forEach((petal, index) => wash(petal, flower * 5.5 - index));
+    petals.forEach((petal, index) => {
+      const amount = flower * 5.5 - index;
+      const lean = index % 2 === 0 ? 16 : -18;
+      // Offset broad strokes cross near the roots; a lighter angled pass
+      // weaves through the first wash instead of filling the ink silhouette.
+      wash(
+        {
+          ...petal,
+          x: petal.x + (100 - petal.x) * 0.3,
+          y: petal.y + (50 - petal.y) * 0.2,
+          angle: petal.angle - lean * 0.3,
+          width: petal.width + 2,
+        },
+        amount,
+      );
+      context.save();
+      context.globalAlpha = 0.38;
+      wash(
+        {
+          ...petal,
+          x: petal.x + (index % 2 === 0 ? 2 : -2),
+          y: petal.y + 1.5,
+          angle: petal.angle + lean,
+          length: petal.length * 0.88,
+          width: petal.width * 0.65,
+        },
+        amount * 1.7 - 0.7,
+      );
+      context.restore();
+    });
     context.save();
     context.beginPath();
     context.arc(100, 50, 4.4, 0, Math.PI * 2);
