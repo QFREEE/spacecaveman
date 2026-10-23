@@ -93,6 +93,27 @@ async function requestPlant(
   return { plant, status: response.status };
 }
 
+function FertilizerBagIcon() {
+  return (
+    <svg
+      width="15"
+      height="17"
+      viewBox="0 0 20 22"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      style={{ verticalAlign: "-3px" }}
+    >
+      <path d="M6 6 5 2q5 1 10 0l-1 4M6 6q-2 4-3 11-.5 3 7 3t7-3q-1-7-3-11M5.5 6q4.5 1 9 0" />
+      <path d="M10 17v-5m0 2q-4 0-4-3 4 0 4 3m0-1q0-4 4-4 0 4-4 4M7 17h6" />
+    </svg>
+  );
+}
+
 export function FlowerVine() {
   const { t } = useLanguage();
   const [stats, setStats] = useState(initialStats);
@@ -333,7 +354,13 @@ export function FlowerVine() {
               disabled={!loaded || failed}
               onClick={() => care(action)}
             >
-              <span aria-hidden="true">{action.icon} </span>
+              <span aria-hidden="true">
+                {action.id === "food" ? (
+                  <FertilizerBagIcon />
+                ) : (
+                  action.icon
+                )}{" "}
+              </span>
               {t(action.label)}
             </button>
           ))}
