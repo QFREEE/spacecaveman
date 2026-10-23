@@ -1,6 +1,7 @@
 declare module "p5.brush" {
   import type P5 from "p5";
   export function instance(p: P5): void;
+  export function load(): void;
   export function noStroke(): void;
   export function noHatch(): void;
   export function noField(): void;

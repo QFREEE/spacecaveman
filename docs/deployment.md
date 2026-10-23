@@ -121,7 +121,9 @@ pnpm verify
 `package.json` for its individual commands. Node's major version is recorded in
 `.node-version` and used by both workflow jobs.
 
-CI installs Chromium's Linux system dependencies too. Actions are pinned to
+CI installs Chromium's Linux system dependencies too. The Checks job allows 30
+minutes for dependency downloads and verification; slow Ubuntu mirrors can take
+more than ten minutes before tests start. Actions are pinned to
 immutable commits; Dependabot checks for action updates monthly. Pull requests run
 without deployment secrets and with a read-only GitHub token. Deployment jobs run
 serially, and an in-progress production upload is not cancelled by another push.
