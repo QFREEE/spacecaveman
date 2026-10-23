@@ -1,9 +1,17 @@
 @charset "UTF-8";
 :root {
-  font-family: Tahoma, "Microsoft YaHei", "PingFang SC", SimSun, sans-serif;
+  --font-primary: "Bricolage Grotesque", "Noto Sans SC", sans-serif;
+  --font-accent: "Space Mono", "Noto Sans SC", monospace;
+  --type-body: 14px;
+  --type-small: 12px;
+  --type-label: 11px;
+  --leading-body: 1.65;
+  --leading-heading: 1.25;
+  font-family: var(--font-primary);
   color: #292929;
-  font-size: 12px;
-  line-height: 1.75;
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  font-optical-sizing: auto;
   background: #ebebeb;
   font-synthesis: none;
   --blue: #616161;
@@ -23,6 +31,17 @@ input,
 select,
 textarea {
   font: inherit;
+}
+/* Dates and compact annotations share the same quiet accent voice. */
+time,
+.welcome-date,
+.site-number,
+.entry-category,
+.entry-bottom,
+.heading-note,
+.online,
+.album-subtitle {
+  font-family: var(--font-accent);
 }
 button,
 a,
@@ -112,7 +131,7 @@ button {
 }
 .masthead h1 {
   font-size: 29px;
-  font-family: SimSun, "Songti SC", serif;
+  font-family: var(--font-primary);
   letter-spacing: 7px;
   font-weight: 400;
   line-height: 1.5;
@@ -126,7 +145,7 @@ button {
   position: absolute;
   right: 29px;
   top: 110px;
-  font-family: SimSun, serif;
+  font-family: var(--font-primary);
   letter-spacing: 2px;
   color: #909090;
   font-size: 11px;
@@ -218,7 +237,7 @@ button {
   color: #656565;
 }
 .module-heading h2 small {
-  font-family: Tahoma, sans-serif;
+  font-family: var(--font-accent);
   font-size: 8px;
   font-weight: 400;
   letter-spacing: 0.6px;
@@ -437,7 +456,7 @@ button {
 }
 .entry-text {
   white-space: pre-line;
-  font-family: SimSun, "Microsoft YaHei", sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
   line-height: 1.9;
   color: #6d6d6d;
@@ -642,7 +661,7 @@ button {
   color: #9b9b9b;
 }
 .player-display {
-  font-family: Tahoma, sans-serif;
+  font-family: var(--font-accent);
   font-size: 8px;
   background: #eeeeee;
   border: 1px solid #cdcdcd;
@@ -697,7 +716,7 @@ button {
   margin: 10px 0;
 }
 .counter span {
-  font-family: monospace;
+  font-family: var(--font-accent);
   font-size: 19px;
   line-height: 27px;
   width: 21px;
@@ -714,7 +733,7 @@ button {
   color: #a1a1a1;
   line-height: 2;
   letter-spacing: 1px;
-  font-family: SimSun, serif;
+  font-family: var(--font-primary);
 }
 .guest-intro {
   font-size: 11px;

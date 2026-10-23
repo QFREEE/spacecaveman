@@ -1,4 +1,61 @@
 /* Three-module home. The full set of Qzone modules stays reusable in source. */
+/* Bricolage carries the voice; mono is reserved for little annotations. */
+.top-brand,
+.navigation a,
+.module-heading h2,
+.bevel {
+  font-family: var(--font-primary);
+  font-weight: 600;
+}
+.top-brand,
+.language-switch button,
+.care-actions button,
+.plant-tools button {
+  font-size: 13px;
+}
+.navigation a,
+.module-heading h2 {
+  font-size: var(--type-body);
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.module-heading h2 {
+  white-space: normal;
+}
+.plant-stat,
+.fine-print,
+.visitors .module-body,
+footer {
+  font-size: var(--type-small);
+  line-height: var(--leading-body);
+}
+.plant-stat,
+.plant-label,
+.plant-name,
+.heading-note,
+.module-heading h2 small {
+  font-family: var(--font-accent);
+  letter-spacing: 0;
+}
+.plant-label,
+.plant-name,
+.heading-note,
+.module-heading h2 small {
+  font-size: var(--type-label);
+}
+.presence-loading {
+  font-family: var(--font-accent);
+}
+.counter span {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 720px) {
+  .plant-stat,
+  .care-actions button,
+  .plant-tools button {
+    font-size: var(--type-body);
+  }
+}
 .home-modules {
   grid-template-columns: minmax(0, 1fr) 250px 220px;
 }
@@ -52,10 +109,7 @@
 }
 .presence-answer {
   margin: 0;
-  font:
-    26px/1.35 Georgia,
-    SimSun,
-    serif;
+  font: 400 24px/1.45 var(--font-accent);
   color: var(--skin-text-strong);
   overflow-wrap: anywhere;
   animation: nyc-answer-reveal 1.2s ease-out both;
@@ -102,7 +156,9 @@
   margin-top: 8px;
   padding-top: 8px;
   color: var(--skin-muted);
-  font-size: 12px;
+  font-family: var(--font-accent);
+  font-size: var(--type-small);
+  line-height: var(--leading-body);
   overflow-wrap: anywhere;
 }
 .presence-detail small {
@@ -139,7 +195,7 @@
   width: 108px;
   height: 108px;
   color: var(--skin-text-strong);
-  font: normal 10px/1.2 var(--space-font);
+  font: normal 10px/1.2 var(--font-accent);
 }
 .earth-dial {
   position: relative;
@@ -158,9 +214,7 @@
   opacity: 0.25;
 }
 .clock-numerals {
-  font:
-    8px Georgia,
-    serif;
+  font: 8px var(--font-accent);
 }
 .space-calendar {
   position: absolute;
@@ -182,9 +236,7 @@
   font-size: 9px;
 }
 .calendar-day {
-  font:
-    12px/1 Georgia,
-    serif;
+  font: 700 12px/1 var(--font-accent);
   font-variant-numeric: tabular-nums;
 }
 .calendar-weekday {

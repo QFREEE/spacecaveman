@@ -75,11 +75,8 @@ html[lang="en"] .masthead {
 .masthead h1,
 html[lang="en"] .masthead h1 {
   color: var(--skin-surface);
-  font:
-    26px/1.5 Georgia,
-    SimSun,
-    serif;
-  letter-spacing: 1px;
+  font: 700 clamp(26px, 3.4vw, 34px)/var(--leading-heading) var(--font-primary);
+  letter-spacing: -0.035em;
   margin: 3px 0;
 }
 .masthead p {
@@ -89,7 +86,7 @@ html[lang="en"] .masthead h1 {
 }
 .space-url {
   color: var(--skin-border-soft);
-  font: 9px monospace;
+  font: 9px var(--font-accent);
 }
 .lunar-scene {
   position: absolute;
@@ -102,7 +99,7 @@ html[lang="en"] .masthead h1 {
   top: 23px;
   right: 65px;
   color: var(--skin-sky-text);
-  font: 20px monospace;
+  font: 20px var(--font-accent);
 }
 .moon-ground {
   position: absolute;
@@ -135,7 +132,7 @@ html[lang="en"] .masthead h1 {
   bottom: 12px;
   left: 26px;
   color: var(--skin-muted);
-  font: 8px monospace;
+  font: 8px var(--font-accent);
   letter-spacing: 1px;
 }
 .skin-toolbar {
@@ -486,7 +483,7 @@ input[type="range"] {
   left: 0;
   width: 100%;
   text-align: center;
-  font: 8px monospace;
+  font: 8px var(--font-accent);
   color: var(--skin-muted);
 }
 .plant-meters {
@@ -742,7 +739,7 @@ footer p {
   }
   .masthead h1,
   html[lang="en"] .masthead h1 {
-    font-size: 24px;
+    font-size: clamp(26px, 5.5vw, 30px);
   }
   .masthead p {
     font-size: 12px;
