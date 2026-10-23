@@ -3,6 +3,12 @@ import { useLanguage } from "./Language";
 import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
 import { WatercolorFlower } from "./WatercolorFlower";
+import {
+  readLocalPlant,
+  saveLocalPlant,
+  nextLocalPlant,
+  type LocalPlant,
+} from "./localPlant";
 
 const actions = [
   {
@@ -39,60 +45,6 @@ const actions = [
   },
 ] as const;
 type Care = (typeof actions)[number];
-type Stats = Record<Care["id"], number>;
-type Plant = {
-  stats: Stats;
-  log: string[];
-  generation: number;
-  bloomed_at: string | null;
-  error?: string;
-};
-const initialStats = { rain: 0, sun: 0, love: 0, food: 0 };
-const careStep = 5;
-
-function previewStats(stats: Stats, queue: readonly Care[]): Stats {
-  const next = { ...stats };
-  for (const action of queue)
-    next[action.id] = Math.min(50, next[action.id] + careStep);
-  return next;
-}
-
-async function requestPlant(
-  care?: Care["id"],
-): Promise<{ plant: Plant; status: number }> {
-  const response = await fetch(`/api/flower${care ? `?care=${care}` : ""}`, {
-    method: care ? "POST" : "GET",
-    signal: AbortSignal.timeout(10000),
-  });
-  if (![200, 409, 429].includes(response.status))
-    throw new Error("Flower unavailable");
-  const plant = await response.json();
-  if (
-    !plant.stats ||
-    !actions.every(
-      ({ id }) =>
-        Number.isInteger(plant.stats[id]) &&
-        plant.stats[id] >= 0 &&
-        plant.stats[id] <= 50,
-    ) ||
-    !Array.isArray(plant.log) ||
-    plant.log.length > 12 ||
-    !plant.log.every((id: unknown) =>
-      actions.some((action) => action.id === id),
-    ) ||
-    !Number.isSafeInteger(plant.generation) ||
-    plant.generation < 1 ||
-    !(
-      plant.bloomed_at === null ||
-      (typeof plant.bloomed_at === "string" &&
-        Number.isFinite(Date.parse(plant.bloomed_at)))
-    )
-  ) {
-    throw new Error("Invalid flower");
-  }
-  return { plant, status: response.status };
-}
-
 function FertilizerBagIcon({ size = 15 }: { size?: number }) {
   return (
     <svg
@@ -121,101 +73,42 @@ function FertilizerBagIcon({ size = 15 }: { size?: number }) {
 
 export function FlowerVine() {
   const { t } = useLanguage();
-  const [stats, setStats] = useState(initialStats);
+  const [plant, setPlant] = useState(readLocalPlant);
+  const current = useRef(plant);
   const [active, setActive] = useState<Care | null>(null);
   const [notice, setNotice] = useState<MessageKey | "">("");
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [contribution, setContribution] = useState({ generation: 0, count: 0 });
   const [effectId, setEffectId] = useState(0);
-  const [queued, setQueued] = useState<Care[]>([]);
-  const queue = useRef<Care[]>([]);
-  const confirmed = useRef(initialStats);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const busy = useRef(false);
-  const revision = useRef(0);
-  const plantGeneration = useRef(0);
-  const mounted = useRef(true);
-  const displayStats = previewStats(stats, queued);
-  const stage = Math.floor(
-    Object.values(displayStats).reduce((sum, value) => sum + value, 0) / 25,
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
   );
-  const completedBars = Object.values(displayStats).filter(
-    (value) => value === 50,
-  ).length;
-  const drawingLabel: MessageKey | "" =
-    completedBars === 0
-      ? "flower.paint.sketch"
-      : completedBars === 1
-        ? "flower.paint.pot"
-        : completedBars === 2
-          ? "flower.paint.leaves"
-          : completedBars === 3
-            ? "flower.paint.petals"
-            : "";
-  function updateQueue(next: Care[]) {
-    queue.current = next;
-    setQueued(next);
+  function commit(next: LocalPlant) {
+    current.current = next;
+    setPlant(next);
+    saveLocalPlant(next);
   }
-  function applyPlant(plant: Plant) {
-    if (plantGeneration.current !== plant.generation) {
-      plantGeneration.current = plant.generation;
-      setNotice("");
-      setActive(null);
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = null;
-      updateQueue([]);
-    }
-    setContribution((previous) =>
-      previous.generation === plant.generation
-        ? previous
-        : { generation: plant.generation, count: 0 },
-    );
-    setStats(plant.stats);
-    confirmed.current = plant.stats;
-    setLoaded(true);
-    setFailed(false);
-  }
-  useEffect(() => {
-    let current = true;
-    async function refresh() {
-      if (busy.current) return;
-      const version = ++revision.current;
-      try {
-        const { plant } = await requestPlant();
-        if (current && version === revision.current) applyPlant(plant);
-      } catch {
-        if (current && version === revision.current) setFailed(true);
-      }
-    }
-    void refresh();
-    const poll = setInterval(() => {
-      if (!document.hidden) void refresh();
-    }, 30000);
-    window.addEventListener("focus", refresh);
-    return () => {
-      current = false;
-      clearInterval(poll);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-      queue.current = [];
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
   function care(action: Care) {
-    if (!loaded || failed) return;
-    if (previewStats(confirmed.current, queue.current)[action.id] >= 50) {
-      return;
-    }
-    updateQueue([...queue.current, action]);
-    setNotice("flower.notice.caring");
+    const before = current.current;
+    if (before.stats[action.id] >= 50) return;
+    const completed = Object.values(before.stats).filter(
+      (value) => value === 50,
+    ).length;
+    const steps = [8, 6, 3, 6][completed];
+    const nextValue = Math.round(
+      ((Math.round((before.stats[action.id] * steps) / 50) + 1) * 50) / steps,
+    );
+    commit({
+      ...before,
+      stats: {
+        ...before.stats,
+        [action.id]: Math.min(50, nextValue),
+      },
+      careCount: Math.min(32, before.careCount + 1),
+    });
+    setNotice(action.response);
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       if (timer.current) clearTimeout(timer.current);
       setActive(action);
@@ -225,81 +118,23 @@ export function FlowerVine() {
         timer.current = null;
       }, 650);
     }
-    void saveCare();
   }
-
-  async function saveCare() {
-    if (busy.current) return;
-    if (!queue.current.length) return;
-    busy.current = true;
-    setPending(true);
-    ++revision.current;
-    try {
-      while (queue.current.length) {
-        const action = queue.current[0];
-        const previousGeneration = plantGeneration.current;
-        const { plant, status } = await requestPlant(action.id);
-        if (!mounted.current) return;
-        updateQueue(queue.current.slice(1));
-        applyPlant(plant);
-        if (status === 200) {
-          setContribution((previous) => ({
-            generation: plant.generation,
-            count:
-              (previous.generation === plant.generation ? previous.count : 0) +
-              1,
-          }));
-        }
-        if (
-          plant.generation !== previousGeneration ||
-          plant.error === "day_changed"
-        ) {
-          updateQueue([]);
-          setNotice("flower.notice.newDay");
-          break;
-        }
-        if (status === 429) {
-          updateQueue([]);
-          setNotice("flower.notice.wait");
-          break;
-        }
-        if (status === 409) {
-          // Another visitor may have filled this bar while our clicks were queued.
-          updateQueue(queue.current.filter((entry) => entry.id !== action.id));
-          setNotice("");
-        } else {
-          setNotice(action.response);
-        }
-      }
-    } catch {
-      if (!mounted.current) return;
-      updateQueue([]);
-      setFailed(true);
-      setNotice("flower.notice.unconfirmed");
-    } finally {
-      busy.current = false;
-      if (mounted.current) setPending(false);
-    }
+  function newPlant() {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    setActive(null);
+    setNotice("");
+    commit(nextLocalPlant(current.current));
   }
-
-  const ordinaryNotice =
-    !notice ||
-    notice === "flower.notice.caring" ||
-    actions.some((action) => action.response === notice);
-  const feedback = failed
-    ? notice === "flower.notice.unconfirmed"
-      ? notice
-      : "flower.unavailable"
-    : !loaded
-      ? "flower.loading"
-      : ordinaryNotice && contribution.count >= 10
-        ? "flower.notice.thanks"
-        : ordinaryNotice && contribution.count >= 6
-          ? "flower.notice.encourage"
-          : ordinaryNotice && contribution.count >= 3
-            ? "flower.notice.growing"
-            : notice;
-
+  const feedback: MessageKey | "" = !notice
+    ? ""
+    : plant.careCount >= 10
+      ? "flower.notice.thanks"
+      : plant.careCount >= 6
+        ? "flower.notice.encourage"
+        : plant.careCount >= 3
+          ? "flower.notice.growing"
+          : notice;
   return (
     <ModuleFrame
       id="flower"
@@ -308,108 +143,66 @@ export function FlowerVine() {
       icon="flower"
       className="flower"
     >
-      <div aria-busy={!loaded && !failed}>
-        <div
-          className="flower-stage"
-          data-stage={loaded ? stage : undefined}
-          data-care={active?.id ?? "idle"}
-        >
-          {loaded ? (
-            <>
-              <span className="plant-label">
-                {drawingLabel ? t(drawingLabel) : ""}
-              </span>
-              <WatercolorFlower stats={displayStats} />
-              {active ? (
-                <span
-                  className={`care-effect effect-${active.id}`}
-                  key={effectId}
-                  aria-hidden="true"
-                >
-                  {active.id === "food" ? (
-                    <FertilizerBagIcon size={28} />
-                  ) : (
-                    active.effect
-                  )}
-                </span>
-              ) : null}
-            </>
-          ) : null}
-        </div>
-        {loaded ? (
-          <div
-            className="plant-meters"
-            data-recognition={contribution.count >= 10 ? "thanks" : undefined}
+      <div
+        className="flower-stage"
+        data-stage={Math.floor(
+          Object.values(plant.stats).reduce((sum, n) => sum + n, 0) / 25,
+        )}
+        data-care={active?.id ?? "idle"}
+      >
+        <WatercolorFlower stats={plant.stats} plantId={plant.plantId} />
+        {active ? (
+          <span
+            className={`care-effect effect-${active.id}`}
+            key={effectId}
+            aria-hidden="true"
           >
-            {actions.map((action) => (
-              <div className="plant-stat" key={action.id}>
-                <span>{t(action.stat)}</span>
-                <meter
-                  aria-label={t(action.stat)}
-                  min="0"
-                  max="50"
-                  value={displayStats[action.id]}
-                  aria-busy={queued.some((entry) => entry.id === action.id)}
-                />
-              </div>
-            ))}
-          </div>
+            {active.id === "food" ? (
+              <FertilizerBagIcon size={28} />
+            ) : (
+              active.effect
+            )}
+          </span>
         ) : null}
-        <div className="care-actions">
-          {actions.map((action) => (
-            <button
-              key={action.id}
-              className="bevel"
-              type="button"
-              disabled={!loaded || failed}
-              onClick={() => care(action)}
-            >
-              <span aria-hidden="true">
-                {action.id === "food" ? (
-                  <FertilizerBagIcon />
-                ) : (
-                  action.icon
-                )}{" "}
-              </span>
-              {t(action.label)}
-            </button>
-          ))}
-        </div>
-        <p
-          className="plant-notice"
-          role="status"
-          aria-label={t("flower.status")}
-        >
-          {feedback ? t(feedback) : ""}
-        </p>
-        <div className="plant-tools">
+      </div>
+      <div
+        className="plant-meters"
+        data-recognition={plant.careCount >= 10 ? "thanks" : undefined}
+      >
+        {actions.map((action) => (
+          <div className="plant-stat" key={action.id}>
+            <span>{t(action.stat)}</span>
+            <meter
+              aria-label={t(action.stat)}
+              min="0"
+              max="50"
+              value={plant.stats[action.id]}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="care-actions">
+        {actions.map((action) => (
           <button
+            key={action.id}
+            className="bevel"
             type="button"
-            className="text-button"
-            disabled={pending || (!loaded && !failed)}
-            onClick={async () => {
-              if (busy.current) return;
-              busy.current = true;
-              setPending(true);
-              const version = ++revision.current;
-              try {
-                const { plant } = await requestPlant();
-                if (version === revision.current) {
-                  applyPlant(plant);
-                  setNotice("");
-                }
-              } catch {
-                setFailed(true);
-              } finally {
-                busy.current = false;
-                setPending(false);
-                void saveCare();
-              }
-            }}
+            onClick={() => care(action)}
           >
-            {t("flower.refresh")}
+            <span aria-hidden="true">
+              {action.id === "food" ? <FertilizerBagIcon /> : action.icon}{" "}
+            </span>
+            {t(action.label)}
           </button>
-        </div>
+        ))}
+      </div>
+      <p className="plant-notice" role="status" aria-label={t("flower.status")}>
+        {feedback ? t(feedback) : ""}
+      </p>
+      <div className="plant-tools">
+        <button type="button" className="text-button" onClick={newPlant}>
+          {t("flower.newPlant")}
+        </button>
       </div>
     </ModuleFrame>
   );

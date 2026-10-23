@@ -1,6 +1,6 @@
 import { test, expect } from "./fixtures";
 
-test("front page contains NYC, shared flower and live page views with lunar identity", async ({
+test("front page contains NYC, local flower and live page views with lunar identity", async ({
   page,
   baseURL,
 }) => {
@@ -56,11 +56,7 @@ test("front page contains NYC, shared flower and live page views with lunar iden
   ).toEqual([]);
   expect(
     [...new Set(requests.filter((url) => url.includes("/api/")))].sort(),
-  ).toEqual([
-    `${baseURL}/api/flower`,
-    `${baseURL}/api/presence/public`,
-    `${baseURL}/api/visitors`,
-  ]);
+  ).toEqual([`${baseURL}/api/presence/public`, `${baseURL}/api/visitors`]);
   await expect(page.locator("body")).not.toContainText(
     /DEMO|sample data|local flower demo/,
   );
@@ -122,15 +118,15 @@ test("public NYC status remains unknown and flower care survives language change
   await expect(page.locator(".presence-answer")).toContainText("还没有更新。");
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "5");
+  ).toHaveAttribute("value", "6");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "5");
+  ).toHaveAttribute("value", "6");
   await page.reload();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "5");
+  ).toHaveAttribute("value", "6");
   await expect(page.locator(".presence-answer")).toContainText(
     "No update yet.",
   );
@@ -146,7 +142,7 @@ test("enlarged text and flower controls fit a short phone viewport", async ({
       "p, h2, a, button, label { font-size: 200% !important; overflow-wrap: anywhere; }",
   });
   await expect(
-    page.getByRole("button", { name: "Refresh plant", exact: true }),
+    page.getByRole("button", { name: "New plant", exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(

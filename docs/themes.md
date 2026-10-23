@@ -64,6 +64,8 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
+`plantDesigns.ts` declares six plant drawings. See the preserved
+[painting method and extension guide](watercolor-plant-art.md).
 `WatercolorFlower.tsx` places and progressively reveals watercolor marks painted by
 [p5](https://p5js.org/) and [p5.brush](https://github.com/acamposuribe/p5.brush).
 `watercolorAtlas.ts` dynamically loads both libraries and uses a seeded, hidden
@@ -72,7 +74,7 @@ result to offscreen 2D canvas tiles, removes the WebGL canvas and stops the sket
 cached marks on a visible 2D canvas without rerunning the painting simulation. SVG retains the black
 contours above it; directional canvas clips reveal the textures and multiply
 blending deepens overlaps. If initialization fails, basic translucent
-canvas washes keep shared progress usable. No remote CDN or image requests are
+canvas washes keep local progress usable. No remote CDN or image requests are
 needed. No data-image URL or CSP expansion is required. The illustration palette is shared between themes; its ink follows the
 active skin. `space.css` disables reveal transitions for reduced motion.
 
@@ -94,8 +96,8 @@ does not key/remount the application or its modules. Flower progress, drafts,
 posted local messages, filters, expanded diary entries, playback, language and
 ornament choices in the retained demo survive switching. Its **Restore default
 skin** control selects Lunar ink and restores Stars and the pendant. The current
-homepage has no earned ornaments; shared flower progress lives on the server and
-resets at New York midnight rather than on page reload.
+homepage has no earned ornaments. Plant progress and selection live in browser
+localStorage, persist through reload, and reset only with New plant.
 
 The first registry entry defines the default. Keep Lunar ink first to preserve
 the accepted design. Changing an optional palette must not edit the lunar CSS or

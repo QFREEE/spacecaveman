@@ -33,7 +33,7 @@ the runtime metadata.
 1. Find the semantic key in `demo/src/i18n/en.ts`. Edit its value and the same
    key in `demo/src/i18n/zh.ts`; keep the key stable when changing wording.
 2. For new text, add a descriptive key to both catalogs, then render it with
-   `const { t } = useLanguage()` and `t("flower.refresh")`. Avoid inline language
+   `const { t } = useLanguage()` and `t("flower.newPlant")`. Avoid inline language
    conditionals and do not import the legacy translator into active code.
 3. Store message keys or domain IDs for feedback/history, not translated text.
    Translate at render time so existing content follows the language switch.
@@ -47,7 +47,7 @@ For example, the same call renders the matching wording in either language:
 
 ```tsx
 const { t } = useLanguage();
-return <button>{t("flower.refresh")}</button>;
+return <button>{t("flower.newPlant")}</button>;
 ```
 
 To change the name or description, edit `site.title` or `site.description` in

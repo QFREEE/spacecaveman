@@ -929,3 +929,10 @@ footer p {
     animation: none !important;
   }
 }
+.plant-name {
+  position: absolute;
+  right: 6px;
+  top: 3px;
+  font-size: 10px;
+  color: var(--skin-muted);
+}

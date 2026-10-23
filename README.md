@@ -1,14 +1,14 @@
 # spacecaveman
 
 The live site at https://spacecaveman.com is a personal lunar space with three
-modules: current NYC presence, a shared flower, and a real page-view counter.
+modules: current NYC presence, a local watercolor plant, and a real page-view counter.
 The React frontend lives in `demo/` for historical reasons; Wrangler builds and
 serves it as the production homepage.
 
 ## Homepage behavior
 
-- NYC and flower widgets show loading feedback until their first response, without
-  flashing a default scene or plant. Later refreshes keep the last confirmed state.
+- NYC shows loading feedback until its first response, without
+  flashing a default scene. Later refreshes keep the last confirmed state.
 - The header Earth dial combines an analog clock and calendar in one drawing.
   It sits behind the Moon surface and foreground artwork.
   It always shows US Eastern time and date, including daylight-saving changes.
@@ -21,33 +21,22 @@ serves it as the production homepage.
   within three hours, or over three hours ago. No exact timestamp is displayed.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
-- Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
-  advance one attribute by five to a maximum of fifty: ten clicks fill a bar.
-  The interface shows bars without numeric counts or levels. Bar progress is
-  ranked from highest to lowest: the leading bar draws the ink sketch, the next
-  paints the terracotta pot, then green leaves, then petals and the ochre center.
-  Any bar can finish first; the first full bar completes the sketch, the second
-  the pot, the third the leaves, and the fourth the flower. Partial bars reveal
-  their ranked layer progressively, so switching the leading action is seamless.
-  p5 and p5.brush paint the watercolor textures once on first use. The sketch
-  stops after exporting its textures; clicks reveal cached brush marks.
-  Loose rectangular transparent watercolor washes cross the outlines while black
-  lines remain visible above the pigment. Reduced motion applies progress
-  immediately. Every click has immediate visual feedback; saves queue while the
-  buttons stay available.
-  Failed saves discard unsaved queued care and restore confirmed progress.
-  Atomic increments keep rapid care within the cap.
-  The last twelve care actions are stored without visitor identities.
-- The flower starts fresh at midnight in New York every day, whether or not it
-  bloomed. The first read or care request after midnight resets the plant, care
-  log and bloom time once for everyone. Daylight-saving changes follow New York.
-  There is no public reset that can erase other visitors' progress.
-  Flower state refreshes every 30 seconds and when the window regains focus.
-- Flower progress is saved on the server, independently of browser storage.
-- Gentle encouragement appears after three and six successful actions in the
-  current visit. After ten, a personal thank-you appears; the bars keep their monochrome style.
-  There is no bloom message. Recognition resets for a new daily plant or page reload;
-  no visitor identity or numeric contribution count is displayed or stored.
+- Plant care is entirely browser-local. Water, Sun, Prune and Feed advance
+  a fifty-point bar (eight clicks for sketch, six for pot, three for leaves, six for petals), with continuous clicking and no visible numbers.
+  Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
+  action leads. Refresh preserves the selected plant and care in versioned
+  `localStorage`; there is no flower request, polling or midnight reset.
+- **New plant** cycles through Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
+  lily and clears the current care and feedback. Separate browsers have separate
+  plants. If browser storage is blocked, care remains usable for the current visit.
+- p5 and p5.brush generate seeded watercolor textures on first use, then stop and
+  release the hidden WebGL sketch. Cached canvas tiles retain transparent pigment,
+  darker edges, crossing washes and visible black ink. Meters stay monochrome.
+- Encouragement appears after three and six actions; ten earn a personal thank-you.
+  New plant clears it. The fertilizer bag is used in both the Feed button and effect.
+- [Watercolor plant art guide](docs/watercolor-plant-art.md) records the approved
+  method and explains how to add designs without changing rendering or care.
+
 - The counter starts at zero when its migration is applied and counts accepted
   page-load reports, including reloads. It is an aggregate, not a count of unique
   people, and is not bot-filtered analytics. The counter stores no IP addresses,
@@ -86,7 +75,7 @@ pnpm verify
 ```
 
 The browser suite covers desktop and touch-enabled phone contexts, both languages,
-shared care, reload persistence, blooming, unavailable storage, and
+local care, reload persistence, six plant designs, unavailable browser storage, and
 responsive layouts. The backend suite executes the schema and conditional SQL
 against SQLite. A dry run builds and packages the Worker without publishing it.
 
@@ -98,9 +87,9 @@ node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
 ```
 
 The smoke test records page views and attempts one real Water action. It checks
-shared state across reload and a second page, phone layouts, languages, private
+local plant state across reload and a second page, phone layouts, languages, private
 presence protection, preserved routes and security headers. It never resets the
-shared plant. Screenshots and browser reports are generated under `outputs/`.
+local plant. Screenshots and browser reports are generated under `outputs/`.
 
 ## Release the main site
 

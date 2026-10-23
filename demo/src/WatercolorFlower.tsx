@@ -1,117 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { loadWatercolorAtlas, type PaintAtlas } from "./watercolorAtlas";
 
-// Sketch and pigment stay separate: transparent flat-brush marks may cross ink edges.
-const petals = [
-  {
-    outline:
-      "M97 44C91 35 87 24 90 16C92 10 101 7 105 4C111 2 117 10 117 19C118 29 111 38 104 44",
-    x: 101,
-    y: 44,
-    angle: -84,
-    length: 40,
-    width: 23,
-    color: "#ee9d7c",
-  },
-  {
-    outline:
-      "M107 47C116 34 132 27 145 28C154 28 154 36 151 42C146 52 126 53 108 52",
-    x: 108,
-    y: 49,
-    angle: -21,
-    length: 47,
-    width: 24,
-    color: "#e88398",
-  },
-  {
-    outline:
-      "M107 54C119 54 137 60 142 70C147 81 138 84 130 81C119 77 109 65 104 57",
-    x: 106,
-    y: 56,
-    angle: 32,
-    length: 42,
-    width: 23,
-    color: "#e87d6b",
-  },
-  {
-    outline: "M96 56C90 69 73 80 63 79C54 78 57 68 62 63C70 56 84 53 93 52",
-    x: 94,
-    y: 54,
-    angle: 151,
-    length: 42,
-    width: 22,
-    color: "#edae94",
-  },
-  {
-    outline: "M93 47C79 47 61 43 57 34C50 22 60 18 67 21C79 25 89 36 97 44",
-    x: 94,
-    y: 46,
-    angle: -149,
-    length: 46,
-    width: 24,
-    color: "#e8887d",
-  },
-];
-const leaves = [
-  {
-    outline:
-      "M101 105C97 104 96 101 92 100C88 99 88 97 84 97C80 96 77 98 74 99C77 100 77 104 81 105C84 106 84 108 89 108C94 109 98 107 101 105",
-    x: 100,
-    y: 103,
-    angle: -173,
-    length: 28,
-    width: 12,
-    color: "#739a70",
-  },
-  {
-    outline:
-      "M103 97C107 97 108 99 112 98C117 98 118 95 122 94C127 92 128 87 131 83C127 84 125 82 121 85C117 87 114 86 111 90C108 92 106 94 103 97",
-    x: 105,
-    y: 96,
-    angle: -29,
-    length: 30,
-    width: 13,
-    color: "#a4ab58",
-  },
-  {
-    outline:
-      "M102 87C98 88 96 86 93 87C89 86 89 83 85 82C82 81 82 77 80 75C83 76 86 74 89 76C92 78 94 77 96 81C98 83 99 85 102 87",
-    x: 101,
-    y: 86,
-    angle: -149,
-    length: 24,
-    width: 11,
-    color: "#8da58a",
-  },
-];
-const ink = [
-  "M75 112L80 140Q100 147 121 139L126 112",
-  "M73 110Q99 104 128 110L127 117Q101 122 73 116Z",
-  "M100 109C107 91 100 76 100 57",
-  ...leaves.map((leaf) => leaf.outline),
-  ...petals.map((petal) => petal.outline),
-  "M104 50C105 56 95 56 95 50C95 44 104 44 104 50",
-  "M12 141Q28 135 44 140M43 137Q58 130 77 136M123 136Q142 132 151 139M151 141Q169 136 185 142",
-];
+import {
+  getPlantDesign,
+  type PlantDesign,
+  type BrushMark,
+} from "./plantDesigns";
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
-
-type Mark = {
-  x: number;
-  y: number;
-  angle: number;
-  length: number;
-  width: number;
-  color: string;
-};
 
 function PaintLayer({
   atlas,
   progress,
   fallback,
+  design,
 }: {
   atlas: PaintAtlas | null;
   progress: number[];
   fallback: boolean;
+  design: PlantDesign;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [, pot, greenery, flower] = progress;
@@ -121,7 +27,7 @@ function PaintLayer({
     context.setTransform(3, 0, 0, 3, 0, 0);
     context.clearRect(0, 0, 200, 153);
     context.globalCompositeOperation = "multiply";
-    function wash(mark: Mark, amount: number) {
+    function wash(mark: BrushMark, amount: number) {
       if (amount <= 0) return;
       context!.save();
       context!.translate(mark.x, mark.y);
@@ -149,32 +55,28 @@ function PaintLayer({
       }
       context!.restore();
     }
-    [0, 1, 2, 3, 4].forEach((row) =>
-      wash(
-        {
-          x: row % 2 ? 125 : 74,
-          y: 111 + row * 6.8,
-          angle: row % 2 ? 180 : 0,
-          length: row === 0 ? 54 : 51 - row * 2,
-          width: 17,
-          color: "#b96f49",
-        },
-        pot * 5 - row,
-      ),
+    design.pot.forEach((mark, index) =>
+      wash(mark, pot * design.pot.length - index),
     );
-    leaves.forEach((leaf, index) =>
-      wash(leaf, greenery * leaves.length - index),
+    design.leaves.forEach((mark, index) =>
+      wash(mark, greenery * design.leaves.length - index),
     );
-    petals.forEach((petal, index) => {
-      const amount = flower * 5.5 - index;
+    const bloomUnits = design.flowers.length + (design.center ? 0.5 : 0);
+    const anchor = design.center ?? { x: 100, y: 50 };
+    design.flowers.forEach((petal, index) => {
+      const amount = flower * bloomUnits - index;
+      if (petal.cross === false) {
+        wash(petal, amount);
+        return;
+      }
       const lean = index % 2 === 0 ? 16 : -18;
       // Offset broad strokes cross near the roots; a lighter angled pass
       // weaves through the first wash instead of filling the ink silhouette.
       wash(
         {
           ...petal,
-          x: petal.x + (100 - petal.x) * 0.3,
-          y: petal.y + (50 - petal.y) * 0.2,
+          x: petal.x + (anchor.x - petal.x) * 0.3,
+          y: petal.y + (anchor.y - petal.y) * 0.2,
           angle: petal.angle - lean * 0.3,
           width: petal.width + 2,
         },
@@ -195,16 +97,26 @@ function PaintLayer({
       );
       context.restore();
     });
-    context.save();
-    context.beginPath();
-    context.arc(100, 50, 4.4, 0, Math.PI * 2);
-    context.clip();
-    wash(
-      { x: 95, y: 50, angle: 0, length: 10, width: 10, color: "#d8ad50" },
-      flower * 11 - 10,
-    );
-    context.restore();
-  }, [atlas, pot, greenery, flower, fallback]);
+    if (design.center) {
+      const center = design.center;
+      context.save();
+      context.beginPath();
+      context.arc(center.x, center.y, center.radius, 0, Math.PI * 2);
+      context.clip();
+      wash(
+        {
+          x: center.x - center.radius,
+          y: center.y,
+          angle: 0,
+          length: center.radius * 2,
+          width: center.radius * 2,
+          color: center.color,
+        },
+        (flower * bloomUnits - design.flowers.length) * 2,
+      );
+      context.restore();
+    }
+  }, [atlas, pot, greenery, flower, fallback, design]);
   return (
     <foreignObject x="0" y="0" width="200" height="153">
       <canvas
@@ -220,9 +132,12 @@ function PaintLayer({
 
 export function WatercolorFlower({
   stats,
+  plantId = "cosmos",
 }: {
   stats: Record<"rain" | "sun" | "love" | "food", number>;
+  plantId?: string;
 }) {
+  const design = getPlantDesign(plantId);
   const [atlas, setAtlas] = useState<PaintAtlas | null>(null);
   const [paintFailed, setPaintFailed] = useState(false);
   useEffect(() => {
@@ -248,11 +163,13 @@ export function WatercolorFlower({
       aria-hidden="true"
       fill="none"
       className="watercolor-flower"
+      data-plant={design.id}
       data-renderer={
         atlas ? "p5.brush" : paintFailed ? "unavailable" : "loading"
       }
     >
       <PaintLayer
+        design={design}
         atlas={atlas}
         fallback={paintFailed}
         progress={[sketch, pot, greenery, flower]}
@@ -268,8 +185,8 @@ export function WatercolorFlower({
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {ink.map((path, index) => {
-          const progress = clamp(sketch * ink.length - index);
+        {design.ink.map((path, index) => {
+          const progress = clamp(sketch * design.ink.length - index);
           return (
             <path
               key={index}

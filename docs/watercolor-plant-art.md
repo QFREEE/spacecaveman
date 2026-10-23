@@ -1,0 +1,78 @@
+# Watercolor plant drawing method
+
+This records the approved drawing method, preserved in code rather than a
+flattened generated image. The homepage has six designs: Cosmos (the original),
+Tulip, Sunflower, Poppy, Lavender and Calla lily.
+
+## Visual rules
+
+- Draw modest, slightly irregular black contours. Keep the ink visible above paint.
+- Use transparent, blunt-ended, roughly rectangular flat-brush marks. Do not mask
+  paint precisely into petal or leaf silhouettes. A little overshoot is intentional.
+- Leaves point outward from their stem attachment, with curved, varied contours.
+- Blossom pigments use brighter coral, rose, golden yellow and lavender tones.
+- Petal washes radiate outward with slightly crossing angles. A weaker second
+  pass crosses the main wash; multiplication naturally deepens overlaps.
+- Pigment is uneven: clear interiors, denser irregular rims and a reverse glaze
+  at the outward tip. Preserve paper grain and some white gaps.
+- Keep the small flower center, no smiley. The original pot uses broad terracotta
+  strokes; the four UI meters always stay monochrome.
+
+## Code and interface
+
+`demo/src/plantDesigns.ts` is the extension seam. A `PlantDesign` declares:
+
+- stable `id`, bilingual name key, ordered `ink` paths;
+- `pot`, `leaves`, and `flowers` arrays of directional `BrushMark` records;
+- an optional colored circle `center` with position and radius.
+
+A mark gives position, angle in degrees, length, width and pigment color. An
+optional `outline` contributes a sketch path; `cross: false` avoids the secondary
+petal wash for tiny lavender flowers or narrow folded details. The design helper
+assembles pot, stem, leaf, bloom, center and ground paths in drawing order.
+`leaf()` and `petal()` convert local contour coordinates to sketch paths.
+
+`WatercolorFlower({ stats, plantId })` is the drawing interface. It ranks the four
+care values, reveals ink and interprets the chosen design. It has no special
+branches for plant IDs. Pot/leaf/bloom arrays each finish at their ranked bar's
+maximum. Centers appear at the end of the bloom layer.
+
+`watercolorAtlas.ts` paints all discovered pigment swatches using p5 2.3.4 and
+p5.brush 2.2.3. A fixed seed stabilizes texture. The palette discovers colors from
+the registry and assigns pot/leaf/petal/center roles, so new colors do not require
+editing the painting engine. Preserve the original palette prefix to retain its
+seed order. Pixel-density-aware canvas cropping keeps colors in their own tiles.
+
+Current petal settings are fill texture 0.65, border intensity 0.95, pigment 205,
+and reverse tip glaze 135. After rendering, a varying alpha mask leaves the belly
+more transparent than the rims. Other roles keep pigment 115 and texture/border
+0.42/0.55. These are art parameters, not care rules.
+
+The engine loads dynamically, paints once, crops into offscreen canvas tiles,
+then removes the WebGL sketch. A visible 2D canvas composites those cached marks
+under SVG ink. No image data URLs, remote assets or CSP changes are needed.
+Failed painting initialization has a simple translucent canvas fallback. Care
+clicks never restart p5 or block waiting for a painting frame.
+
+## Add a design
+
+1. Add a stable ID and bilingual name in `i18n/en.ts` and `i18n/zh.ts`.
+2. Add one registry entry using the design helper, or supply a full `PlantDesign`.
+3. Keep ink and washes within the 200 × 153 viewBox. The shared pot sits near
+   y=110–145; keep new stems connected and avoid stray branches.
+4. Declare its stems, green marks and blossom marks. Mark colors are discovered
+   automatically. Use an optional center only where the flower needs one.
+5. Inspect blank, sketch-only, pot-only, leaves and full-color stages. Verify
+   stroke direction, ink visibility, overlap and phone scale.
+6. Run `pnpm verify`. Add the ID to the six-design browser gallery as the collection
+   grows, and compare silhouettes, not just different colors of the same flower.
+
+## Local care
+
+`localPlant.ts` owns the versioned `spacecaveman:plant:v1` record. It validates IDs,
+integer bounds and counters before using stored data. The UI writes only to browser
+localStorage; it does not call the legacy flower endpoint. In completion order, empty bars take eight clicks for sketch, six for pot, three for leaves and six for petals.
+Partly filled bars keep their normalized progress when the click rate changes. Ranked care reveals sketch → pot → leaves → blooms, independent of button
+order. Reload preserves care. New plant cycles registry order and clears care and
+feedback; there is no midnight reset. If storage is blocked, the visit still works
+in memory. This record is per browser/origin, not synchronized across devices.

@@ -66,19 +66,29 @@ try {
   );
   const initialCount = Number(await page.locator(".counter").textContent());
 
-  // One genuine care action, including on production. Never reset the shared plant.
-  const careResponse = page.waitForResponse(
-    (res) =>
-      res.url().includes("/api/flower?care=rain") &&
-      res.request().method() === "POST",
+  // Care belongs only to this browser context; no server request is made.
+  const before = Number(
+    await page
+      .getByRole("meter", { name: "Rain", exact: true })
+      .getAttribute("value"),
   );
+  const completed = await page
+    .locator("#flower meter")
+    .evaluateAll(
+      (meters) =>
+        meters.filter((meter) => Number(meter.getAttribute("value")) === 50)
+          .length,
+    );
+  const steps = [8, 6, 3, 6][completed] ?? 6;
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  const care = await careResponse;
-  assert.ok(
-    [200, 409, 429].includes(care.status()),
-    `Care returned ${care.status()}: ${await care.text()}`,
-  );
-  const saved = await care.json();
+  const saved = {
+    stats: {
+      rain: Math.min(
+        50,
+        Math.round(((Math.round((before * steps) / 50) + 1) * 50) / steps),
+      ),
+    },
+  };
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
   ).toHaveAttribute("value", String(saved.stats.rain));
@@ -133,17 +143,16 @@ try {
   assert.equal(presence.status(), 200);
   const protectedPresence = await context.request.get(`${base}/api/presence`);
   assert.ok([401, 503].includes(protectedPresence.status()));
-  assert.ok(
-    writes.every((url) => /\/api\/(visitors|flower\?care=rain)$/.test(url)),
-  );
+  assert.ok(writes.every((url) => /\/api\/visitors$/.test(url)));
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);
   console.log(
     JSON.stringify({
       base,
       counter: "live D1 page views",
-      flower: "shared, persisted across reload and a second page",
-      careStatus: care.status(),
+      flower:
+        "browser-local, persisted across reload and a same-browser second page",
+      careStatus: "browser-local",
       languages: "en/zh",
       phoneWidths: [320, 390, 430],
       securityHeaders: "preserved",

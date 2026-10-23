@@ -1,20 +1,9 @@
 // p5.brush paints the atlas once. SVG only places and reveals its real brush marks.
-export const paintColors = [
-  "#b96f49",
-  "#739a70",
-  "#a4ab58",
-  "#8da58a",
-  "#ee9d7c",
-  "#e88398",
-  "#e87d6b",
-  "#edae94",
-  "#e8887d",
-  "#d8ad50",
-];
+import { pigmentPalette } from "./plantDesigns";
 export const cellWidth = 128;
 export const cellHeight = 80;
 export const atlasWidth = cellWidth * 4;
-export const atlasHeight = cellHeight * 3;
+export const atlasHeight = cellHeight * Math.ceil(pigmentPalette.length / 4);
 export type PaintAtlas = Record<string, HTMLCanvasElement>;
 let atlas: Promise<PaintAtlas> | undefined;
 
@@ -24,6 +13,7 @@ export function loadWatercolorAtlas(): Promise<PaintAtlas> {
 
 async function createAtlas(): Promise<PaintAtlas> {
   const { default: P5 } = await import("p5");
+  P5.disableFriendlyErrors = true;
   // p5.brush registers its flush hooks against this constructor during import.
   if (!Reflect.get(window, "p5")) Reflect.set(window, "p5", P5);
   const brush = await import("p5.brush");
@@ -79,10 +69,10 @@ async function createAtlas(): Promise<PaintAtlas> {
             brush.noField();
             brush.fillBleed(0.13, "out", 0);
             brush.fillTexture(0.42, 0.55, false);
-            paintColors.forEach((color, index) => {
+            pigmentPalette.forEach(({ color, role }, index) => {
               const x = (index % 4) * cellWidth - atlasWidth / 2;
               const y = Math.floor(index / 4) * cellHeight - atlasHeight / 2;
-              const isPetal = index >= 4 && index <= 8;
+              const isPetal = role === "petal";
               // Keep the interior watery while pigment gathers along irregular edges.
               brush.fillTexture(
                 isPetal ? 0.65 : 0.42,
@@ -107,7 +97,7 @@ async function createAtlas(): Promise<PaintAtlas> {
                 [10, 40],
               ].forEach(([dx, dy]) => brush.vertex(x + dx, y + dy));
               brush.endShape(true);
-              if (index >= 4 && index <= 8) {
+              if (role === "petal") {
                 // A reverse glaze deposits pigment at the outward end, not only the root.
                 brush.fill(color, 135);
                 brush.fillBleed(0.08, "out", Math.PI);
@@ -132,7 +122,7 @@ async function createAtlas(): Promise<PaintAtlas> {
                 const canvas = host.querySelector("canvas");
                 if (!canvas) throw new Error("Missing watercolor canvas");
                 const textures: PaintAtlas = {};
-                paintColors.forEach((color, index) => {
+                pigmentPalette.forEach(({ color, role }, index) => {
                   const crop = document.createElement("canvas");
                   crop.width = cellWidth;
                   crop.height = cellHeight;
@@ -151,7 +141,7 @@ async function createAtlas(): Promise<PaintAtlas> {
                     cellWidth,
                     cellHeight,
                   );
-                  if (index >= 4 && index <= 8) {
+                  if (role === "petal") {
                     // Opacity varies across each flat brush: clearer belly, denser rims.
                     const wetness = context.createLinearGradient(0, 16, 0, 64);
                     wetness.addColorStop(0, "rgba(0,0,0,1)");
