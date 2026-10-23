@@ -89,7 +89,7 @@ async function createAtlas(): Promise<PaintAtlas> {
                 isPetal ? 0.95 : 0.55,
                 false,
               );
-              brush.fill(color, isPetal ? 175 : 115);
+              brush.fill(color, isPetal ? 205 : 115);
               // Broad, blunt-ended flat-brush geometry, with space for bleed.
               brush.beginShape(0.08);
               [
@@ -109,7 +109,7 @@ async function createAtlas(): Promise<PaintAtlas> {
               brush.endShape(true);
               if (index >= 4 && index <= 8) {
                 // A reverse glaze deposits pigment at the outward end, not only the root.
-                brush.fill(color, 110);
+                brush.fill(color, 135);
                 brush.fillBleed(0.08, "out", Math.PI);
                 brush.beginShape(0.1);
                 [
