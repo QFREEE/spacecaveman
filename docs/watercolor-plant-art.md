@@ -1,8 +1,9 @@
 # Watercolor plant drawing method
 
 This records the approved drawing method, preserved in code rather than a
-flattened generated image. The homepage has six designs: Cosmos (the original),
-Tulip, Sunflower, Poppy, Lavender and Calla lily.
+flattened generated image. The homepage has twelve designs: Cosmos (the original),
+Tulip, Sunflower, Poppy, Lavender, Calla lily, Rose, Daisy, Iris, Daffodil,
+Hydrangea and Lily of the valley.
 
 ## Visual rules
 
@@ -10,7 +11,9 @@ Tulip, Sunflower, Poppy, Lavender and Calla lily.
 - Use transparent, blunt-ended, roughly rectangular flat-brush marks. Do not mask
   paint precisely into petal or leaf silhouettes. A little overshoot is intentional.
 - Leaves point outward from their stem attachment, with curved, varied contours.
-- Blossom pigments use brighter coral, rose, golden yellow and lavender tones.
+- Use a distinct combination of leaf and blossom shades for each plant. Alternate
+  related pigments within each bloom. Leaves range from olive and sage to emerald
+  and blue-green; flowers include coral, raspberry, gold, violet and cool blue.
 - Petal washes radiate outward with slightly crossing angles. A weaker second
   pass crosses the main wash; multiplication naturally deepens overlaps.
 - Pigment is uneven: clear interiors, denser irregular rims and a reverse glaze
@@ -68,7 +71,7 @@ clicks never restart p5 or block waiting for a painting frame.
    automatically. Use an optional center only where the flower needs one.
 5. Inspect seed, sprout, sketch-only, pot-only, leaves and full-color stages. Verify
    stroke direction, ink visibility, overlap and phone scale.
-6. Run `pnpm verify`. Add the ID to the six-design browser gallery as the collection
+6. Run `pnpm verify`. Add the ID to the twelve-design browser gallery as the collection
    grows, and compare silhouettes, not just different colors of the same flower.
 
 ## Local care
@@ -80,3 +83,34 @@ Partly filled bars keep their normalized progress when the click rate changes. R
 order. Reload preserves care. New plant uses a saved shuffled order, showing every design once per round without consecutive repeats and clears care and
 feedback; there is no midnight reset. If storage is blocked, the visit still works
 in memory. This record is per browser/origin, not synchronized across devices.
+
+## Local review gallery
+
+With `pnpm demo:dev` running, open `/plant-preview.html` to compare the active palettes per plant. The default view shows roses, irises and
+hydrangeas; select any species or all twelve. Controls show seed, sprout, ink,
+leaves and watercolor states, with incremental care for the full progression.
+This separate development entry is not included in the production homepage build.
+Existing saved shuffle queues finish their current round before drawing a new
+twelve-plant round, preserving the user's current plant and care.
+
+## Natural palette varieties
+
+`plantPalettes.ts` defines coordinated natural palettes per species, including
+leaf shades and fixed accents such as iris beards and calla spadices. The renderer
+caches palette-specific designs and discovers their pigments in the shared atlas.
+New plants save a `paletteId` in the existing versioned local record. Missing or
+invalid palette metadata keeps the original colors without losing care.
+The local gallery compares rose, iris and hydrangea by default, with a selector
+for any species or all 29 active variants. Stage buttons and incremental care demonstrate
+the existing seed-to-ink-to-watercolor progression.
+
+Near-duplicate review IDs 02, 08, 14, 15, 29, 30 and 36 are retired from new
+plant choices and the gallery. Existing saves retain their palette and care.
+Reference numbers stay fixed, with gaps for retired options. Palette 16 uses
+deeper apricot pigment.
+
+Review 35 now depicts Bluebell, using a dedicated silhouette and bilingual name.
+Its historical `lily-of-the-valley:ivory` key is retained for saved-care compatibility.
+The twelve shuffle slots therefore cover thirteen depicted species across 29 active
+choices. Sunflowers use pointed curved petals, warm darker disks with sparse
+crosshatching, and double-line stems. The review gallery keeps its original numbers.

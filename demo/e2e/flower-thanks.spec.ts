@@ -1,6 +1,20 @@
 import { test, expect } from "./fixtures";
 const storageKey = "spacecaveman:plant:v1";
 const actions = ["Water", "Sun", "Prune", "Feed"];
+const plantIds = [
+  "cosmos",
+  "tulip",
+  "sunflower",
+  "poppy",
+  "lavender",
+  "calla",
+  "rose",
+  "daisy",
+  "iris",
+  "daffodil",
+  "hydrangea",
+  "lily-of-the-valley",
+];
 const layers = ["sketch", "pot", "leaves", "petals"];
 
 test("local care is instant, capped, persistent, and makes no flower requests", async ({
@@ -41,7 +55,8 @@ test("every plant has its own complete drawing and New plant shuffles without re
   const flower = page.locator("#flower");
   await expect(flower.locator(".plant-name")).toHaveCount(0);
   const silhouettes = new Set<string>();
-  const ids = ["cosmos", "tulip", "sunflower", "poppy", "lavender", "calla"];
+  test.setTimeout(60000);
+  const ids = plantIds;
   const seen = new Set<string>();
   for (let i = 0; i < ids.length; i++) {
     const id = (await flower
@@ -96,7 +111,7 @@ test("every plant has its own complete drawing and New plant shuffles without re
       await expect(meter).toHaveAttribute("value", "0");
     await expect(flower.locator(".plant-notice")).toHaveCount(0);
   }
-  expect(silhouettes.size).toBe(6);
+  expect(silhouettes.size).toBe(plantIds.length);
   const selected = await flower
     .locator(".watercolor-flower")
     .getAttribute("data-plant");
@@ -239,9 +254,10 @@ test("shuffled rounds survive reload, avoid boundary repeats and preserve legacy
   const next = page.getByRole("button", { name: "New plant", exact: true });
   const order: string[] = [];
   let previous: string | null = null;
+  test.setTimeout(90000);
   for (let round = 0; round < 3; round++) {
     const seen = new Set<string>();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < plantIds.length; i++) {
       const id = (await plant.getAttribute("data-plant"))!;
       expect(id).not.toBe(previous);
       expect(seen.has(id)).toBe(false);
@@ -259,7 +275,7 @@ test("shuffled rounds survive reload, avoid boundary repeats and preserve legacy
       previous = id;
       await next.click();
     }
-    expect(seen.size).toBe(6);
+    expect(seen.size).toBe(plantIds.length);
   }
   expect(order).not.toEqual([
     "cosmos",

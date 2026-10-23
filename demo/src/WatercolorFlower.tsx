@@ -103,6 +103,14 @@ function PaintLayer({
       context.beginPath();
       context.arc(center.x, center.y, center.radius, 0, Math.PI * 2);
       context.clip();
+      if (design.id === "sunflower") {
+        context.save();
+        context.globalAlpha =
+          0.62 * clamp((flower * bloomUnits - design.flowers.length) * 2);
+        context.fillStyle = center.color;
+        context.fill();
+        context.restore();
+      }
       wash(
         {
           x: center.x - center.radius,
@@ -133,11 +141,13 @@ function PaintLayer({
 export function WatercolorFlower({
   stats,
   plantId = "cosmos",
+  paletteId = "original",
 }: {
   stats: Record<"rain" | "sun" | "love" | "food", number>;
   plantId?: string;
+  paletteId?: string;
 }) {
-  const design = getPlantDesign(plantId);
+  const design = getPlantDesign(plantId, paletteId);
   const [atlas, setAtlas] = useState<PaintAtlas | null>(null);
   const [paintFailed, setPaintFailed] = useState(false);
   useEffect(() => {
@@ -165,7 +175,9 @@ export function WatercolorFlower({
       aria-hidden="true"
       fill="none"
       className="watercolor-flower"
-      data-plant={design.id}
+      data-plant={plantId}
+      data-species={design.id}
+      data-palette={paletteId}
       data-growth={sketch === 0 ? "seed" : growth === 0 ? "sprout" : "growing"}
       data-renderer={
         atlas ? "p5.brush" : paintFailed ? "unavailable" : "loading"
