@@ -82,7 +82,8 @@ async function createAtlas(): Promise<PaintAtlas> {
             paintColors.forEach((color, index) => {
               const x = (index % 4) * cellWidth - atlasWidth / 2;
               const y = Math.floor(index / 4) * cellHeight - atlasHeight / 2;
-              brush.fill(color, 115);
+              // Petals carry richer pigment; leaves, pot and center stay unchanged.
+              brush.fill(color, index >= 4 && index <= 8 ? 185 : 115);
               // Broad, blunt-ended flat-brush geometry, with space for bleed.
               brush.beginShape(0.08);
               [
@@ -100,6 +101,24 @@ async function createAtlas(): Promise<PaintAtlas> {
                 [10, 40],
               ].forEach(([dx, dy]) => brush.vertex(x + dx, y + dy));
               brush.endShape(true);
+              if (index >= 4 && index <= 8) {
+                // A reverse glaze deposits pigment at the outward end, not only the root.
+                brush.fill(color, 90);
+                brush.fillBleed(0.08, "out", Math.PI);
+                brush.beginShape(0.1);
+                [
+                  [86, 23],
+                  [99, 19],
+                  [113, 22],
+                  [115, 40],
+                  [111, 61],
+                  [99, 59],
+                  [84, 57],
+                  [90, 40],
+                ].forEach(([dx, dy]) => brush.vertex(x + dx, y + dy));
+                brush.endShape(true);
+                brush.fillBleed(0.13, "out", 0);
+              }
             });
             // The library flushes watercolor buffers in its postdraw hook.
             requestAnimationFrame(() => {
