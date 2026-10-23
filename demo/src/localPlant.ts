@@ -1,4 +1,4 @@
-import { getPlantDesign, plantDesigns } from "./plantDesigns";
+import { plantDesigns } from "./plantDesigns";
 export const localPlantKey = "spacecaveman:plant:v1";
 export type CareId = "rain" | "sun" | "love" | "food";
 export type CareStats = Record<CareId, number>;
@@ -7,13 +7,30 @@ export type LocalPlant = {
   plantId: string;
   stats: CareStats;
   careCount: number;
+  remainingIds: string[];
 };
-export function freshPlant(plantId = plantDesigns[0].id): LocalPlant {
+const plantIds = plantDesigns.map((plant) => plant.id);
+function shuffled(ids: readonly string[]): string[] {
+  const order = [...ids];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+export function freshPlant(
+  plantId?: string,
+  remainingIds?: string[],
+): LocalPlant {
+  const order = shuffled(
+    plantId ? plantIds.filter((id) => id !== plantId) : plantIds,
+  );
   return {
     version: 1,
-    plantId,
+    plantId: plantId ?? order.shift()!,
     stats: { rain: 0, sun: 0, love: 0, food: 0 },
     careCount: 0,
+    remainingIds: remainingIds ?? order,
   };
 }
 export function parsePlant(value: string | null): LocalPlant | null {
@@ -45,6 +62,16 @@ export function parsePlant(value: string | null): LocalPlant | null {
         food: p.stats.food,
       },
       careCount: p.careCount,
+      // Older saves lack a queue; retain their current plant and care.
+      remainingIds:
+        Array.isArray(p.remainingIds) &&
+        p.remainingIds.every(
+          (id: unknown) =>
+            typeof id === "string" && plantIds.includes(id) && id !== p.plantId,
+        ) &&
+        new Set(p.remainingIds).size === p.remainingIds.length
+          ? [...p.remainingIds]
+          : shuffled(plantIds.filter((id) => id !== p.plantId)),
     };
   } catch {
     return null;
@@ -65,6 +92,11 @@ export function saveLocalPlant(plant: LocalPlant): void {
   }
 }
 export function nextLocalPlant(current: LocalPlant): LocalPlant {
-  const index = plantDesigns.indexOf(getPlantDesign(current.plantId));
-  return freshPlant(plantDesigns[(index + 1) % plantDesigns.length].id);
+  const order = current.remainingIds.length
+    ? [...current.remainingIds]
+    : shuffled(plantIds);
+  // Keep all designs in the next round, but do not repeat at its boundary.
+  if (order[0] === current.plantId && order.length > 1)
+    [order[0], order[1]] = [order[1], order[0]];
+  return freshPlant(order[0], order.slice(1));
 }

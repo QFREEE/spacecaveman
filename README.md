@@ -26,7 +26,7 @@ serves it as the production homepage.
   Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
   action leads. Refresh preserves the selected plant and care in versioned
   `localStorage`; there is no flower request, polling or midnight reset.
-- **New plant** cycles through Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
+- **New plant** shuffles Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
   lily and clears the current care and feedback. Separate browsers have separate
   plants. If browser storage is blocked, care remains usable for the current visit.
 - p5 and p5.brush generate seeded watercolor textures on first use, then stop and

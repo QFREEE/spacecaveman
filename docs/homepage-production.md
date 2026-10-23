@@ -7,7 +7,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | Homepage badge/footer                    | Fictional/demo labels                  | Personal space copy matching real features                                             |
 | Visitor counter                          | Hardcoded 001286                       | D1 aggregate starting at zero; includes reloads; loading/error/retry states            |
 | Flower care                              | Per-page state lost on refresh         | Per-browser saved plant and progress; six watercolor designs; no care network requests |
-| Flower reset                             | Any visitor could reset the local demo | New plant cycles designs and clears local care; no automatic reset                     |
+| Flower reset                             | Any visitor could reset the local demo | New plant shuffles designs and clears local care; no automatic reset                     |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected             |
 | NYC presence                             | Static Unknown card                    | Live coarse status and approximate update age                                          |
 | `/api/visits`                            | Fictional named visit plans            | Empty public list until owner/invited-friend access exists                             |
@@ -36,7 +36,7 @@ any first full bar finishes the sketch, then pot, then leaves, then blooms.
 The UI exposes only monochrome bars, not numeric counts or levels. Full attempts
 are silent. There is no In full color label or separate bloom notice.
 
-**New plant** (新植物) replaces Refresh plant. It cycles through Cosmos, Tulip,
+**New plant** (新植物) replaces Refresh plant. It shuffles Cosmos, Tulip,
 Sunflower, Poppy, Lavender and Calla lily, clears care and feedback, and saves the
 new selection. Reload preserves selection and progress. Nothing resets at midnight.
 Care shows no encouragement, thank-you or action-status messages. Progress is

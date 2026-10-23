@@ -73,6 +73,9 @@ export function FlowerVine() {
   const [active, setActive] = useState<Care | null>(null);
   const [effectId, setEffectId] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    saveLocalPlant(current.current);
+  }, []);
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
