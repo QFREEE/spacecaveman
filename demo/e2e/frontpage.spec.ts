@@ -51,7 +51,10 @@ test("front page contains NYC, local flower and live page views with lunar ident
     requests.filter(
       (url) =>
         !url.startsWith(`${baseURL}/`) &&
-        !url.startsWith(`${baseURL?.replace(/^http/, "ws")}/`),
+        !url.startsWith(`${baseURL?.replace(/^http/, "ws")}/`) &&
+        !["https://fonts.googleapis.com", "https://fonts.gstatic.com"].includes(
+          new URL(url).origin,
+        ),
     ),
   ).toEqual([]);
   expect(

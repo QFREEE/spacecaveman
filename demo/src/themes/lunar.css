@@ -43,7 +43,7 @@
   --space-gap: 10px;
   --space-header-height: 222px;
   --space-phone-header-height: 211px;
-  --space-font: Tahoma, "Microsoft YaHei", "PingFang SC", SimSun, sans-serif;
+  --space-font: var(--font-primary);
   --space-wallpaper-image:
     radial-gradient(
       circle at 15px 35px,
