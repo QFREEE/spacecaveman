@@ -92,6 +92,23 @@ held original value or create a replacement token.
 
 ## Local commands
 
+### Daily visitor counter migration
+
+Before merging the daily visitor counter release, apply migration
+`0005_daily_visitors.sql` to the website's existing D1 database using an authorized
+migration credential:
+
+```powershell
+pnpm exec wrangler d1 migrations apply spacecaveman-presence-trial --remote
+```
+
+CI does not apply migrations. This adds daily identifier tables and an insert
+trigger while preserving the existing total. It is compatible with the previous
+Worker. Deploying the new Worker before migration makes visitor writes return 503.
+The website's hourly cron removes previous days' salts and hashes. No new secret
+or presence-trial Worker deployment is needed. Rolling back the Worker preserves
+the total but resumes counting every page load; leave the additive schema in place.
+
 Use Node 24 and the package manager version recorded in the project manifest.
 
 ```sh

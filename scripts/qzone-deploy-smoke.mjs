@@ -149,7 +149,7 @@ try {
   console.log(
     JSON.stringify({
       base,
-      counter: "live D1 page views",
+      counter: "live D1 visits, deduplicated daily",
       flower:
         "browser-local, persisted across reload and a same-browser second page",
       careStatus: "browser-local",

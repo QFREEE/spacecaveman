@@ -42,13 +42,13 @@ test("language changes translate metadata, feedback and accessibility without re
     page.getByRole("button", { name: "详情", exact: true }),
   ).toHaveCount(0);
   expect(await page.locator("main").innerText()).not.toMatch(
-    /Watered|Care log|Total page views|flower\./,
+    /Watered|Care log|Total visits|Repeat visits|flower\./,
   );
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    "Yuntong’s space: NYC status, a flower and page views.",
+    "Yuntong’s space: NYC status, a flower and visits.",
   );
   await expect(flower.getByRole("status")).toHaveCount(0);
   expect(

@@ -5,7 +5,7 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 | Surface                                  | Previous demo behavior                 | Production behavior                                                                    |
 | ---------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------- |
 | Homepage badge/footer                    | Fictional/demo labels                  | Personal space copy matching real features                                             |
-| Visitor counter                          | Hardcoded 001286                       | D1 aggregate starting at zero; includes reloads; loading/error/retry states            |
+| Visitor counter                          | Hardcoded 001286                       | Cumulative visits; IP + browser counted once per New York day; loading/error/retry states |
 | Flower care                              | Per-page state lost on refresh         | Per-browser saved plant and progress; six watercolor designs; no care network requests |
 | Flower reset                             | Any visitor could reset the local demo | New plant shuffles designs and clears local care; no automatic reset                     |
 | Pause button                             | Manual animation toggle                | Removed at the owner's request; device reduced-motion setting is respected             |
@@ -15,10 +15,25 @@ Tracked in [issue #31](https://github.com/QFREEE/spacecaveman/issues/31).
 
 ## Data and API contract
 
-`GET /api/visitors` reads the total. Same-origin `POST /api/visitors` increments it
-atomically and returns `{ views }`. Each accepted page-load report counts, so this
-is not unique-person analytics or a bot-resistant metric. Reads never increment.
-A retry after an uncertain network failure may report another view.
+`GET /api/visitors` reads the total. Same-origin `POST /api/visitors` returns
+`{ views }`, incrementing only for the first IP + User-Agent combination on each
+New York calendar day. Refreshes, simultaneous loads and retries count once.
+The daily identifier uses HMAC-SHA-256 with a random salt shared through D1 for
+that day and includes the hostname. Raw IPs and User-Agent strings are never
+stored. Cloudflare's `CF-Connecting-IP` header is used; forwarding lists are ignored.
+If either identity header is missing (including plain local requests), the endpoint
+reads the total without incrementing. GET never creates an identity or increments.
+
+Migration `0005_daily_visitors.sql` adds daily salts, hashes and an insert trigger
+that increments the aggregate atomically only for a new unique identifier. The
+existing hourly website job deletes previous days' salts and cascading hashes,
+even without new traffic. Cleanup requires the website Worker cron to be running;
+Cloudflare backups/Time Travel follow their separate retention policies.
+The existing aggregate is preserved as a historical page-view baseline; earlier
+views cannot be deduplicated retroactively. Returning on a later day adds another
+visit. This estimates daily visitors, not distinct people across all time, and
+does not filter bots. People sharing IP and browser information may be combined;
+network or browser changes may count someone again.
 
 ## Local plant care
 
@@ -57,7 +72,8 @@ See [the preserved painting method and extension guide](watercolor-plant-art.md)
 The existing D1 `/api/flower` GET/POST contract and migrations remain available
 for older deployed clients. Its fifty-point bounds and New York daily reset are
 legacy backend behavior; the current homepage does not use or synchronize them.
-This change does not erase server state or require a database migration.
+Moving plant care into the browser did not erase server state or require a plant
+migration. Daily visitor counting separately requires migration 0005 above.
 
 ## Validation
 

@@ -1,6 +1,6 @@
 export const en = {
   "site.title": "Yuntong’s space",
-  "site.description": "Yuntong’s space: NYC status, a flower and page views.",
+  "site.description": "Yuntong’s space: NYC status, a flower and visits.",
   "clock.label": "Earth clock",
   "language.label": "Language",
   "nav.label": "Space navigation",
@@ -69,7 +69,8 @@ export const en = {
   "flower.loading": "Loading the flower…",
   "flower.status": "Flower status",
   "flower.refresh": "Refresh plant",
-  "visitors.total": "Total page views",
+  "visitors.total": "Total visits",
+  "visitors.note": "Repeat visits count once per day (New York time).",
   "visitors.unavailable": "Visit count is temporarily unavailable.",
   "visitors.loading": "Loading visit count…",
   "common.retry": "Try again",
