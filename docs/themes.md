@@ -23,7 +23,7 @@ belong to the retained full-homepage implementation.
 | Available skins, label, scene and portrait            | `demo/src/themes/registry.ts`                       |
 | Theme selection state                                 | `demo/src/themes/ThemeProvider.tsx`                 |
 | Shared responsive space composition and gadgets       | `demo/src/styles/space.css`                         |
-| Current three-module composition and NYC card          | `demo/src/styles/home.css`                          |
+| Current three-module composition and NYC card         | `demo/src/styles/home.css`                          |
 | Shared Qzone typography, controls and module defaults | `demo/src/styles/qzone.css`                         |
 | New translated labels                                 | `demo/src/lunarCopy.ts`                             |
 
@@ -64,6 +64,20 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
+`plantDesigns.ts` declares six plant drawings. See the preserved
+[painting method and extension guide](watercolor-plant-art.md).
+`WatercolorFlower.tsx` places and progressively reveals watercolor marks painted by
+[p5](https://p5js.org/) and [p5.brush](https://github.com/acamposuribe/p5.brush).
+`watercolorAtlas.ts` dynamically loads both libraries and uses a seeded, hidden
+WebGL sketch to paint a transparent color atlas once per page. It exports the
+result to offscreen 2D canvas tiles, removes the WebGL canvas and stops the sketch. Care clicks reveal
+cached marks on a visible 2D canvas without rerunning the painting simulation. SVG retains the black
+contours above it; directional canvas clips reveal the textures and multiply
+blending deepens overlaps. If initialization fails, basic translucent
+canvas washes keep local progress usable. No remote CDN or image requests are
+needed. No data-image URL or CSP expansion is required. The illustration palette is shared between themes; its ink follows the
+active skin. `space.css` disables reveal transitions for reduced motion.
+
 Use a named React component with no required props. It renders **decoration only** inside the reserved header
 region. It can read the active CSS tokens and supply theme-scoped selectors.
 Retain the pause convention (`.motion-off`) and a reduced-motion still state;
@@ -82,8 +96,8 @@ does not key/remount the application or its modules. Flower progress, drafts,
 posted local messages, filters, expanded diary entries, playback, language and
 ornament choices in the retained demo survive switching. Its **Restore default
 skin** control selects Lunar ink and restores Stars and the pendant. The current
-homepage has no earned ornaments; shared flower progress lives on the server and
-resets at New York midnight rather than on page reload.
+homepage has no earned ornaments. Plant progress and selection live in browser
+localStorage, persist through reload, and reset only with New plant.
 
 The first registry entry defines the default. Keep Lunar ink first to preserve
 the accepted design. Changing an optional palette must not edit the lunar CSS or

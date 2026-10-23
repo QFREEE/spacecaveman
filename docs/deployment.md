@@ -29,7 +29,8 @@ also supported from `main` and runs the same checks before deployment.
 
 The isolated `spacecaveman-presence-trial` Worker is bundled during checks but is
 not automatically deployed. The website reads its existing D1 database for public presence
-and stores flower/counter state in separate tables. Credentials stay protected;
+and stores counter state in a separate table. Current plant care is browser-local;
+the older flower table/endpoint remain for compatible older clients. Credentials stay protected;
 CI does not apply migrations. The current production database already has homepage
 migrations 0002 and 0003. Before merging the daily-flower release, apply migration
 0004 to `spacecaveman-presence-trial` using an authorized migration credential:
@@ -139,7 +140,7 @@ rollback path is documented, not exercised against production by this setup.
 ## Exact build verification
 
 The release check compares the public HTML title and JS/CSS paths and contents
-with the generated dist/site build, then verifies the public presence, flower,
+with the generated dist/site build, then verifies public presence, local plant care,
 visitor and empty-visits contracts plus protected and retired routes. It uses
 GET only and rejects the old demo even when it responds with HTTP 200.
 

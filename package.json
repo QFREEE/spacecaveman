@@ -35,6 +35,8 @@
     "wrangler": "^4.0.0"
   },
   "dependencies": {
+    "p5": "2.3.4",
+    "p5.brush": "2.2.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   }

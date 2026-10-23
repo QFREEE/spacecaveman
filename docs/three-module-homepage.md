@@ -1,7 +1,7 @@
 # Three-module homepage
 
-Historical design milestone: the current homepage now uses live presence, shared
-flower storage and real page views. See [production behavior](homepage-production.md)
+Historical design milestone: the current homepage uses live presence, browser-local
+watercolor plants and real page views. See [production behavior](homepage-production.md)
 and the [bilingual editing guide](bilingual-homepage.md). The behavior and screenshots
 below describe the earlier demo milestone.
 

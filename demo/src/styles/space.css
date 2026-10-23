@@ -472,6 +472,14 @@ input[type="range"] {
   font-size: 10px;
   color: var(--skin-muted);
 }
+.flower-ink-stroke {
+  transition: stroke-dashoffset 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flower-ink-stroke {
+    transition: none;
+  }
+}
 .flower-stage > small {
   position: absolute;
   bottom: 2px;
@@ -513,15 +521,6 @@ meter::-webkit-meter-optimum-value {
 }
 meter::-moz-meter-bar {
   background: var(--skin-muted);
-}
-.plant-meters[data-recognition="thanks"] {
-  --plant-fill: var(--skin-care-thanks);
-}
-.plant-meters[data-recognition] meter::-webkit-meter-optimum-value {
-  background: var(--plant-fill);
-}
-.plant-meters[data-recognition] meter::-moz-meter-bar {
-  background: var(--plant-fill);
 }
 .care-actions {
   display: grid;
@@ -929,4 +928,11 @@ footer p {
   .care-effect {
     animation: none !important;
   }
+}
+.plant-name {
+  position: absolute;
+  right: 6px;
+  top: 3px;
+  font-size: 10px;
+  color: var(--skin-muted);
 }
