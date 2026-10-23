@@ -1,10 +1,12 @@
 import { plantDesigns } from "./plantDesigns";
+import { getPlantPalettes, getAllPlantPalettes } from "./plantPalettes";
 export const localPlantKey = "spacecaveman:plant:v1";
 export type CareId = "rain" | "sun" | "love" | "food";
 export type CareStats = Record<CareId, number>;
 export type LocalPlant = {
   version: 1;
   plantId: string;
+  paletteId: string;
   stats: CareStats;
   careCount: number;
   remainingIds: string[];
@@ -25,9 +27,13 @@ export function freshPlant(
   const order = shuffled(
     plantId ? plantIds.filter((id) => id !== plantId) : plantIds,
   );
+  const selectedId = plantId ?? order.shift()!;
+  const palettes = getPlantPalettes(selectedId);
   return {
     version: 1,
-    plantId: plantId ?? order.shift()!,
+    plantId: selectedId,
+    paletteId:
+      palettes[Math.floor(Math.random() * palettes.length)]?.id ?? "original",
     stats: { rain: 0, sun: 0, love: 0, food: 0 },
     careCount: 0,
     remainingIds: remainingIds ?? order,
@@ -55,6 +61,12 @@ export function parsePlant(value: string | null): LocalPlant | null {
     return {
       version: 1,
       plantId: p.plantId,
+      // Missing/invalid palette metadata must not discard saved care.
+      paletteId: getAllPlantPalettes(p.plantId).some(
+        (palette) => palette.id === p.paletteId,
+      )
+        ? p.paletteId
+        : "original",
       stats: {
         rain: p.stats.rain,
         sun: p.stats.sun,

@@ -3,6 +3,10 @@ import { test, expect } from "./fixtures";
 test("presence waits for its request while local care is immediately usable", async ({
   page,
 }) => {
+  // Hold app time while inspecting loading UI; timeout behavior is tested separately.
+  const now = new Date();
+  await page.clock.install({ time: now });
+  await page.clock.pauseAt(now);
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;

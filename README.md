@@ -31,10 +31,10 @@ serves it as the production homepage.
   Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
   action leads. Refresh preserves the selected plant and care in versioned
   `localStorage`; there is no flower request, polling or midnight reset.
-- **New plant** shuffles Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
-  lily and clears the current care and feedback. Separate browsers have separate
+- **New plant** shuffles twelve designs: Cosmos, Tulip, Sunflower, Poppy, Lavender,
+  Calla lily, Rose, Daisy, Iris, Daffodil, Hydrangea and Lily of the valley, and clears the current care and feedback. Separate browsers have separate
   plants. If browser storage is blocked, care remains usable for the current visit.
-- p5 and p5.brush generate seeded watercolor textures on first use, then stop and
+- p5 and p5.brush generate seeded watercolor textures for visible flowers on demand, then stop and
   release the hidden WebGL sketch. Cached canvas tiles retain transparent pigment,
   darker edges, crossing washes and visible black ink. Meters stay monochrome.
 - Care updates the illustration and bars without encouragement or thank-you messages.
@@ -81,7 +81,7 @@ pnpm verify
 ```
 
 The browser suite covers desktop and touch-enabled phone contexts, both languages,
-local care, reload persistence, six plant designs, unavailable browser storage, and
+local care, reload persistence, twelve plant designs, unavailable browser storage, and
 responsive layouts. The backend suite executes the schema and conditional SQL
 against SQLite. A dry run builds and packages the Worker without publishing it.
 
@@ -132,3 +132,11 @@ Start with the [trial guide](docs/presence-trial.md) and
 [domain status](docs/domain-connection.md),
 [publishing guide](docs/qzone-publishing.md), and
 [homepage production audit](docs/homepage-production.md).
+
+Each new plant selects a coordinated natural palette from its species (30 active palettes across thirteen depicted species).
+The palette is saved with care progress. Existing saves without a palette retain
+their original colors. Preview all varieties locally at `/plant-preview.html`.
+
+Review number 35 depicts a deep-blue bluebell with narrow leaves and tubular bells.
+It retains its historical lily-of-the-valley/ivory storage slot so existing care
+and shuffle queues remain valid; the other lily-of-the-valley option is unchanged.

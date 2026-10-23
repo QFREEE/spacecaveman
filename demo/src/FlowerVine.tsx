@@ -158,7 +158,11 @@ export function FlowerVine() {
         )}
         data-care={active?.id ?? "idle"}
       >
-        <WatercolorFlower stats={plant.stats} plantId={plant.plantId} />
+        <WatercolorFlower
+          stats={plant.stats}
+          plantId={plant.plantId}
+          paletteId={plant.paletteId}
+        />
         {active ? (
           <span
             className={`care-effect effect-${active.id}`}
