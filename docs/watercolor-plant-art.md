@@ -118,3 +118,8 @@ crosshatching, and double-line stems. The review gallery keeps its original numb
 Review 02 restores the original five-color coral/peach/pink cosmos and its original
 leaf pigments. It is available to new plants as well as preserved legacy saves.
 
+
+Several pink, coral, apricot, purple and blue choices distribute neighboring hues
+across petals or florets, rather than alternating only light and dark versions of
+one hue. These curated stroke colors stay fixed across care and reload. The
+restored original mix and approved sunflower palettes retain their exact colors.
