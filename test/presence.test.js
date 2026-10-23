@@ -9,6 +9,8 @@ import { handlePresence, handlePublicPresence, cleanupPresence, digest } from '.
 async function fixture() {
   const sqlite = new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('../migrations/0001_presence.sql', import.meta.url), 'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0002_site_counter.sql', import.meta.url), 'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0005_daily_visitors.sql', import.meta.url), 'utf8'));
   const db = {
     prepare(sql) {
       return { bind(...values) {

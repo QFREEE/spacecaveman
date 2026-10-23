@@ -139,9 +139,19 @@ export async function handleFlower(request, env, now = Date.now()) {
   }
 }
 
-// Counts page loads, including reloads, rather than claiming unique people.
-// The database stores only an aggregate, without IPs, cookies or browser IDs.
-export async function handleVisitorCount(request, env) {
+// Each New York day gets a random salt; only the resulting daily hashes persist.
+// The hourly scheduled job deletes previous days and their hashes together.
+export async function cleanupVisitorIdentifiers(env, now = Date.now()) {
+  if (!env?.PRESENCE_DB) return;
+  await env.PRESENCE_DB.prepare(
+    "DELETE FROM site_visitor_days WHERE day_key < ?",
+  )
+    .bind(dayKey(now))
+    .run();
+}
+
+// Refreshes/retries count once per IP + browser per New York calendar day.
+export async function handleVisitorCount(request, env, now = Date.now()) {
   if (!["GET", "POST"].includes(request.method)) {
     return Response.json(
       { error: "Method not allowed" },
@@ -164,11 +174,51 @@ export async function handleVisitorCount(request, env) {
     );
   }
   try {
-    const row = await env.PRESENCE_DB.prepare(
-      request.method === "POST"
-        ? "UPDATE site_counter SET views = views + 1 WHERE id = 1 RETURNING views"
-        : "SELECT views FROM site_counter WHERE id = 1",
-    )
+    const db = env.PRESENCE_DB;
+    if (request.method === "POST") {
+      // Trust Cloudflare's client-IP header, never caller-supplied forwarding lists.
+      // Local development without this header reads the total without counting.
+      const ip = request.headers.get("CF-Connecting-IP");
+      const agent = request.headers.get("User-Agent");
+      if (ip && agent) {
+        const today = dayKey(now);
+        const { salt } = await db
+          .prepare(
+            `INSERT INTO site_visitor_days (day_key, salt) VALUES (?, ?)
+           ON CONFLICT(day_key) DO UPDATE SET day_key = excluded.day_key
+           RETURNING salt`,
+          )
+          .bind(today, crypto.randomUUID())
+          .first();
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          "raw",
+          encoder.encode(salt),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"],
+        );
+        const signature = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          encoder.encode(
+            JSON.stringify([new URL(request.url).hostname, ip, agent]),
+          ),
+        );
+        const hash = Array.from(new Uint8Array(signature), (byte) =>
+          byte.toString(16).padStart(2, "0"),
+        ).join("");
+        // The unique key and trigger commit the identity and increment atomically.
+        await db
+          .prepare(
+            "INSERT INTO site_daily_visitors (day_key, visitor_hash) VALUES (?, ?) ON CONFLICT DO NOTHING RETURNING visitor_hash",
+          )
+          .bind(today, hash)
+          .first();
+      }
+    }
+    const row = await db
+      .prepare("SELECT views FROM site_counter WHERE id = 1")
       .bind()
       .first();
     if (!row || !Number.isSafeInteger(row.views) || row.views < 0)

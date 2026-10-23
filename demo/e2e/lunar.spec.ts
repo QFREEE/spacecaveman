@@ -65,11 +65,24 @@ test("three modules fit phones in both languages, with practical flower touch ta
         ),
       ).toBe(true);
       if (width < 721) {
-        const flower = await page.locator("#flower").boundingBox();
-        const nyc = await page.locator("#nyc").boundingBox();
-        const visitors = await page.locator("#visitors").boundingBox();
-        expect(nyc!.y + nyc!.height).toBeLessThanOrEqual(flower!.y);
-        expect(flower!.y + flower!.height).toBeLessThanOrEqual(visitors!.y);
+        // Loading presence/fonts can move the cards between separate reads.
+        // Check one layout snapshot and retry until the responsive layout settles.
+        await expect
+          .poll(() =>
+            page.evaluate(() => {
+              const nyc = document
+                .querySelector("#nyc")!
+                .getBoundingClientRect();
+              const flower = document
+                .querySelector("#flower")!
+                .getBoundingClientRect();
+              const visitors = document
+                .querySelector("#visitors")!
+                .getBoundingClientRect();
+              return nyc.bottom <= flower.top && flower.bottom <= visitors.top;
+            }),
+          )
+          .toBe(true);
         for (const button of await page
           .locator(
             ".care-actions button, .skin-toolbar .bevel, .plant-tools button",

@@ -3,11 +3,11 @@ import {
   handlePublicPresence,
   cleanupPresence,
 } from "./presence.js";
-import { handleVisitorCount, handleFlower } from "./site.js";
+import { handleVisitorCount, handleFlower, cleanupVisitorIdentifiers } from "./site.js";
 
 export default {
   async scheduled(_controller, env) {
-    await cleanupPresence(env);
+    await Promise.all([cleanupPresence(env), cleanupVisitorIdentifiers(env)]);
   },
   async fetch(request, env) {
     const { pathname } = new URL(request.url);

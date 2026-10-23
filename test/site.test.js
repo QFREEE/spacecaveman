@@ -3,14 +3,20 @@ import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 import worker from "../src/worker.js";
-import { handleFlower } from "../src/site.js";
+import {
+  handleFlower,
+  handleVisitorCount,
+  cleanupVisitorIdentifiers,
+} from "../src/site.js";
 
 function fixture() {
   const sqlite = new DatabaseSync(":memory:");
+  sqlite.exec("PRAGMA foreign_keys = ON");
   for (const name of [
     "0002_site_counter",
     "0003_shared_flower",
     "0004_daily_flower",
+    "0005_daily_visitors",
   ]) {
     sqlite.exec(
       readFileSync(
@@ -26,6 +32,7 @@ function fixture() {
           bind(...values) {
             return {
               first: async () => sqlite.prepare(sql).get(...values) ?? null,
+              run: async () => sqlite.prepare(sql).run(...values),
             };
           },
         };
@@ -35,7 +42,11 @@ function fixture() {
   const request = (path, method = "GET", origin = "https://example.com") =>
     new Request(`https://example.com/api/${path}`, {
       method,
-      headers: { Origin: origin },
+      headers: {
+        Origin: origin,
+        "CF-Connecting-IP": "192.0.2.1",
+        "User-Agent": "Test browser",
+      },
     });
   return {
     env,
@@ -77,14 +88,15 @@ test("counter starts at zero and increments atomically, reads do not increment",
   const f = fixture();
   assert.deepEqual(await (await f.fetch("visitors")).json(), { views: 0 });
   const counts = await Promise.all(
-    Array.from(
-      { length: 30 },
-      async () => (await (await f.fetch("visitors", "POST")).json()).views,
-    ),
+    Array.from({ length: 30 }, async (_, index) => {
+      const request = f.request("visitors", "POST");
+      request.headers.set("CF-Connecting-IP", `192.0.2.${index + 1}`);
+      return (await (await worker.fetch(request, f.env)).json()).views;
+    }),
   );
   assert.deepEqual(
-    counts.sort((a, b) => a - b),
-    Array.from({ length: 30 }, (_, i) => i + 1),
+    counts.every((count) => count >= 1 && count <= 30),
+    true,
   );
   const read = await f.fetch("visitors");
   assert.equal(read.headers.get("Cache-Control"), "no-store");
@@ -96,6 +108,103 @@ test("counter starts at zero and increments atomically, reads do not increment",
   assert.equal((await f.fetch("visitors", "DELETE")).status, 405);
   assert.equal((await f.fetch("visitors", "POST", "null")).status, 403);
   assert.deepEqual(await (await f.fetch("visitors")).json(), { views: 30 });
+  f.sqlite.close();
+});
+
+test("refreshes and simultaneous loads from the same IP and browser count once per New York day", async () => {
+  const f = fixture();
+  const now = Date.parse("2026-10-23T23:59:59-04:00");
+  const visit = (at = now) =>
+    handleVisitorCount(f.request("visitors", "POST"), f.env, at);
+  const counts = await Promise.all(
+    Array.from(
+      { length: 20 },
+      async () => (await (await visit()).json()).views,
+    ),
+  );
+  assert.deepEqual(counts, Array(20).fill(1));
+  assert.deepEqual(await (await visit()).json(), { views: 1 });
+  assert.deepEqual(await (await visit(now + 1000)).json(), { views: 2 });
+  const otherBrowser = f.request("visitors", "POST");
+  otherBrowser.headers.set("User-Agent", "Another browser");
+  assert.deepEqual(
+    await (await handleVisitorCount(otherBrowser, f.env, now + 1000)).json(),
+    { views: 3 },
+  );
+  f.sqlite.close();
+});
+
+test("missing identity headers and spoofed forwarding lists do not increment the counter", async () => {
+  const f = fixture();
+  for (const header of ["CF-Connecting-IP", "User-Agent"]) {
+    const request = f.request("visitors", "POST");
+    request.headers.delete(header);
+    request.headers.set("X-Forwarded-For", "198.51.100.9");
+    assert.deepEqual(await (await worker.fetch(request, f.env)).json(), {
+      views: 0,
+    });
+  }
+  assert.equal(
+    f.sqlite.prepare("SELECT COUNT(*) AS count FROM site_visitor_days").get()
+      .count,
+    0,
+  );
+  f.sqlite.close();
+});
+
+test("daily identifiers rotate and scheduled cleanup removes salts and hashes without losing the total", async () => {
+  const f = fixture();
+  // The migration must preserve a nonzero historical page-view baseline.
+  f.sqlite.exec("UPDATE site_counter SET views = 42");
+  const before = Date.parse("2026-11-01T00:30:00-04:00");
+  const visit = (at) =>
+    handleVisitorCount(f.request("visitors", "POST"), f.env, at);
+  assert.deepEqual(await (await visit(before)).json(), { views: 43 });
+  const first = f.sqlite.prepare("SELECT * FROM site_daily_visitors").get();
+  const salt = f.sqlite
+    .prepare("SELECT salt FROM site_visitor_days")
+    .get().salt;
+  // Both sides of the repeated DST hour belong to the same local day.
+  assert.deepEqual(
+    await (await visit(Date.parse("2026-11-01T01:30:00-05:00"))).json(),
+    { views: 43 },
+  );
+  const next = Date.parse("2026-11-02T00:00:00-05:00");
+  assert.deepEqual(await (await visit(next)).json(), { views: 44 });
+  const identities = f.sqlite
+    .prepare("SELECT * FROM site_daily_visitors ORDER BY day_key")
+    .all();
+  assert.equal(identities.length, 2);
+  assert.match(first.visitor_hash, /^[a-f0-9]{64}$/);
+  assert.notEqual(identities[1].visitor_hash, first.visitor_hash);
+  assert.notEqual(
+    f.sqlite
+      .prepare(
+        "SELECT salt FROM site_visitor_days WHERE day_key = '2026-11-02'",
+      )
+      .get().salt,
+    salt,
+  );
+  assert.deepEqual(Object.keys(first).sort(), ["day_key", "visitor_hash"]);
+  await cleanupVisitorIdentifiers(f.env, next);
+  assert.equal(
+    f.sqlite.prepare("SELECT COUNT(*) AS count FROM site_daily_visitors").get()
+      .count,
+    1,
+  );
+  assert.equal(
+    f.sqlite.prepare("SELECT COUNT(*) AS count FROM site_visitor_days").get()
+      .count,
+    1,
+  );
+  assert.deepEqual(await (await visit(next)).json(), { views: 44 });
+  await cleanupVisitorIdentifiers(f.env, next + 86400_000);
+  assert.equal(
+    f.sqlite.prepare("SELECT COUNT(*) AS count FROM site_daily_visitors").get()
+      .count,
+    0,
+  );
+  assert.deepEqual(await (await f.fetch("visitors")).json(), { views: 44 });
   f.sqlite.close();
 });
 

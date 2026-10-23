@@ -40,11 +40,12 @@ serves it as the production homepage.
 - [Watercolor plant art guide](docs/watercolor-plant-art.md) records the approved
   method and explains how to add designs without changing rendering or care.
 
-- The counter starts at zero when its migration is applied and counts accepted
-  page-load reports, including reloads. It is an aggregate, not a count of unique
-  people, and is not bot-filtered analytics. The counter stores no IP addresses,
-  cookies or browser identifiers. Loading and failed requests never show a fake
-  number.
+- The counter counts the same IP and browser once per New York calendar day.
+  Refreshes and retries do not add visits that day; returning on another day does.
+  Daily salted hashes are stored temporarily; raw IPs, browser strings and cookies
+  are not stored. The hourly job deletes previous days' hashes and salts. The total
+  preserves the earlier page-view baseline and is not a count of unique people
+  or bot-filtered analytics. Loading and failed requests never show a fake number.
 - English is the default. The English/中文 switch translates the interface without
   resetting module state. Animation follows the device's reduced-motion setting;
   there is no pause-animation button.
@@ -89,7 +90,7 @@ pnpm exec wrangler dev --config wrangler.jsonc --ip 127.0.0.1 --port 8799
 node scripts/qzone-deploy-smoke.mjs http://127.0.0.1:8799
 ```
 
-The smoke test records page views and attempts one real Water action. It checks
+The smoke test reports a daily-deduplicated visit and attempts one real Water action. It checks
 local plant state across reload and a second page, phone layouts, languages, private
 presence protection, preserved routes and security headers. It never resets the
 local plant. Screenshots and browser reports are generated under `outputs/`.
@@ -105,7 +106,10 @@ credentials, rollback and the explicitly requested manual-deployment path.
 `dist/site/`. The homepage and separate phone trial use the existing D1 database;
 flower and counter tables are independent of presence tables. Migrations 0002
 and 0003 have already been applied to the current production database. A new
-environment needs those migrations before serving the homepage. CI does not
+environment needs all migrations before serving the homepage. Apply migration
+0005 before releasing daily visitor counting; it preserves the existing total.
+See [the release instructions](docs/deployment.md#daily-visitor-counter-migration).
+CI does not
 apply migrations or redeploy the separate phone Worker. Retired `/shortcuts`
 setup URLs remain 410 Gone.
 
