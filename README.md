@@ -24,6 +24,8 @@ serves it as the production homepage.
   and beyond, “Several hours ago”. No exact timestamp is displayed.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
+- Every new plant starts with a visible ink pot and seed. The first care action
+  draws a small sprout; further care continues the incremental ink drawing and color.
 - Plant care is entirely browser-local. Water, Sun, Prune and Feed advance
   a fifty-point bar (six clicks for sketch, four for pot, three for leaves, five for petals), with continuous clicking and no visible numbers.
   Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
