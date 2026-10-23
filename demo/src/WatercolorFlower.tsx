@@ -3,76 +3,79 @@ import { useId } from "react";
 // Sketch and pigment stay separate: transparent flat-brush marks may cross ink edges.
 const petals = [
   {
-    outline: "M96 36C88 24 85 6 97 5C111 2 113 22 104 36",
-    x: 100,
-    y: 36,
-    angle: -90,
-    length: 34,
-    width: 15,
+    outline:
+      "M97 44C91 35 87 24 90 16C92 10 101 7 105 4C111 2 117 10 117 19C118 29 111 38 104 44",
+    x: 101,
+    y: 44,
+    angle: -84,
+    length: 40,
+    width: 23,
     color: "#ee9d7c",
   },
   {
-    outline: "M108 38C119 23 139 16 140 27C145 40 124 47 109 44",
-    x: 109,
-    y: 41,
-    angle: -30,
-    length: 35,
-    width: 16,
+    outline:
+      "M107 47C116 34 132 27 145 28C154 28 154 36 151 42C146 52 126 53 108 52",
+    x: 108,
+    y: 49,
+    angle: -21,
+    length: 47,
+    width: 24,
     color: "#e88398",
   },
   {
-    outline: "M109 47C126 47 140 56 136 66C130 76 114 62 104 51",
-    x: 107,
-    y: 49,
+    outline:
+      "M107 54C119 54 137 60 142 70C147 81 138 84 130 81C119 77 109 65 104 57",
+    x: 106,
+    y: 56,
     angle: 32,
-    length: 33,
-    width: 17,
+    length: 42,
+    width: 23,
     color: "#e87d6b",
   },
   {
-    outline: "M95 49C85 65 68 73 64 62C61 52 77 46 91 43",
-    x: 93,
-    y: 47,
+    outline: "M96 56C90 69 73 80 63 79C54 78 57 68 62 63C70 56 84 53 93 52",
+    x: 94,
+    y: 54,
     angle: 151,
-    length: 35,
-    width: 16,
+    length: 42,
+    width: 22,
     color: "#edae94",
   },
   {
-    outline: "M91 39C74 39 59 28 65 18C73 10 90 24 97 35",
-    x: 93,
-    y: 38,
-    angle: -145,
-    length: 35,
-    width: 17,
+    outline: "M93 47C79 47 61 43 57 34C50 22 60 18 67 21C79 25 89 36 97 44",
+    x: 94,
+    y: 46,
+    angle: -149,
+    length: 46,
+    width: 24,
     color: "#e8887d",
   },
 ];
 const leaves = [
   {
-    outline: "M98 105C84 107 70 100 68 90C80 86 94 94 98 105",
+    outline: "M98 106C82 109 65 103 60 91C72 93 87 94 98 106",
     x: 97,
-    y: 102,
-    angle: -157,
-    length: 31,
-    width: 12,
+    y: 104,
+    angle: -160,
+    length: 39,
+    width: 13,
     color: "#739a70",
   },
   {
-    outline: "M103 91C111 76 128 72 133 77C131 90 115 98 103 95",
+    outline: "M104 99C114 85 129 85 147 83C142 96 122 104 104 99",
     x: 105,
-    y: 92,
-    angle: -28,
-    length: 32,
-    width: 13,
+    y: 98,
+    angle: -22,
+    length: 44,
+    width: 15,
     color: "#a4ab58",
   },
   {
-    outline: "M99 83C87 85 77 77 76 69C85 65 96 72 99 83",
-    x: 98,
-    y: 81,
-    angle: -151,
-    length: 26,
+    outline: "M100 88C88 91 75 85 72 78C84 76 96 81 100 88",
+    x: 99,
+    y: 87,
+    angle: -157,
+    length: 30,
     width: 11,
     color: "#8da58a",
   },
@@ -80,11 +83,11 @@ const leaves = [
 const ink = [
   "M75 112L80 140Q100 147 121 139L126 112",
   "M73 110Q99 104 128 110L127 117Q101 122 73 116Z",
-  "M100 109Q97 77 101 48",
-  "M99 101L94 99M102 94L110 88M99 81L93 77",
+  "M100 109C107 91 100 76 100 57",
+  "M101 102L95 102M103 99Q108 87 114 83M102 91L97 86",
   ...leaves.map((leaf) => leaf.outline),
   ...petals.map((petal) => petal.outline),
-  "M104 43C104 49 95 49 95 43C95 37 104 37 104 43",
+  "M104 50C105 56 95 56 95 50C95 44 104 44 104 50",
   "M12 141Q28 135 44 140M43 137Q58 130 77 136M123 136Q142 132 151 139M151 141Q169 136 185 142",
 ];
 const flatWash =
@@ -125,16 +128,16 @@ function Wash({
         </clipPath>
       </defs>
       <g clipPath={`url(#${id})`}>
-        <path d={flatWash} fill={color} opacity=".62" />
+        <path d={flatWash} fill={color} opacity=".44" />
         <path
           d="M.02-.32Q.32-.44 .59-.32T.98-.33L.96-.2Q.6-.29 .3-.22L.03-.19Z"
           fill={color}
-          opacity=".14"
+          opacity=".09"
         />
         <path
           d="M.12 .28Q.5 .36 .96 .24L.98 .39Q.55 .49 .1 .4Z"
           fill={color}
-          opacity=".19"
+          opacity=".12"
         />
       </g>
     </g>
@@ -217,10 +220,10 @@ export function WatercolorFlower({
           ))}
           <circle
             cx="100"
-            cy="43"
+            cy="50"
             r="4.4"
             fill="#d8ad50"
-            opacity={clamp(flower * 11 - 10) * 0.78}
+            opacity={clamp(flower * 11 - 10) * 0.6}
           />
         </g>
       </g>
