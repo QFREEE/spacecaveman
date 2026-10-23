@@ -30,7 +30,7 @@ plant choice or recognition state is sent to the server. Visitors in separate
 browsers have independent plants; this is not a shared daily garden.
 
 Water, Sun, Prune and Feed advance their stat in stage-dependent steps, capped at fifty.
-In completion order, empty bars take eight clicks for sketch, six for pot, three for leaves and six for petals. Inputs remain available without a cooldown.
+In completion order, empty bars take six clicks for sketch, four for pot, three for leaves and five for petals. Inputs remain available without a cooldown.
 Values are ranked highest to lowest to reveal sketch, pot, leaves and blooms;
 any first full bar finishes the sketch, then pot, then leaves, then blooms.
 The UI exposes only monochrome bars, not numeric counts or levels. Full attempts

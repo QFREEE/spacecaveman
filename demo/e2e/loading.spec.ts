@@ -58,6 +58,6 @@ test("presence timeout does not block local plant care", async ({ page }) => {
     "No update yet.",
   );
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await expect(page.getByRole("button", { name: "New plant" })).toBeEnabled();
 });

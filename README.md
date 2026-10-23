@@ -22,7 +22,7 @@ serves it as the production homepage.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
 - Plant care is entirely browser-local. Water, Sun, Prune and Feed advance
-  a fifty-point bar (eight clicks for sketch, six for pot, three for leaves, six for petals), with continuous clicking and no visible numbers.
+  a fifty-point bar (six clicks for sketch, four for pot, three for leaves, five for petals), with continuous clicking and no visible numbers.
   Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
   action leads. Refresh preserves the selected plant and care in versioned
   `localStorage`; there is no flower request, polling or midnight reset.

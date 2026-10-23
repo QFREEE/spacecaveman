@@ -79,7 +79,7 @@ try {
         meters.filter((meter) => Number(meter.getAttribute("value")) === 50)
           .length,
     );
-  const steps = [8, 6, 3, 6][completed] ?? 6;
+  const steps = [6, 4, 3, 5][completed] ?? 6;
   await page.getByRole("button", { name: "Water", exact: true }).click();
   const saved = {
     stats: {

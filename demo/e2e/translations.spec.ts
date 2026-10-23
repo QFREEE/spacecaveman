@@ -36,7 +36,7 @@ test("language changes translate metadata, feedback and accessibility without re
   await expect(flower.getByRole("status")).toHaveCount(0);
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await expect(page.locator(".counter")).toHaveText("000001");
   await expect(
     page.getByRole("button", { name: "详情", exact: true }),
@@ -59,7 +59,7 @@ test("language changes translate metadata, feedback and accessibility without re
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
 });
 
 test("unavailable messages and retry controls switch languages together", async ({

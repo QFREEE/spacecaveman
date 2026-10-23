@@ -52,7 +52,7 @@ test("every plant has its own complete drawing and New plant shuffles without re
     seen.add(id);
     await flower.locator(".care-actions button").evaluateAll((buttons) =>
       buttons.forEach((button, index) => {
-        for (let i = 0; i < [8, 6, 3, 6][index]; i++)
+        for (let i = 0; i < [6, 4, 3, 5][index]; i++)
           (button as HTMLButtonElement).click();
       }),
     );
@@ -117,7 +117,7 @@ test("ranked partial progress and any first completed action choose the same dra
     await flower
       .getByRole("button", { name: first, exact: true })
       .evaluate((button: HTMLButtonElement) => {
-        for (let i = 0; i < 8; i++) button.click();
+        for (let i = 0; i < 6; i++) button.click();
       });
     for (const [i, layer] of layers.entries())
       await expect(flower.locator(`[data-paint="${layer}"]`)).toHaveAttribute(
@@ -161,7 +161,7 @@ test("care survives language changes and midnight until New plant is pressed", a
   await flower.getByRole("button", { name: "Feed", exact: true }).click();
   await expect(flower.locator(".effect-food svg")).toBeVisible();
   await page.clock.fastForward(120000);
-  await expect(flower.getByRole("meter").last()).toHaveAttribute("value", "6");
+  await expect(flower.getByRole("meter").last()).toHaveAttribute("value", "8");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("button", { name: "新植物", exact: true }),
@@ -193,7 +193,7 @@ test("invalid or blocked browser storage keeps local care usable", async ({
   await page.goto("/");
   await expect(page.getByRole("meter").first()).toHaveAttribute("value", "0");
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await page.addInitScript(() =>
     Object.defineProperty(window, "localStorage", {
       get() {
@@ -203,7 +203,7 @@ test("invalid or blocked browser storage keeps local care usable", async ({
   );
   await page.reload();
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await page.getByRole("button", { name: "New plant" }).click();
   await expect(page.getByRole("meter").first()).toHaveAttribute("value", "0");
 });

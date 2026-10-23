@@ -40,6 +40,28 @@ const actions = [
   },
 ] as const;
 type Care = (typeof actions)[number];
+function ScissorsIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 22 22"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      style={{ verticalAlign: "-2px" }}
+    >
+      <circle cx="5" cy="5" r="2.8" />
+      <circle cx="5" cy="17" r="2.8" />
+      <path d="M7.2 6.8 19 19M7.2 15.2 19 3" />
+      <circle cx="11" cy="11" r=".65" />
+    </svg>
+  );
+}
 function FertilizerBagIcon({ size = 15 }: { size?: number }) {
   return (
     <svg
@@ -93,7 +115,7 @@ export function FlowerVine() {
     const completed = Object.values(before.stats).filter(
       (value) => value === 50,
     ).length;
-    const steps = [8, 6, 3, 6][completed];
+    const steps = [6, 4, 3, 5][completed];
     const nextValue = Math.round(
       ((Math.round((before.stats[action.id] * steps) / 50) + 1) * 50) / steps,
     );
@@ -145,6 +167,8 @@ export function FlowerVine() {
           >
             {active.id === "food" ? (
               <FertilizerBagIcon size={28} />
+            ) : active.id === "love" ? (
+              <ScissorsIcon size={28} />
             ) : (
               active.effect
             )}
@@ -176,7 +200,13 @@ export function FlowerVine() {
             onClick={() => care(action)}
           >
             <span aria-hidden="true">
-              {action.id === "food" ? <FertilizerBagIcon /> : action.icon}{" "}
+              {action.id === "food" ? (
+                <FertilizerBagIcon />
+              ) : action.id === "love" ? (
+                <ScissorsIcon />
+              ) : (
+                action.icon
+              )}{" "}
             </span>
             {t(action.label)}
           </button>

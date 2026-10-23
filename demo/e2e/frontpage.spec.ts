@@ -118,15 +118,15 @@ test("public NYC status remains unknown and flower care survives language change
   await expect(page.locator(".presence-answer")).toContainText("还没有更新。");
   await expect(
     page.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await page.reload();
   await expect(
     page.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await expect(page.locator(".presence-answer")).toContainText(
     "No update yet.",
   );

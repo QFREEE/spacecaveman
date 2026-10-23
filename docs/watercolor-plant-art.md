@@ -71,7 +71,7 @@ clicks never restart p5 or block waiting for a painting frame.
 
 `localPlant.ts` owns the versioned `spacecaveman:plant:v1` record. It validates IDs,
 integer bounds and counters before using stored data. The UI writes only to browser
-localStorage; it does not call the legacy flower endpoint. In completion order, empty bars take eight clicks for sketch, six for pot, three for leaves and six for petals.
+localStorage; it does not call the legacy flower endpoint. In completion order, empty bars take six clicks for sketch, four for pot, three for leaves and five for petals.
 Partly filled bars keep their normalized progress when the click rate changes. Ranked care reveals sketch → pot → leaves → blooms, independent of button
 order. Reload preserves care. New plant uses a saved shuffled order, showing every design once per round without consecutive repeats and clears care and
 feedback; there is no midnight reset. If storage is blocked, the visit still works
