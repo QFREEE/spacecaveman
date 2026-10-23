@@ -82,8 +82,14 @@ async function createAtlas(): Promise<PaintAtlas> {
             paintColors.forEach((color, index) => {
               const x = (index % 4) * cellWidth - atlasWidth / 2;
               const y = Math.floor(index / 4) * cellHeight - atlasHeight / 2;
-              // Petals carry richer pigment; leaves, pot and center stay unchanged.
-              brush.fill(color, index >= 4 && index <= 8 ? 210 : 115);
+              const isPetal = index >= 4 && index <= 8;
+              // Keep the interior watery while pigment gathers along irregular edges.
+              brush.fillTexture(
+                isPetal ? 0.65 : 0.42,
+                isPetal ? 0.95 : 0.55,
+                false,
+              );
+              brush.fill(color, isPetal ? 175 : 115);
               // Broad, blunt-ended flat-brush geometry, with space for bleed.
               brush.beginShape(0.08);
               [
@@ -145,6 +151,19 @@ async function createAtlas(): Promise<PaintAtlas> {
                     cellWidth,
                     cellHeight,
                   );
+                  if (index >= 4 && index <= 8) {
+                    // Opacity varies across each flat brush: clearer belly, denser rims.
+                    const wetness = context.createLinearGradient(0, 16, 0, 64);
+                    wetness.addColorStop(0, "rgba(0,0,0,1)");
+                    wetness.addColorStop(0.2, "rgba(0,0,0,.95)");
+                    wetness.addColorStop(0.45, "rgba(0,0,0,.6)");
+                    wetness.addColorStop(0.65, "rgba(0,0,0,.72)");
+                    wetness.addColorStop(0.9, "rgba(0,0,0,1)");
+                    wetness.addColorStop(1, "rgba(0,0,0,1)");
+                    context.globalCompositeOperation = "destination-in";
+                    context.fillStyle = wetness;
+                    context.fillRect(0, 0, cellWidth, cellHeight);
+                  }
                   textures[color] = crop;
                 });
                 finish(undefined, textures);
