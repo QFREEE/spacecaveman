@@ -64,6 +64,11 @@ stripe treatment using the active palette.
 
 ## Replace decorative artwork
 
+The flower's muted brushstroke uses `--skin-flower-paint` in the active palette.
+`PaintedFlowerHead.tsx` supplies one textured SVG pigment mark under the ink;
+`space.css` controls its strength across the bud and opening stages and its
+reduced-motion behavior.
+
 Use a named React component with no required props. It renders **decoration only** inside the reserved header
 region. It can read the active CSS tokens and supply theme-scoped selectors.
 Retain the pause convention (`.motion-off`) and a reduced-motion still state;

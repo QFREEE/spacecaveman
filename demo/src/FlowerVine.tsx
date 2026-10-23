@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./Language";
 import type { MessageKey } from "./i18n/en";
 import { ModuleFrame } from "./ModuleFrame";
+import { PaintedFlowerHead } from "./PaintedFlowerHead";
 
 const actions = [
   {
@@ -323,24 +324,29 @@ export function FlowerVine() {
                   <path d="M101 60q-14 0-17-11 15-2 17 11m2-5q14 1 17-10-14-3-17 10" />
                 ) : null}
                 {stage === 4 ? (
-                  <path d={`M103 ${stemTop}q-10-7-3-15l3 3 3-3q8 8-3 15z`} />
+                  <PaintedFlowerHead
+                    path={`M103 ${stemTop}q-10-7-3-15l3 3 3-3q8 8-3 15z`}
+                  />
                 ) : null}
                 {stage === 5 ? (
-                  <path d={`M103 ${stemTop}q-18-13-5-24l5 5 6-5q12 14-6 24z`} />
+                  <PaintedFlowerHead
+                    path={`M103 ${stemTop}q-18-13-5-24l5 5 6-5q12 14-6 24z`}
+                  />
                 ) : null}
                 {stage >= 6 ? (
                   <g
                     transform={`translate(${100 - 100 * bloomScale} ${stemTop - 41 * bloomScale}) scale(${bloomScale})`}
                   >
-                    <path d="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z" />
-                    <circle cx="100" cy="41" r="11" />
-                    {stage === 8 ? (
-                      <>
-                        <path d="M95 43q5 6 10-1" />
-                        <circle cx="96" cy="38" r=".7" />
-                        <circle cx="105" cy="38" r=".7" />
-                      </>
-                    ) : null}
+                    <PaintedFlowerHead path="M103 30q-17-22-22-6-20-4-14 10-10 13 8 18 0 18 17 8 13 14 19-2 19 2 15-14 18-11 1-20-3-17-17-8z">
+                      <circle cx="100" cy="41" r="11" />
+                      {stage === 8 ? (
+                        <>
+                          <path d="M95 43q5 6 10-1" />
+                          <circle cx="96" cy="38" r=".7" />
+                          <circle cx="105" cy="38" r=".7" />
+                        </>
+                      ) : null}
+                    </PaintedFlowerHead>
                   </g>
                 ) : null}
                 {displayStats.rain > 0 ? (

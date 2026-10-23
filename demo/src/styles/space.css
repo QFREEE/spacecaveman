@@ -472,6 +472,41 @@ input[type="range"] {
   font-size: 10px;
   color: var(--skin-muted);
 }
+.flower-paint-reveal {
+  animation: flower-pigment-arrive 1.6s ease-out both;
+}
+.flower-paint {
+  opacity: var(--flower-pigment, 0.15);
+  transition: opacity 1.4s ease-out;
+}
+.flower-stage[data-stage="5"] {
+  --flower-pigment: 0.25;
+}
+.flower-stage[data-stage="6"] {
+  --flower-pigment: 0.4;
+}
+.flower-stage[data-stage="7"] {
+  --flower-pigment: 0.55;
+}
+.flower-stage[data-stage="8"] {
+  --flower-pigment: 0.72;
+}
+@keyframes flower-pigment-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flower-paint-reveal {
+    animation: none;
+  }
+  .flower-paint {
+    transition: none;
+  }
+}
 .flower-stage > small {
   position: absolute;
   bottom: 2px;

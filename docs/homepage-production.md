@@ -36,6 +36,11 @@ from sprout through leaves and buds to a full flower. Each stage spans 25 points
 about five accepted actions. Other tabs refresh every 30 seconds or on
 window focus.
 
+The bud and petals take on a single broad coral brushstroke with an irregular
+edge, bristle gaps and uneven pigment. Color softly fades in and strengthens
+through the later stages while the original ink outline stays visible.
+Reduced motion shows the pigment immediately; the fade does not block care.
+
 At midnight in `America/New_York`, the next read or care request atomically starts
 a new generation and clears all care bars, the care log and bloom time, whether
 or not yesterday's plant bloomed. Concurrent requests reset it only once. The flower

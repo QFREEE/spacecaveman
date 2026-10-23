@@ -24,8 +24,11 @@ serves it as the production homepage.
 - Everyone cares for one flower stored in D1. Water, Sun, Prune and Feed each
   advance one attribute by five to a maximum of fifty: ten clicks fill a bar.
   The interface shows bars without numeric counts or levels. Total shared care
-  drives nine growth stages, changing about every five clicks. Every click has
-  immediate visual feedback; saves queue while the buttons stay available.
+  drives nine growth stages, changing about every five clicks.
+  The bud and petals gradually take on a single textured coral brushstroke,
+  softly fading into color as the flower opens. Reduced motion shows the color
+  immediately. Every click has immediate visual feedback; saves queue while the
+  buttons stay available.
   Failed saves discard unsaved queued care and restore confirmed progress.
   Atomic increments keep rapid care within the cap.
   The last twelve care actions are stored without visitor identities.
