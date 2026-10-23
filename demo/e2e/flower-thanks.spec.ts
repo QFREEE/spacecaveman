@@ -13,6 +13,7 @@ test("rapid confirmed care earns a translated thank-you without numeric counts",
     await flower
       .getByRole("button", { name: buttons[i % 4], exact: true })
       .click();
+    if (i === 3) await expect(flower.locator(".effect-food svg")).toBeVisible();
   }
   await expect(
     flower.getByRole("button", { name: "Refresh plant" }),

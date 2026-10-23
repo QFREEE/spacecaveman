@@ -93,7 +93,7 @@ async function requestPlant(
   return { plant, status: response.status };
 }
 
-function FertilizerBagIcon() {
+function FertilizerBagIcon({ size = 15 }: { size?: number }) {
   return (
     <svg
       width="15"
@@ -106,7 +106,12 @@ function FertilizerBagIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      style={{ verticalAlign: "-3px" }}
+      style={{
+        width: size,
+        height: size * 1.1,
+        marginTop: 0,
+        verticalAlign: "-3px",
+      }}
     >
       <path d="M6 6 5 2q5 1 10 0l-1 4M6 6q-2 4-3 11-.5 3 7 3t7-3q-1-7-3-11M5.5 6q4.5 1 9 0" />
       <path d="M10 17v-5m0 2q-4 0-4-3 4 0 4 3m0-1q0-4 4-4 0 4-4 4M7 17h6" />
@@ -320,7 +325,11 @@ export function FlowerVine() {
                   key={effectId}
                   aria-hidden="true"
                 >
-                  {active.effect}
+                  {active.id === "food" ? (
+                    <FertilizerBagIcon size={28} />
+                  ) : (
+                    active.effect
+                  )}
                 </span>
               ) : null}
             </>
