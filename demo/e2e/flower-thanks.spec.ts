@@ -33,7 +33,7 @@ test("local care is instant, capped, persistent, and makes no flower requests", 
   expect(requests).toEqual([]);
 });
 
-test("every plant has its own complete drawing and New plant cycles and resets", async ({
+test("every plant has its own complete drawing and New plant shuffles without repeats and resets", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -42,14 +42,17 @@ test("every plant has its own complete drawing and New plant cycles and resets",
   await expect(flower.locator(".plant-name")).toHaveCount(0);
   const silhouettes = new Set<string>();
   const ids = ["cosmos", "tulip", "sunflower", "poppy", "lavender", "calla"];
-  for (const id of ids) {
-    await expect(flower.locator(".watercolor-flower")).toHaveAttribute(
-      "data-plant",
-      id,
-    );
+  const seen = new Set<string>();
+  for (let i = 0; i < ids.length; i++) {
+    const id = (await flower
+      .locator(".watercolor-flower")
+      .getAttribute("data-plant"))!;
+    expect(ids).toContain(id);
+    expect(seen.has(id)).toBe(false);
+    seen.add(id);
     await flower.locator(".care-actions button").evaluateAll((buttons) =>
       buttons.forEach((button, index) => {
-        for (let i = 0; i < [8, 6, 3, 6][index]; i++)
+        for (let i = 0; i < [6, 4, 3, 5][index]; i++)
           (button as HTMLButtonElement).click();
       }),
     );
@@ -94,11 +97,14 @@ test("every plant has its own complete drawing and New plant cycles and resets",
     await expect(flower.locator(".plant-notice")).toHaveCount(0);
   }
   expect(silhouettes.size).toBe(6);
+  const selected = await flower
+    .locator(".watercolor-flower")
+    .getAttribute("data-plant");
+  await page.reload();
   await expect(flower.locator(".watercolor-flower")).toHaveAttribute(
     "data-plant",
-    "cosmos",
+    selected!,
   );
-  await page.reload();
   await expect(flower.getByRole("meter").first()).toHaveAttribute("value", "0");
 });
 
@@ -111,7 +117,7 @@ test("ranked partial progress and any first completed action choose the same dra
     await flower
       .getByRole("button", { name: first, exact: true })
       .evaluate((button: HTMLButtonElement) => {
-        for (let i = 0; i < 8; i++) button.click();
+        for (let i = 0; i < 6; i++) button.click();
       });
     for (const [i, layer] of layers.entries())
       await expect(flower.locator(`[data-paint="${layer}"]`)).toHaveAttribute(
@@ -155,7 +161,7 @@ test("care survives language changes and midnight until New plant is pressed", a
   await flower.getByRole("button", { name: "Feed", exact: true }).click();
   await expect(flower.locator(".effect-food svg")).toBeVisible();
   await page.clock.fastForward(120000);
-  await expect(flower.getByRole("meter").last()).toHaveAttribute("value", "6");
+  await expect(flower.getByRole("meter").last()).toHaveAttribute("value", "8");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("button", { name: "新植物", exact: true }),
@@ -163,10 +169,13 @@ test("care survives language changes and midnight until New plant is pressed", a
   await flower.getByRole("button", { name: "新植物", exact: true }).click();
   await expect(flower.locator(".care-effect")).toHaveCount(0);
   await expect(flower.getByRole("meter").last()).toHaveAttribute("value", "0");
+  const selected = await flower
+    .locator(".watercolor-flower")
+    .getAttribute("data-plant");
   await page.reload();
   await expect(flower.locator(".watercolor-flower")).toHaveAttribute(
     "data-plant",
-    "tulip",
+    selected!,
   );
 });
 
@@ -184,7 +193,7 @@ test("invalid or blocked browser storage keeps local care usable", async ({
   await page.goto("/");
   await expect(page.getByRole("meter").first()).toHaveAttribute("value", "0");
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await page.addInitScript(() =>
     Object.defineProperty(window, "localStorage", {
       get() {
@@ -194,7 +203,7 @@ test("invalid or blocked browser storage keeps local care usable", async ({
   );
   await page.reload();
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await page.getByRole("button", { name: "New plant" }).click();
   await expect(page.getByRole("meter").first()).toHaveAttribute("value", "0");
 });
@@ -217,4 +226,65 @@ test("a separate browser has its own plant and progress", async ({
   } finally {
     await other.close();
   }
+});
+
+test("shuffled rounds survive reload, avoid boundary repeats and preserve legacy care", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Math.random = () => 0;
+  });
+  await page.goto("/");
+  const plant = page.locator(".watercolor-flower");
+  const next = page.getByRole("button", { name: "New plant", exact: true });
+  const order: string[] = [];
+  let previous: string | null = null;
+  for (let round = 0; round < 3; round++) {
+    const seen = new Set<string>();
+    for (let i = 0; i < 6; i++) {
+      const id = (await plant.getAttribute("data-plant"))!;
+      expect(id).not.toBe(previous);
+      expect(seen.has(id)).toBe(false);
+      seen.add(id);
+      if (round === 0) order.push(id);
+      const saved = await page.evaluate(
+        (key) => localStorage.getItem(key),
+        storageKey,
+      );
+      await page.reload();
+      await expect(plant).toHaveAttribute("data-plant", id);
+      expect(
+        await page.evaluate((key) => localStorage.getItem(key), storageKey),
+      ).toBe(saved);
+      previous = id;
+      await next.click();
+    }
+    expect(seen.size).toBe(6);
+  }
+  expect(order).not.toEqual([
+    "cosmos",
+    "tulip",
+    "sunflower",
+    "poppy",
+    "lavender",
+    "calla",
+  ]);
+  await page.evaluate(
+    (key) =>
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          version: 1,
+          plantId: "tulip",
+          stats: { rain: 25, sun: 0, love: 0, food: 0 },
+          careCount: 4,
+        }),
+      ),
+    storageKey,
+  );
+  await page.reload();
+  await expect(plant).toHaveAttribute("data-plant", "tulip");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "25");
+  await next.click();
+  expect(await plant.getAttribute("data-plant")).not.toBe("tulip");
 });

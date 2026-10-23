@@ -14,7 +14,7 @@ test("language preserves care; keyboard and reduced motion work", async ({
   await page.keyboard.press("Enter");
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await expect(flower.locator(".care-effect")).toHaveCount(0);
   await expect(page.locator(".caveman-traveler")).toHaveCSS(
     "animation-name",
@@ -23,13 +23,13 @@ test("language preserves care; keyboard and reduced motion work", async ({
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "雨露", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await expect(flower.getByRole("status")).toHaveCount(0);
   await expect(flower.getByRole("button", { name: "详情" })).toHaveCount(0);
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
     flower.getByRole("meter", { name: "Rain", exact: true }),
-  ).toHaveAttribute("value", "6");
+  ).toHaveAttribute("value", "8");
   await expect(flower.getByRole("status")).toHaveCount(0);
 });
 

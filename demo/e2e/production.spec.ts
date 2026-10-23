@@ -11,7 +11,7 @@ test("unavailable server storage affects visitors but local care remains availab
     "Visit count is temporarily unavailable.",
   );
   await page.getByRole("button", { name: "Water", exact: true }).click();
-  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "6");
+  await expect(page.getByRole("meter").first()).toHaveAttribute("value", "8");
   await page.route("**/api/visitors", (route) =>
     route.fulfill({ json: { views: 73 } }),
   );

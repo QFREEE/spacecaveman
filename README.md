@@ -22,11 +22,11 @@ serves it as the production homepage.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
 - Plant care is entirely browser-local. Water, Sun, Prune and Feed advance
-  a fifty-point bar (eight clicks for sketch, six for pot, three for leaves, six for petals), with continuous clicking and no visible numbers.
+  a fifty-point bar (six clicks for sketch, four for pot, three for leaves, five for petals), with continuous clicking and no visible numbers.
   Ranked progress reveals sketch → pot → leaves → blooms, regardless of which
   action leads. Refresh preserves the selected plant and care in versioned
   `localStorage`; there is no flower request, polling or midnight reset.
-- **New plant** cycles through Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
+- **New plant** shuffles Cosmos, Tulip, Sunflower, Poppy, Lavender and Calla
   lily and clears the current care and feedback. Separate browsers have separate
   plants. If browser storage is blocked, care remains usable for the current visit.
 - p5 and p5.brush generate seeded watercolor textures on first use, then stop and
