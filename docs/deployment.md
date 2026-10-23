@@ -108,6 +108,11 @@ CI installs Chromium's Linux system dependencies too. Actions are pinned to
 immutable commits; Dependabot checks for action updates monthly. Pull requests run
 without deployment secrets and with a read-only GitHub token. Deployment jobs run
 serially, and an in-progress production upload is not cancelled by another push.
+Immediately before upload, a read-only GitHub API check compares the run commit
+with the current main SHA. Superseded runs skip upload and public verification;
+API failures block deployment. The checked commit stays pinned so the deployed
+source is the source that passed checks. A new merge during an upload is handled
+by its own release run.
 
 ## Verification and rollback
 

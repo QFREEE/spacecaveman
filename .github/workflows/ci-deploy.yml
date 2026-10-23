@@ -57,7 +57,13 @@ jobs:
             echo '::error::Add CLOUDFLARE_API_TOKEN to the production environment. See docs/deployment.md.'
             exit 1
           fi
+      - name: Check current main before deployment
+        id: deployment-head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/check-deployment-head.mjs
       - name: Deploy Worker and static assets
+        if: steps.deployment-head.outputs.current == 'true'
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -65,4 +71,5 @@ jobs:
           packageManager: pnpm
           command: deploy --config wrangler.jsonc --keep-vars
       - name: Verify public website
+        if: steps.deployment-head.outputs.current == 'true'
         run: node scripts/verify-deployment.mjs
