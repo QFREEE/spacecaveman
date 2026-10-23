@@ -43,7 +43,7 @@ serves it as the production homepage.
   Flower state refreshes every 30 seconds and when the window regains focus.
 - Flower progress is saved on the server, independently of browser storage.
 - Gentle encouragement appears after three and six successful actions in the
-  current visit. After ten, the bars turn green with a personal thank-you.
+  current visit. After ten, a personal thank-you appears; the bars keep their monochrome style.
   There is no bloom message. Recognition resets for a new daily plant or page reload;
   no visitor identity or numeric contribution count is displayed or stored.
 - The counter starts at zero when its migration is applied and counts accepted

@@ -54,7 +54,7 @@ or not yesterday's plant bloomed. Concurrent requests reset it only once. The fl
 card shows care actions and refresh, without a details panel. Blooming changes the
 plant's appearance; there is no flag reward or saved browser unlock.
 Three and six successful actions across the care buttons during the current visit
-show gentle encouragement; ten show a personal thank-you and green bars. There is
+show gentle encouragement; ten show a personal thank-you. Bars remain monochrome at every stage. There is
 no bloom message or separate gold-bar reward. Full or failed attempts do not earn recognition. This count
 exists only in page memory and resets for a new generation or reload. Decorative
 care effects never block further clicks; reduced motion still receives the

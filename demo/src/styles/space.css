@@ -526,15 +526,6 @@ meter::-webkit-meter-optimum-value {
 meter::-moz-meter-bar {
   background: var(--skin-muted);
 }
-.plant-meters[data-recognition="thanks"] {
-  --plant-fill: var(--skin-care-thanks);
-}
-.plant-meters[data-recognition] meter::-webkit-meter-optimum-value {
-  background: var(--plant-fill);
-}
-.plant-meters[data-recognition] meter::-moz-meter-bar {
-  background: var(--plant-fill);
-}
 .care-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
