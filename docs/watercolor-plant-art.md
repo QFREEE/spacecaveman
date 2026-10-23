@@ -44,7 +44,7 @@ care values, reveals ink and interprets the chosen design. It has no special
 branches for plant IDs. Pot/leaf/bloom arrays each finish at their ranked bar's
 maximum. Centers appear at the end of the bloom layer.
 
-`watercolorAtlas.ts` paints all discovered pigment swatches using p5 2.3.4 and
+`watercolorAtlas.ts` paints requested pigment swatches using p5 2.3.4 and
 p5.brush 2.2.3. A fixed seed stabilizes texture. The palette discovers colors from
 the registry and assigns pot/leaf/petal/center roles, so new colors do not require
 editing the painting engine. Preserve the original palette prefix to retain its
@@ -55,8 +55,8 @@ and reverse tip glaze 135. After rendering, a varying alpha mask leaves the bell
 more transparent than the rims. Other roles keep pigment 115 and texture/border
 0.42/0.55. These are art parameters, not care rules.
 
-The engine loads dynamically, paints once, crops into offscreen canvas tiles,
-then removes the WebGL sketch. A visible 2D canvas composites those cached marks
+The engine loads dynamically, batches colors needed by visible flowers, crops into offscreen canvas tiles,
+then removes the WebGL sketch. New plants reuse cached pigments and render only missing colors; batches run serially because p5.brush has global state. A visible 2D canvas composites those cached marks
 under SVG ink. No image data URLs, remote assets or CSP changes are needed.
 Failed painting initialization has a simple translucent canvas fallback. Care
 clicks never restart p5 or block waiting for a painting frame.

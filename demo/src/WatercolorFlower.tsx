@@ -40,7 +40,7 @@ function PaintLayer({
         1.6 * mark.width,
       );
       context!.clip();
-      if (atlas)
+      if (atlas?.[mark.color])
         context!.drawImage(
           atlas[mark.color],
           -0.12 * mark.length,
@@ -152,7 +152,14 @@ export function WatercolorFlower({
   const [paintFailed, setPaintFailed] = useState(false);
   useEffect(() => {
     let current = true;
-    loadWatercolorAtlas()
+    setAtlas(null);
+    setPaintFailed(false);
+    loadWatercolorAtlas([
+      ...design.pot.map((mark) => mark.color),
+      ...design.leaves.map((mark) => mark.color),
+      ...design.flowers.map((mark) => mark.color),
+      ...(design.center ? [design.center.color] : []),
+    ])
       .then((image) => {
         if (current) setAtlas(image);
       })
@@ -162,7 +169,7 @@ export function WatercolorFlower({
     return () => {
       current = false;
     };
-  }, []);
+  }, [design]);
   // Bar identities do not choose layers: the leading bar draws first.
   const [sketch, pot, greenery, flower] = Object.values(stats)
     .map((value) => clamp(value / 50))

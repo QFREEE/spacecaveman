@@ -59,6 +59,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
 }) => {
   const now = Date.now();
   await page.clock.install({ time: new Date(now) });
+  await page.clock.pauseAt(new Date(now));
   let report = {
     status: "not_in_nyc",
     observed_at: new Date(now).toISOString(),

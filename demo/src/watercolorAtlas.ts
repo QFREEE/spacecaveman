@@ -1,17 +1,38 @@
-// p5.brush paints the atlas once. SVG only places and reveals its real brush marks.
+// p5.brush paints each requested pigment once. SVG places and reveals its brush marks.
 import { pigmentPalette } from "./plantDesigns";
 export const cellWidth = 128;
 export const cellHeight = 80;
 export const atlasWidth = cellWidth * 4;
-export const atlasHeight = cellHeight * Math.ceil(pigmentPalette.length / 4);
 export type PaintAtlas = Record<string, HTMLCanvasElement>;
-let atlas: Promise<PaintAtlas> | undefined;
+const cached: PaintAtlas = {};
+const requested = new Set<string>();
+let pending: Promise<void> | undefined;
 
-export function loadWatercolorAtlas(): Promise<PaintAtlas> {
-  return (atlas ??= createAtlas());
+// Batch visible flowers in the same render, and serialize p5.brush's global state.
+export function loadWatercolorAtlas(colors: string[]): Promise<PaintAtlas> {
+  for (const color of colors) if (!cached[color]) requested.add(color);
+  if (colors.every((color) => cached[color]))
+    return Promise.resolve({ ...cached });
+  if (!pending) {
+    pending = Promise.resolve()
+      .then(async () => {
+        const pigments = pigmentPalette.filter(({ color }) =>
+          requested.has(color),
+        );
+        requested.clear();
+        Object.assign(cached, await createAtlas(pigments));
+      })
+      .finally(() => {
+        pending = undefined;
+      });
+  }
+  return pending.then(() => loadWatercolorAtlas(colors));
 }
 
-async function createAtlas(): Promise<PaintAtlas> {
+async function createAtlas(
+  pigments: typeof pigmentPalette,
+): Promise<PaintAtlas> {
+  const atlasHeight = cellHeight * Math.ceil(pigments.length / 4);
   const { default: P5 } = await import("p5");
   P5.disableFriendlyErrors = true;
   // p5.brush registers its flush hooks against this constructor during import.
@@ -69,7 +90,7 @@ async function createAtlas(): Promise<PaintAtlas> {
             brush.noField();
             brush.fillBleed(0.13, "out", 0);
             brush.fillTexture(0.42, 0.55, false);
-            pigmentPalette.forEach(({ color, role }, index) => {
+            pigments.forEach(({ color, role }, index) => {
               const x = (index % 4) * cellWidth - atlasWidth / 2;
               const y = Math.floor(index / 4) * cellHeight - atlasHeight / 2;
               const isPetal = role === "petal";
@@ -122,7 +143,7 @@ async function createAtlas(): Promise<PaintAtlas> {
                 const canvas = host.querySelector("canvas");
                 if (!canvas) throw new Error("Missing watercolor canvas");
                 const textures: PaintAtlas = {};
-                pigmentPalette.forEach(({ color, role }, index) => {
+                pigments.forEach(({ color, role }, index) => {
                   const crop = document.createElement("canvas");
                   crop.width = cellWidth;
                   crop.height = cellHeight;

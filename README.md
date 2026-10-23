@@ -34,7 +34,7 @@ serves it as the production homepage.
 - **New plant** shuffles twelve designs: Cosmos, Tulip, Sunflower, Poppy, Lavender,
   Calla lily, Rose, Daisy, Iris, Daffodil, Hydrangea and Lily of the valley, and clears the current care and feedback. Separate browsers have separate
   plants. If browser storage is blocked, care remains usable for the current visit.
-- p5 and p5.brush generate seeded watercolor textures on first use, then stop and
+- p5 and p5.brush generate seeded watercolor textures for visible flowers on demand, then stop and
   release the hidden WebGL sketch. Cached canvas tiles retain transparent pigment,
   darker edges, crossing washes and visible black ink. Meters stay monochrome.
 - Care updates the illustration and bars without encouragement or thank-you messages.
