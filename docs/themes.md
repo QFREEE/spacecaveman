@@ -66,7 +66,13 @@ stripe treatment using the active palette.
 
 `WatercolorFlower.tsx` supplies separate sketch, terracotta pot, green leaf,
 and coral/peach petal layers. Transparent irregular rectangular SVG washes sit
-under the ink contours. The illustration's watercolor palette is shared between
+under the ink contours. Each wash builds up from eight stable irregular pigment
+sheets, with extra pigment along its edges and a paper-grain filter per mark.
+Multiply blending darkens overlapping sheets and separate strokes. This SVG
+implementation takes inspiration from the bleed/texture/border controls in
+[p5.brush](https://github.com/acamposuribe/p5.brush); it does not install or bundle
+the library. Shapes are generated once so clicking does not reshuffle their texture.
+The pigment group is isolated to keep blending inside the illustration. The illustration's watercolor palette is shared between
 themes; its ink uses the active skin text color. `space.css` controls the short
 progress transitions and disables them for reduced motion.
 

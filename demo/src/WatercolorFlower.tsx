@@ -89,8 +89,35 @@ const ink = [
   "M104 50C105 56 95 56 95 50C95 44 104 44 104 50",
   "M12 141Q28 135 44 140M43 137Q58 130 77 136M123 136Q142 132 151 139M151 141Q169 136 185 142",
 ];
-const flatWash =
-  "M0-0.43L.07-.49 .14-.44 .28-.48 .44-.43 .63-.48 .81-.44 .94-.48 1-.37 .96-.22 1.02-.1 .97 .02 1.01 .18 .96 .3 .99 .43 .84 .47 .69 .42 .5 .48 .31 .44 .14 .49 .02 .41 -.02 .26 .02 .08 -.01-.12Z";
+// Thin, irregular pigment sheets build tone like watercolor glazing.
+// Fixed variation keeps the paper marks stable across care updates.
+const washContour = [
+  [0, -0.43],
+  [0.15, -0.47],
+  [0.34, -0.44],
+  [0.56, -0.46],
+  [0.78, -0.43],
+  [0.98, -0.45],
+  [1.01, -0.22],
+  [0.98, 0.02],
+  [1, 0.23],
+  [0.97, 0.44],
+  [0.78, 0.46],
+  [0.57, 0.43],
+  [0.37, 0.47],
+  [0.16, 0.44],
+  [0.01, 0.42],
+  [-0.01, 0.19],
+  [0.01, -0.1],
+];
+const pigmentSheets = Array.from({ length: 8 }, (_, layer) => {
+  const points = washContour.map(([x, y], vertex) => {
+    const variation = Math.sin((layer + 1) * 19.7 + vertex * 7.3);
+    const drift = Math.cos((layer + 2) * 11.1 + vertex * 9.7);
+    return `${(x + variation * 0.025).toFixed(3)},${(y + drift * 0.055).toFixed(3)}`;
+  });
+  return `M${points.join("L")}Z`;
+});
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
 function Wash({
@@ -101,6 +128,7 @@ function Wash({
   length,
   width,
   color,
+  texture,
 }: {
   progress: number;
   x: number;
@@ -109,35 +137,48 @@ function Wash({
   length: number;
   width: number;
   color: string;
+  texture: string;
 }) {
   const id = useId();
   return (
-    <g
-      transform={`translate(${x} ${y}) rotate(${angle}) scale(${length} ${width})`}
-    >
-      <defs>
-        <clipPath id={id}>
-          <rect
-            className="flower-wash-window"
-            x="-.03"
-            y="-.6"
-            width={progress * 1.1}
-            height="1.2"
+    <g className="flower-watercolor-mark" filter={`url(#${texture}-paper)`}>
+      <g
+        transform={`translate(${x} ${y}) rotate(${angle}) scale(${length} ${width})`}
+      >
+        <defs>
+          <clipPath id={id}>
+            <rect
+              className="flower-wash-window"
+              x="-.03"
+              y="-.6"
+              width={progress * 1.1}
+              height="1.2"
+            />
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#${id})`}>
+          {pigmentSheets.map((path, index) => (
+            <path
+              key={index}
+              className="flower-pigment-sheet"
+              d={path}
+              fill={color}
+              opacity={0.09 + (index % 3) * 0.012}
+            />
+          ))}
+          <path
+            className="flower-pigment-sheet"
+            d="M.02-.34Q.3-.49 .6-.36T.98-.35L.97-.25Q.58-.35 .28-.28L.03-.23Z"
+            fill={color}
+            opacity=".13"
           />
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${id})`}>
-        <path d={flatWash} fill={color} opacity=".56" />
-        <path
-          d="M.02-.32Q.32-.44 .59-.32T.98-.33L.96-.2Q.6-.29 .3-.22L.03-.19Z"
-          fill={color}
-          opacity=".12"
-        />
-        <path
-          d="M.12 .28Q.5 .36 .96 .24L.98 .39Q.55 .49 .1 .4Z"
-          fill={color}
-          opacity=".16"
-        />
+          <path
+            className="flower-pigment-sheet"
+            d="M.04 .29Q.48 .4 .97 .28L.98 .43Q.5 .53 .03 .43Z"
+            fill={color}
+            opacity=".17"
+          />
+        </g>
       </g>
     </g>
   );
@@ -185,11 +226,12 @@ export function WatercolorFlower({
           <feComposite in="SourceGraphic" in2="grain" operator="in" />
         </filter>
       </defs>
-      <g filter={`url(#${id}-paper)`} stroke="none">
+      <g className="flower-watercolor" stroke="none">
         <g data-paint="pot" data-progress={pot}>
           {[0, 1, 2, 3, 4].map((row) => (
             <Wash
               key={row}
+              texture={id}
               progress={clamp(pot * 5 - row)}
               x={row % 2 ? 125 : 74}
               y={111 + row * 6.8}
@@ -204,6 +246,7 @@ export function WatercolorFlower({
           {leaves.map((leaf, index) => (
             <Wash
               key={index}
+              texture={id}
               {...leaf}
               progress={clamp(greenery * leaves.length - index)}
             />
@@ -213,6 +256,7 @@ export function WatercolorFlower({
           {petals.map((petal, index) => (
             <Wash
               key={index}
+              texture={id}
               {...petal}
               progress={clamp(flower * 5.5 - index)}
             />
