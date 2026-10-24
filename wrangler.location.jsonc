@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "spacecaveman-location",
+  "account_id": "b72709d7edb8e1f6d064c69ee4b6d3c5",
+  "main": "src/location-worker.js",
+  "compatibility_date": "2026-10-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "location.spacecaveman.com", "custom_domain": true }],
+  "vars": {
+    "LOCATION_ACTIVE_KEY": "v1",
+    "LOCATION_ACCESS_AUD": "CONFIGURE_ACCESS_AUDIENCE"
+  },
+  "access": { "dev": { "aud": "CONFIGURE_ACCESS_AUDIENCE" } },
+  "triggers": { "crons": ["* * * * *"] },
+  "d1_databases": [
+    {
+      "binding": "LOCATION_DB",
+      "database_name": "spacecaveman-location-private",
+      "database_id": "1bdb68ae-c55d-4388-98bd-f78aaac77441",
+      "migrations_dir": "migrations/location-private"
+    },
+    {
+      "binding": "PUBLIC_PRESENCE_DB",
+      "database_name": "spacecaveman-presence-trial",
+      "database_id": "9d05a3a7-1c0e-4cd0-a267-dcad60cb3613",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": false, "traces": { "enabled": false } }
+}

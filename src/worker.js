@@ -22,7 +22,10 @@ export default {
     if (pathname === "/api/flower") return handleFlower(request, env);
     if (pathname === "/api/presence/public")
       return handlePublicPresence(request, env);
-    if (pathname === "/api/presence") return handlePresence(request, env);
+    if (pathname === "/api/presence") {
+      if (env?.LOCATION_PUBLIC_READ === 'true') return Response.json({ error: 'Legacy presence endpoint retired' }, { status: 410, headers: { 'Cache-Control': 'no-store' } });
+      return handlePresence(request, env);
+    }
     const headers = {
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",

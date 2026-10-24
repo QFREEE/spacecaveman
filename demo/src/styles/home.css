@@ -151,6 +151,11 @@ footer {
     animation-duration: 0s;
   }
 }
+.presence-borough {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+
 .presence-detail {
   border-top: 1px dotted var(--skin-border-soft);
   margin-top: 8px;

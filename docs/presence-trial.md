@@ -1,5 +1,10 @@
 # Deployed iPhone presence trial
 
+The approved [private coordinate-history upgrade](private-location.md) is a
+separate Worker/database. Its guide records provisioning and remaining Access/
+deployment prerequisites. The existing trial described below remains the legacy
+coarse-status endpoint until phone and public cutover are verified.
+
 Deployed 2026-10-20 to the existing Cloudflare account, separately from the public sample site.
 
 - Viewer: https://spacecaveman-presence-trial.spacecaveman.workers.dev/presence.html

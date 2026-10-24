@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.25.0",
   "type": "module",
   "scripts": {
-    "verify": "pnpm check && pnpm test && pnpm demo:build && pnpm demo:test && pnpm deploy:check && pnpm presence:deploy:check",
+    "verify": "pnpm check && pnpm test && pnpm location:test:runtime && pnpm demo:build && pnpm demo:test && pnpm deploy:check && pnpm presence:deploy:check && pnpm location:deploy:check",
     "build:site": "pnpm demo:build && node scripts/build-site.mjs",
     "demo:dev": "vite --config vite.demo.config.ts",
     "demo:build": "tsc -p demo/tsconfig.json && vite build --config vite.demo.config.ts",
@@ -13,7 +13,7 @@
     "demo:check": "tsc -p demo/tsconfig.json",
     "demo:test": "playwright test --config playwright.demo.config.ts",
     "dev": "wrangler dev --ip 127.0.0.1",
-    "check": "node --check public/app.js && node --check src/worker.js && node --check src/site.js && node --check src/presence.js && node --check public/presence-viewer.js && node --check scripts/presence-check.mjs",
+    "check": "node --check public/app.js && node --check src/worker.js && node --check src/site.js && node --check src/presence.js && node --check public/presence-viewer.js && node --check scripts/presence-check.mjs && node --check src/location.js && node --check src/location-worker.js && node --check src/borough.js && node --check scripts/location-credentials.mjs && node --check scripts/location-client.mjs && node --check scripts/update-borough-boundaries.mjs",
     "test": "node --test test/*.test.js",
     "deploy:check": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy --keep-vars",
@@ -21,7 +21,12 @@
     "presence:credentials": "node scripts/presence-credentials.mjs",
     "presence:check": "node scripts/presence-check.mjs",
     "presence:deploy:check": "wrangler deploy --config wrangler.presence.jsonc --dry-run",
-    "presence:deploy": "wrangler deploy --config wrangler.presence.jsonc"
+    "presence:deploy": "wrangler deploy --config wrangler.presence.jsonc",
+    "location:dev": "wrangler dev --config wrangler.location.jsonc --ip 127.0.0.1 --port 8792",
+    "location:credentials": "node scripts/location-credentials.mjs",
+    "location:client": "node scripts/location-client.mjs",
+    "location:test:runtime": "node scripts/location-runtime-smoke.mjs",
+    "location:deploy:check": "wrangler deploy --config wrangler.location.jsonc --dry-run"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

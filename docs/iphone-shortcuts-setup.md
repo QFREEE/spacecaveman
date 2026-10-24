@@ -1,5 +1,11 @@
 # iPhone Shortcuts presence setup
 
+For the approved encrypted-coordinate history upgrade, follow
+[Private coordinate history](private-location.md#change-the-existing-shortcut-after-backend-setup).
+It uses numeric latitude/longitude, not the text form of Current Location. Do not
+switch the phone before the private Access-protected endpoint is ready. The
+recipes below describe the compatible legacy coarse-status setup.
+
 Researched 2026-10-20 for the previously supplied iOS 17 device. The protected server trial is now deployed; see [the live trial and private credential setup](presence-trial.md). The action recipe still needs testing on the actual phone. Full invited-friend access is not implemented.
 
 ## Reusable publisher (2026-10-21)

@@ -1,5 +1,9 @@
 # iPhone presence: feasibility and security design
 
+The owner approved a separate encrypted coordinate-history backend on 2026-10-24.
+See [Private coordinate history](private-location.md) for the current architecture
+and rollout state. The coarse-only design below is retained as historical context.
+
 Investigated 2026-10-20. Device version supplied by owner: iOS 17. A protected Worker/D1 trial with scoped write/read credentials is now deployed; see [trial status and setup](presence-trial.md). The sections below retain the broader proposed production design. Owner administration, invited-friend login, manual overrides, and iPhone automations have not been implemented or installed.
 
 ## Recommendation

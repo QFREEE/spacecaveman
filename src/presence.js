@@ -39,6 +39,12 @@ export async function handlePublicPresence(request, env, now = Date.now()) {
   if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405, { Allow: 'GET' });
   if (!env.PRESENCE_DB) return reply({ error: 'Presence is not configured' }, 503);
   try {
+    if (env.LOCATION_PUBLIC_READ === 'true') {
+      const row = await env.PRESENCE_DB.prepare('SELECT status, borough, observed_at, expires_at FROM location_public WHERE id=1').first();
+      if (!row || row.observed_at <= now - RETENTION) return reply({ status: 'unknown', borough: null, observed_at: null, expires_at: null });
+      return reply({ status: row.expires_at > now ? row.status : 'unknown', borough: row.expires_at > now ? row.borough : null,
+        observed_at: new Date(row.observed_at).toISOString(), expires_at: new Date(row.expires_at).toISOString() });
+    }
     const row = await env.PRESENCE_DB.prepare(`SELECT p.status, p.observed_at, p.expires_at FROM presence p
       JOIN presence_credentials writer ON writer.id = p.credential_id
       WHERE p.id = 1 AND writer.revoked = 0 AND writer.expires_at > ?

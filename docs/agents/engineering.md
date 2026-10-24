@@ -17,6 +17,7 @@ Track work in the configured issue tracker. Root `AGENTS.md` is authoritative;
 | `demo/src/` | Published bilingual React homepage; retired prototypes stay unmounted |
 | `public/` | Supporting static pages and security headers; visits and presence viewer |
 | `src/worker.js`, `src/presence.js` | Public homepage endpoints and protected presence handler |
+| `src/location-worker.js`, `src/location.js`, `src/borough.js` | Access-protected encrypted coordinate history and sanitized publication |
 | `wrangler.jsonc` | Website Worker and generated `dist/site/` assets |
 | `wrangler.presence.jsonc`, `migrations/` | Separate private presence trial and D1 schema |
 | `test/`, `demo/e2e/` | Node API/storage tests and Playwright browser tests |
@@ -40,6 +41,11 @@ type/build checks, browser tests, and both Worker dry runs, stopping on failure.
 It does not deploy, provision credentials, or apply D1 migrations. CI runs this
 same command after installing dependencies and Chromium.
 
+Private location changes also run a synthetic local workerd/D1 smoke and a third
+Worker dry run through `pnpm verify`. Use `wrangler.location.jsonc` and its separate
+`migrations/location-private/` directory; never point homepage migrations at the
+private database. See `docs/private-location.md` for rollout and Access requirements.
+
 For iteration, run the relevant individual script from `package.json` first.
 Before a code PR, complete the shared verification and report actual results.
 For documentation-only changes, check links and factual claims; CI still runs
@@ -56,9 +62,12 @@ establish physical iOS automation behavior.
 
 - Keep real plans private until server-side owner/friend authorization exists.
   Public fixtures and browser-local demo content are explicitly fictional.
-- Keep phone geofence detection local. Accept only coarse presence and event
-  metadata; never upload or store GPS coordinates. Enforce credential scope,
-  revocation, event ordering, and expiry. A missed departure must become unknown.
+- Precise coordinates are authorized only for the encrypted private location
+  history described in `docs/private-location.md`. Bind its database and encryption
+  key only to the private Worker. Public APIs, logs and analytics must never contain
+  raw coordinates. Enforce scoped credentials, revocation, ordering and expiry;
+  a missed report must become unknown publicly. Do not send samples to external
+  geocoders. Keep private history until the owner explicitly deletes it.
 - Keep credentials outside source, public assets, chat, command arguments, and
   logs. Private bundles belong in ignored `.presence-private/`; CI deployment
   credentials belong in GitHub's `production` environment.
