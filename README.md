@@ -17,11 +17,11 @@ serves it as the production homepage.
 
 - NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
   reports presence; the homepage refreshes every minute and shows the latest answer.
-  Update age is approximate: “Just updated” under five minutes, “A few minutes ago”
-  from five to under fifteen, then “Within the last half hour” until thirty minutes
-  and “Within the last hour” until sixty minutes. Whole-hour windows show
-  “About an hour ago”, “About 2 hours ago”, and “About 3 hours ago”; at four hours
-  and beyond, “Several hours ago”. No exact timestamp is displayed.
+  Update age is approximate and each time frame starts with “Last updated”: “just now” under five minutes, “a few minutes ago”
+  from five to under fifteen, then “within the last half hour” until thirty minutes
+  and “within the last hour” until sixty minutes. Whole-hour windows show
+  “about an hour ago”, “about 2 hours ago”, and “about 3 hours ago”; at four hours
+  and beyond, “several hours ago”. No exact timestamp is displayed.
   Missing reports and reports older than six hours show “No update yet.” Report age is
   available for up to 30 days. No phone credentials are sent to the browser.
 - Every new plant starts with a visible ink pot and seed. The first care action
