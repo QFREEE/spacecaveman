@@ -43,3 +43,45 @@ test("every new pigment batch contains painted pixels and preserves earlier colo
       ).toBeGreaterThan(100);
   await expect(page.locator("[data-p5-painter]")).toHaveCount(0);
 });
+
+test("leaf washes retain uneven translucency in every pigment batch", async ({
+  page,
+}) => {
+  await page.route("**/atlas-test", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: "<html><body></body></html>",
+    }),
+  );
+  await page.goto("/atlas-test");
+  const washes = await page.evaluate(async () => {
+    const modulePath = "/src/watercolorAtlas.ts";
+    const { loadWatercolorAtlas } = await import(modulePath);
+    const results = [];
+    for (const color of ["#739a70", "#a4ab58"]) {
+      const atlas = await loadWatercolorAtlas([color]);
+      const pixels = atlas[color]
+        .getContext("2d")
+        .getImageData(0, 0, 128, 80).data;
+      const opacity = [];
+      for (let y = 25; y < 55; y++)
+        for (let x = 25; x < 100; x++)
+          opacity.push(pixels[(y * 128 + x) * 4 + 3]);
+      results.push({
+        color,
+        min: Math.min(...opacity),
+        max: Math.max(...opacity),
+        levels: new Set(opacity).size,
+      });
+    }
+    return results;
+  });
+  for (const wash of washes) {
+    expect(wash.max, wash.color + " must remain translucent").toBeLessThan(240);
+    expect(
+      wash.max - wash.min,
+      wash.color + " must vary within a stroke",
+    ).toBeGreaterThan(30);
+    expect(wash.levels).toBeGreaterThan(20);
+  }
+});
