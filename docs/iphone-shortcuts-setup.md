@@ -1,5 +1,9 @@
 # iPhone Shortcuts presence setup
 
+For the new two-field `borough` and `observed_at` payload, use the
+[borough payload guide](presence-borough-payload.md). Classification happens on
+the phone. The status/event-ID recipes below document compatible legacy clients.
+
 Researched 2026-10-20 for the previously supplied iOS 17 device. The protected server trial is now deployed; see [the live trial and private credential setup](presence-trial.md). The action recipe still needs testing on the actual phone. Full invited-friend access is not implemented.
 
 ## Reusable publisher (2026-10-21)

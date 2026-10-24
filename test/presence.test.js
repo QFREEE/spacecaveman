@@ -11,6 +11,7 @@ async function fixture() {
   sqlite.exec(readFileSync(new URL('../migrations/0001_presence.sql', import.meta.url), 'utf8'));
   sqlite.exec(readFileSync(new URL('../migrations/0002_site_counter.sql', import.meta.url), 'utf8'));
   sqlite.exec(readFileSync(new URL('../migrations/0005_daily_visitors.sql', import.meta.url), 'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0006_presence_borough.sql', import.meta.url), 'utf8'));
   const db = {
     prepare(sql) {
       return { bind(...values) {
@@ -42,6 +43,101 @@ async function fixture() {
   return { sqlite, db, now, tokens, env, event, request };
 }
 
+test('borough migration preserves the existing report and constrains location values', () => {
+  const sqlite = new DatabaseSync(':memory:');
+  try {
+    sqlite.exec(readFileSync(new URL('../migrations/0001_presence.sql', import.meta.url), 'utf8'));
+    sqlite.prepare("UPDATE presence SET status = 'in_nyc', observed_at = 123, expires_at = 456, received_at = 123 WHERE id = 1").run();
+    const before = { ...sqlite.prepare('SELECT * FROM presence').get() };
+    sqlite.exec(readFileSync(new URL('../migrations/0006_presence_borough.sql', import.meta.url), 'utf8'));
+    assert.deepEqual({ ...sqlite.prepare('SELECT * FROM presence').get() }, { ...before, borough: null });
+    assert.throws(() => sqlite.prepare('UPDATE presence SET borough = ?').run('10001'), /CHECK constraint failed/);
+  } finally {
+    sqlite.close();
+  }
+});
+
+test('two-field borough reports derive NYC status and expose only coarse location', async () => {
+  for (const borough of ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten_island', 'outside_nyc']) {
+    const f = await fixture();
+    f.env.PRESENCE_PUBLIC_READ = 'true';
+    const report = { borough, observed_at: new Date(f.now).toISOString() };
+    assert.equal((await f.request('POST', f.tokens.read, report)).status, 401);
+    const write = await f.request('POST', f.tokens.write, report);
+    assert.equal(write.status, 200);
+    assert.deepEqual(await write.json(), { accepted: true });
+    const expected = {
+      status: borough === 'outside_nyc' ? 'not_in_nyc' : 'in_nyc',
+      borough,
+      observed_at: report.observed_at,
+      expires_at: new Date(f.now + 6 * 3600_000).toISOString(),
+    };
+    assert.deepEqual(await (await f.request('GET', f.tokens.read)).json(), expected);
+    assert.deepEqual(await (await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, f.now)).json(), expected);
+  }
+});
+
+test('borough payload requires exactly two fields and an explicit valid enum', async () => {
+  const f = await fixture();
+  const report = { borough: 'queens', observed_at: new Date(f.now).toISOString() };
+  for (const borough of ['', 'X', 'unknown', 'Queens', '10001', null, 1, {}, ['queens']]) {
+    assert.equal((await f.request('POST', f.tokens.write, { ...report, borough })).status, 400);
+  }
+  for (const invalid of [
+    { observed_at: report.observed_at }, { borough: 'queens' },
+    { ...report, zip_code: '10001' }, { ...report, latitude: 40 },
+    { ...report, status: 'in_nyc' }, { ...report, event_id: 'extra' },
+    { ...report, observed_at: '2026-10-20T19:00:00' },
+    { ...report, observed_at: new Date(f.now - 300001).toISOString() },
+    { ...report, observed_at: new Date(f.now + 60001).toISOString() },
+  ]) assert.equal((await f.request('POST', f.tokens.write, invalid)).status, 400);
+  assert.equal(f.sqlite.prepare('SELECT status FROM presence').get().status, null);
+});
+
+test('borough timestamp ordering rejects replay, conflicting reports and fast updates', async () => {
+  const f = await fixture();
+  const report = { borough: 'queens', observed_at: 'Tue, 20 Oct 2026 19:00:00 -0400' };
+  assert.equal((await f.request('POST', f.tokens.write, report)).status, 200);
+  const before = f.sqlite.prepare('SELECT * FROM presence').get();
+  assert.equal((await f.request('POST', f.tokens.write, report, f.now + 10_000)).status, 409);
+  const conflicting = { borough: 'outside_nyc', observed_at: new Date(f.now).toISOString() };
+  assert.equal((await f.request('POST', f.tokens.write, conflicting, f.now + 10_000)).status, 409);
+  assert.equal((await f.request('POST', f.tokens.write, { ...report, observed_at: new Date(f.now + 1).toISOString() })).status, 409);
+  assert.deepEqual(f.sqlite.prepare('SELECT * FROM presence').get(), before);
+  const later = f.now + 10_000;
+  assert.equal((await f.request('POST', f.tokens.write, { ...conflicting, observed_at: new Date(later).toISOString() }, later)).status, 200);
+  assert.equal((await f.request('GET', f.tokens.read, null, later)).status, 200);
+  assert.equal((await (await f.request('GET', f.tokens.read, null, later)).json()).borough, 'outside_nyc');
+  // A legacy report must clear a previously known borough rather than retain it.
+  assert.equal((await f.request('POST', f.tokens.write, f.event({ observed_at: new Date(later + 10_000).toISOString() }), later + 10_000)).status, 200);
+  assert.equal((await (await f.request('GET', f.tokens.read, null, later + 10_000)).json()).borough, null);
+});
+
+test('borough is hidden on expiry and cleared on revocation, deletion and retention cleanup', async () => {
+  for (const operation of ['expire', 'revoke', 'delete', 'cleanup']) {
+    const f = await fixture();
+    f.env.PRESENCE_PUBLIC_READ = 'true';
+    await f.request('POST', f.tokens.write, { borough: 'brooklyn', observed_at: new Date(f.now).toISOString() });
+    let at = f.now;
+    if (operation === 'expire') at += 6 * 3600_000;
+    if (operation === 'revoke') f.sqlite.prepare("UPDATE presence_credentials SET revoked = 1 WHERE scope = 'presence:write'").run();
+    if (operation === 'delete') f.sqlite.prepare("DELETE FROM presence_credentials WHERE scope = 'presence:write'").run();
+    if (operation === 'cleanup') {
+      at += 30 * 86400_000;
+      await cleanupPresence(f.env, at);
+    }
+    for (const response of [
+      await f.request('GET', f.tokens.read, null, at),
+      await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, at),
+    ]) {
+      const report = await response.json();
+      assert.equal(report.status, 'unknown');
+      assert.equal(report.borough, null);
+    }
+    if (operation !== 'expire') assert.equal(f.sqlite.prepare('SELECT borough FROM presence').get().borough, null);
+  }
+});
+
 test('presence fails closed and separates read/write credentials', async () => {
   const f = await fixture();
   assert.equal((await handlePresence(new Request('https://example.com/api/presence'), {})).status, 503);
@@ -62,7 +158,7 @@ test('stores normalized status privately, acknowledges only, expires at lease ed
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { accepted: true });
   const state = await (await f.request('GET', f.tokens.read)).json();
-  assert.deepEqual(state, { status: 'in_nyc', observed_at: '2026-10-20T23:00:00.000Z', expires_at: '2026-10-21T05:00:00.000Z' });
+  assert.deepEqual(state, { status: 'in_nyc', borough: null, observed_at: '2026-10-20T23:00:00.000Z', expires_at: '2026-10-21T05:00:00.000Z' });
   assert.equal((await (await f.request('GET', f.tokens.read, null, f.now + 6 * 3600_000)).json()).status, 'unknown');
 });
 
@@ -136,7 +232,7 @@ test('a manual Unknown report clears status and preserves ordering, scope and de
   assert.equal((await f.request('POST', f.tokens.read, clear, clearedAt)).status, 401);
   assert.deepEqual(await (await f.request('POST', f.tokens.write, clear, clearedAt)).json(), { accepted: true });
   assert.deepEqual(await (await f.request('GET', f.tokens.read, null, clearedAt)).json(), {
-    status: 'unknown', observed_at: null, expires_at: null,
+    status: 'unknown', borough: null, observed_at: null, expires_at: null,
   });
   assert.equal(f.sqlite.prepare('SELECT observed_at FROM presence').get().observed_at, clearedAt);
   assert.equal((await f.request('POST', f.tokens.write, clear, clearedAt + 10_000)).status, 409);
@@ -161,7 +257,7 @@ test('main public status reads the phone database without exposing credentials o
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
   const body = await response.json();
   assert.equal(body.status, 'in_nyc');
-  assert.deepEqual(Object.keys(body).sort(), ['expires_at', 'observed_at', 'status']);
+  assert.deepEqual(Object.keys(body).sort(), ['borough', 'expires_at', 'observed_at', 'status']);
   assert.equal((await worker.fetch(new Request('https://example.com/api/presence/public', { method: 'POST' }), f.env)).status, 405);
   f.sqlite.prepare('UPDATE presence SET expires_at = ?').run(Date.now() - 1);
   assert.equal((await (await get()).json()).status, 'unknown');
@@ -180,8 +276,8 @@ test('stale reports retain last-updated time until the exact 30-day cutoff on th
   for (const age of [6 * 3600_000, ttl - 1, ttl, ttl + 1]) {
     const at = f.now + age;
     const expected = age < ttl
-      ? { status: 'unknown', observed_at: new Date(f.now).toISOString(), expires_at: new Date(f.now + 6 * 3600_000).toISOString() }
-      : { status: 'unknown', observed_at: null, expires_at: null };
+      ? { status: 'unknown', borough: null, observed_at: new Date(f.now).toISOString(), expires_at: new Date(f.now + 6 * 3600_000).toISOString() }
+      : { status: 'unknown', borough: null, observed_at: null, expires_at: null };
     assert.deepEqual(await (await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, at)).json(), expected);
   }
 });
@@ -196,7 +292,7 @@ test('scheduled cleanup clears expired report data and hashes without deleting c
   t.mock.method(Date, 'now', () => expiry);
   await worker.scheduled({}, f.env);
   assert.deepEqual({ ...f.sqlite.prepare('SELECT * FROM presence').get() }, {
-    id: 1, status: null, observed_at: 0, expires_at: 0, received_at: 0, credential_id: null,
+    id: 1, status: null, borough: null, observed_at: 0, expires_at: 0, received_at: 0, credential_id: null,
   });
   assert.equal(f.sqlite.prepare('SELECT count(*) AS total FROM presence_credentials').get().total, 2);
   assert.equal(f.sqlite.prepare('SELECT count(*) AS total FROM presence_events').get().total, 1);
@@ -213,7 +309,7 @@ test('revoked or expired writer credentials hide retained timestamps', async () 
     await f.request('POST', f.tokens.write, f.event());
     if (revoke) f.sqlite.prepare("UPDATE presence_credentials SET revoked = 1 WHERE scope = 'presence:write'").run();
     else f.sqlite.prepare("UPDATE presence_credentials SET expires_at = ? WHERE scope = 'presence:write'").run(f.now);
-    const expected = { status: 'unknown', observed_at: null, expires_at: null };
+    const expected = { status: 'unknown', borough: null, observed_at: null, expires_at: null };
     assert.deepEqual(await (await handlePublicPresence(new Request('https://example.com/api/presence/public'), f.env, f.now)).json(), expected);
   }
 });

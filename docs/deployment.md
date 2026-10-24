@@ -11,6 +11,13 @@ branch. This is a record of that verification, not a promise about future runs.
 
 ## Normal release path
 
+The borough presence API requires `migrations/0006_presence_borough.sql` on the
+shared presence D1 database before either updated Worker is deployed. Apply it
+through the authorized D1 migration process below. The dedicated phone trial
+also needs the new Worker code before enabling a two-field Shortcut. CI deploys
+the main website only and does not apply migrations or update the trial. See the
+[borough payload rollout](presence-borough-payload.md#rollout).
+
 Open a pull request, wait for its checks, and merge to `main`. Track the release
 in [GitHub Actions](https://github.com/QFREEE/spacecaveman/actions). No local
 Cloudflare login or manual upload is needed for this path.
