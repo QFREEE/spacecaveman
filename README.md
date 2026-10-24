@@ -17,6 +17,9 @@ serves it as the production homepage.
 
 - NYC status comes from `GET /api/presence/public`. The hourly iPhone Shortcut
   reports presence; the homepage refreshes every minute and shows the latest answer.
+  The preferred [phone payload](docs/presence-borough-payload.md) contains only a
+  locally determined borough enum and observation time. Read APIs include the
+  current borough; the homepage continues to use the derived NYC status.
   Update age is approximate: “Just updated” under five minutes, “A few minutes ago”
   from five to under fifteen, then “Within the last half hour” until thirty minutes
   and “Within the last hour” until sixty minutes. Whole-hour windows show

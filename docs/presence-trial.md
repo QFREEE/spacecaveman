@@ -1,5 +1,9 @@
 # Deployed iPhone presence trial
 
+The new [borough payload guide](presence-borough-payload.md) documents the preferred
+two-field format and its migration/deployment prerequisites. The dated trial setup
+below describes the legacy format, which remains accepted for installed clients.
+
 Deployed 2026-10-20 to the existing Cloudflare account, separately from the public sample site.
 
 - Viewer: https://spacecaveman-presence-trial.spacecaveman.workers.dev/presence.html

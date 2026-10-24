@@ -25,7 +25,7 @@ await writeFile(new URL('iphone-setup.txt', directory), [
   'Endpoint: https://spacecaveman-presence-trial.spacecaveman.workers.dev/api/presence',
   'Method: POST; Request Body: JSON',
   `Authorization: Bearer ${credentials.write}`,
-  'JSON fields: status (in_nyc, not_in_nyc, or unknown to clear), observed_at (fresh ISO 8601 with timezone), event_id (fresh unique text).',
+  'JSON fields: borough (manhattan, brooklyn, queens, bronx, staten_island, outside_nyc), observed_at (fresh ISO 8601 or RFC 2822 with timezone). Determine the borough locally; never send ZIP codes or coordinates.',
   'Phone action guide: repository docs/iphone-shortcuts-setup.md (not hosted in production).',
   'Never share the populated shortcut. Read credential is for the private status viewer only.',
   `Private viewer credential: ${credentials.read}`,

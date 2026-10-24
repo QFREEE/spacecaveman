@@ -4,15 +4,17 @@ const LEASE = 6 * 60 * 60 * 1000;
 const RETENTION = 30 * 24 * 60 * 60 * 1000;
 const FRESHNESS = 5 * 60 * 1000;
 const MIN_INTERVAL = 10 * 1000;
+const BOROUGHS = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten_island', 'outside_nyc'];
 const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' };
 const reply = (body, status = 200, extra = {}) => Response.json(body, { status, headers: { ...headers, ...extra } });
 
 function reportResponse(row, now) {
   if (!row?.status || row.observed_at <= now - RETENTION) {
-    return reply({ status: 'unknown', observed_at: null, expires_at: null });
+    return reply({ status: 'unknown', borough: null, observed_at: null, expires_at: null });
   }
   return reply({
     status: row.expires_at > now ? row.status : 'unknown',
+    borough: row.expires_at > now ? row.borough ?? null : null,
     observed_at: new Date(row.observed_at).toISOString(),
     expires_at: new Date(row.expires_at).toISOString(),
   });
@@ -21,7 +23,7 @@ function reportResponse(row, now) {
 export async function cleanupPresence(env, now = Date.now()) {
   // Keep the singleton row so subsequent conditional updates can still succeed.
   await env.PRESENCE_DB.batch([
-    env.PRESENCE_DB.prepare(`UPDATE presence SET status = NULL, observed_at = 0,
+    env.PRESENCE_DB.prepare(`UPDATE presence SET status = NULL, borough = NULL, observed_at = 0,
       expires_at = 0, received_at = 0, credential_id = NULL
       WHERE id = 1 AND observed_at <= ?`).bind(now - RETENTION),
     env.PRESENCE_DB.prepare('DELETE FROM presence_events WHERE expires_at <= ?').bind(now),
@@ -39,7 +41,7 @@ export async function handlePublicPresence(request, env, now = Date.now()) {
   if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405, { Allow: 'GET' });
   if (!env.PRESENCE_DB) return reply({ error: 'Presence is not configured' }, 503);
   try {
-    const row = await env.PRESENCE_DB.prepare(`SELECT p.status, p.observed_at, p.expires_at FROM presence p
+    const row = await env.PRESENCE_DB.prepare(`SELECT p.status, p.borough, p.observed_at, p.expires_at FROM presence p
       JOIN presence_credentials writer ON writer.id = p.credential_id
       WHERE p.id = 1 AND writer.revoked = 0 AND writer.expires_at > ?
       AND writer.scope = 'presence:write'`).bind(now).first();
@@ -107,36 +109,47 @@ export async function handlePresence(request, env, now = Date.now()) {
         AND EXISTS (SELECT 1 FROM presence_credentials WHERE id = ?
           AND revoked = 0 AND expires_at > ? AND scope = 'presence:read')`)
         .bind(now, credential.id, now).first();
-      if (!row?.status || row.expires_at <= now) return reply({ status: 'unknown', observed_at: null, expires_at: null });
-      return reply({ status: row.status, observed_at: new Date(row.observed_at).toISOString(), expires_at: new Date(row.expires_at).toISOString() });
+      if (!row?.status || row.expires_at <= now) return reply({ status: 'unknown', borough: null, observed_at: null, expires_at: null });
+      return reply({ status: row.status, borough: row.borough ?? null, observed_at: new Date(row.observed_at).toISOString(), expires_at: new Date(row.expires_at).toISOString() });
     }
     const body = await readBody(request);
     if (body.error) return body.error;
     const event = body.value;
-    if (!event || Array.isArray(event) || typeof event !== 'object' ||
-        Object.keys(event).sort().join(',') !== 'event_id,observed_at,status' ||
-        !['in_nyc', 'not_in_nyc', 'unknown'].includes(event.status) ||
-        typeof event.event_id !== 'string' || !/^[A-Za-z0-9_.:+-]{1,128}$/.test(event.event_id) ||
+    if (!event || Array.isArray(event) || typeof event !== 'object') {
+      return reply({ error: 'Expected borough and observed_at' }, 400);
+    }
+    const boroughReport = Object.hasOwn(event, 'borough');
+    // Existing installed Shortcuts may still send the legacy three-field report.
+    const validPayload = boroughReport
+      ? Object.keys(event).sort().join(',') === 'borough,observed_at' && BOROUGHS.includes(event.borough)
+      : Object.keys(event).sort().join(',') === 'event_id,observed_at,status' &&
+        ['in_nyc', 'not_in_nyc', 'unknown'].includes(event.status) &&
+        typeof event.event_id === 'string' && /^[A-Za-z0-9_.:+-]{1,128}$/.test(event.event_id);
+    const isoDate = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+    const rfcDate = /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} [+-](?:[01]\d|2[0-3])[0-5]\d$/;
+    if (!validPayload ||
         typeof event.observed_at !== 'string' ||
-        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(event.observed_at)) {
-      return reply({ error: 'Expected only status, observed_at and event_id' }, 400);
+        !(isoDate.test(event.observed_at) || (boroughReport && rfcDate.test(event.observed_at)))) {
+      return reply({ error: 'Expected borough (manhattan, brooklyn, queens, bronx, staten_island, outside_nyc) and observed_at with timezone; legacy status, observed_at and event_id are also accepted' }, 400);
     }
     const observed = Date.parse(event.observed_at);
     if (!Number.isFinite(observed) || observed < now - FRESHNESS || observed > now + 60_000) {
       return reply({ error: 'Observation must be fresh and include its time zone' }, 400);
     }
-    const eventDigest = await digest(event.event_id);
+    const status = boroughReport ? (event.borough === 'outside_nyc' ? 'not_in_nyc' : 'in_nyc') : event.status;
+    const borough = boroughReport ? event.borough : null;
+    const eventDigest = await digest(boroughReport ? `borough:${observed}` : event.event_id);
     const expires = Math.min(observed + LEASE, credential.expires_at);
     const results = await db.batch([
       db.prepare('DELETE FROM presence_events WHERE expires_at <= ?').bind(now),
-      db.prepare(`UPDATE presence SET status = ?, observed_at = ?, expires_at = ?, received_at = ?, credential_id = ?
+      db.prepare(`UPDATE presence SET status = ?, borough = ?, observed_at = ?, expires_at = ?, received_at = ?, credential_id = ?
         WHERE id = 1 AND observed_at < ? AND received_at <= ?
         AND NOT EXISTS (SELECT 1 FROM presence_events WHERE digest = ?)
         AND EXISTS (SELECT 1 FROM presence_credentials WHERE id = ? AND digest = ?
           AND scope = 'presence:write' AND revoked = 0 AND expires_at > ?)`)
         // Clearing visibility retains the observation watermark: a delayed arrival
         // must not restore a status that the owner has just cleared.
-        .bind(event.status === 'unknown' ? null : event.status, observed, expires, now, credential.id, observed, now - MIN_INTERVAL,
+        .bind(status === 'unknown' ? null : status, borough, observed, expires, now, credential.id, observed, now - MIN_INTERVAL,
           eventDigest, credential.id, credential.digest, now),
       db.prepare('INSERT INTO presence_events (digest, expires_at) SELECT ?, ? WHERE changes() = 1')
         .bind(eventDigest, now + FRESHNESS + 60_000),

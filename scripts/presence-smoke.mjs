@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
 
 const origin = process.argv[2] || 'http://127.0.0.1:8791';
 if (!['http://127.0.0.1:8791', 'https://spacecaveman-presence-trial.spacecaveman.workers.dev'].includes(origin)) {
@@ -12,7 +11,7 @@ const get = token => fetch(endpoint, { headers: token ? { Authorization: `Bearer
 const post = (token, body) => fetch(endpoint, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 assert.equal((await get()).status, 401);
 assert.equal((await get(credentials.write)).status, 401);
-const body = { status: 'not_in_nyc', observed_at: new Date().toISOString(), event_id: randomUUID() };
+const body = { borough: 'outside_nyc', observed_at: new Date().toISOString() };
 assert.equal((await post(credentials.read, body)).status, 401);
 assert.equal((await post(credentials.write, { ...body, latitude: 0 })).status, 400);
 const result = await post(credentials.write, body);
@@ -24,6 +23,7 @@ assert.equal(read.status, 200);
 assert.equal(read.headers.get('Cache-Control'), 'no-store');
 const state = await read.json();
 assert.equal(state.status, 'not_in_nyc');
+assert.equal(state.borough, 'outside_nyc');
 assert.equal(state.observed_at, body.observed_at);
 assert.ok(Date.parse(state.expires_at) <= Date.parse(body.observed_at) + 6 * 3600_000);
 for (const value of Object.values(credentials)) assert.ok(!JSON.stringify(state).includes(value));
