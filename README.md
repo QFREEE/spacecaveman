@@ -5,6 +5,11 @@ modules: current NYC presence, a local watercolor plant, and a real page-view co
 The React frontend lives in `demo/` for historical reasons; Wrangler builds and
 serves it as the production homepage.
 
+The [encrypted coordinate-history upgrade](docs/private-location.md) adds an
+isolated private database and Worker, with owner-only history retained until
+explicit deletion. The public cutover is off by default; the guide records setup,
+Access prerequisites, the exact iPhone changes and the staged rollout.
+
 ## Homepage behavior
 
 - NYC shows loading feedback until its first response, without

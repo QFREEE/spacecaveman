@@ -11,6 +11,16 @@ branch. This is a record of that verification, not a promise about future runs.
 
 ## Normal release path
 
+The [private coordinate-history upgrade](private-location.md) has its own gated
+`Deploy private location Worker` job. It runs from current main only when the
+repository variable `LOCATION_DEPLOY_ENABLED` is `true`, with production secret
+`LOCATION_KEYS` and repository variable `LOCATION_ACCESS_AUD` configured. The
+website job does not receive the private encryption key. Private and public D1
+migrations must be provisioned separately as described in that guide; CI does not
+apply them. `LOCATION_PUBLIC_READ=false` keeps the existing homepage pipeline
+until a deliberate follow-up cutover PR. Existing site/phone reporting continues
+while Access and private ingestion are being prepared.
+
 Open a pull request, wait for its checks, and merge to `main`. Track the release
 in [GitHub Actions](https://github.com/QFREEE/spacecaveman/actions). No local
 Cloudflare login or manual upload is needed for this path.
