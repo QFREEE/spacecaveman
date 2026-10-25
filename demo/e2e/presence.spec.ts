@@ -73,7 +73,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
   await expect(presence.getByRole("status")).toHaveText(
     "Nope! Chilling in the woods",
   );
-  await expect(presence).toContainText("Just updated");
+  await expect(presence).toContainText("Last updated just now");
   await expect(presence.locator("time, [datetime]")).toHaveCount(0);
   await expect(presence).not.toContainText(report.observed_at);
   await page.screenshot({
@@ -89,7 +89,7 @@ test("homepage shows latest presence, expires locally, and refreshes the report"
   };
   await page.clock.fastForward(60_000);
   await expect(presence.getByRole("status")).toHaveText("Yep!");
-  await expect(presence).toContainText("Just updated");
+  await expect(presence).toContainText("Last updated just now");
   await page.getByRole("button", { name: "中文", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "实时纽约状态" }).getByRole("status"),
@@ -118,23 +118,23 @@ test("update age stays approximate and advances when refreshing fails", async ({
   );
   await page.goto("/");
   const presence = page.locator(".presence-strip");
-  await expect(presence).toContainText("Just updated");
+  await expect(presence).toContainText("Last updated just now");
   unavailable = true;
   const windows = [
-    [4, "Just updated", "刚刚更新"],
-    [5, "A few minutes ago", "几分钟前更新"],
-    [14, "A few minutes ago", "几分钟前更新"],
-    [15, "Within the last half hour", "半小时内更新"],
-    [29, "Within the last half hour", "半小时内更新"],
-    [30, "Within the last hour", "一小时内更新"],
-    [59, "Within the last hour", "一小时内更新"],
-    [60, "About an hour ago", "约一小时前更新"],
-    [119, "About an hour ago", "约一小时前更新"],
-    [120, "About 2 hours ago", "约两小时前更新"],
-    [179, "About 2 hours ago", "约两小时前更新"],
-    [180, "About 3 hours ago", "约三小时前更新"],
-    [239, "About 3 hours ago", "约三小时前更新"],
-    [240, "Several hours ago", "几小时前更新"],
+    [4, "Last updated just now", "刚刚更新"],
+    [5, "Last updated a few minutes ago", "几分钟前更新"],
+    [14, "Last updated a few minutes ago", "几分钟前更新"],
+    [15, "Last updated within the last half hour", "半小时内更新"],
+    [29, "Last updated within the last half hour", "半小时内更新"],
+    [30, "Last updated within the last hour", "一小时内更新"],
+    [59, "Last updated within the last hour", "一小时内更新"],
+    [60, "Last updated about an hour ago", "约一小时前更新"],
+    [119, "Last updated about an hour ago", "约一小时前更新"],
+    [120, "Last updated about 2 hours ago", "约两小时前更新"],
+    [179, "Last updated about 2 hours ago", "约两小时前更新"],
+    [180, "Last updated about 3 hours ago", "约三小时前更新"],
+    [239, "Last updated about 3 hours ago", "约三小时前更新"],
+    [240, "Last updated several hours ago", "几小时前更新"],
   ] as const;
   let previousMinutes = 0;
   for (const [minutes, english, chinese] of windows) {
