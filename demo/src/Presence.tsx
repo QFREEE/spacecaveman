@@ -3,6 +3,8 @@ import { useLanguage } from "./Language";
 
 type Report = {
   status: "in_nyc" | "not_in_nyc" | "unknown";
+  borough?:
+    "manhattan" | "brooklyn" | "queens" | "bronx" | "staten_island" | null;
   observed_at: string | null;
   expires_at: string | null;
 };
@@ -73,6 +75,13 @@ export function Presence({
 
   const active = report && Date.parse(report.expires_at ?? "") > now;
   const state = active ? report.status : "unknown";
+  const borough =
+    state === "in_nyc" &&
+    ["manhattan", "brooklyn", "queens", "bronx", "staten_island"].includes(
+      report?.borough ?? "",
+    )
+      ? report?.borough
+      : null;
   const observed = Date.parse(report?.observed_at ?? "");
   const label =
     state === "in_nyc"
@@ -115,6 +124,9 @@ export function Presence({
       ) : (
         renderAnswer(state, label)
       )}
+      {borough ? (
+        <p className="presence-borough">{t(`presence.borough.${borough}`)}</p>
+      ) : null}
       {Number.isFinite(observed) || health === "error" ? (
         <div className="presence-detail">
           {Number.isFinite(observed) ? <span>{recency}</span> : null}
