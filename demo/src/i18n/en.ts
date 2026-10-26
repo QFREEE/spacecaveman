@@ -77,7 +77,6 @@ export const en = {
   "flower.status": "Flower status",
   "flower.refresh": "Refresh plant",
   "visitors.total": "Total visits",
-  "visitors.note": "Repeat visits count once per day (New York time).",
   "visitors.unavailable": "Visit count is temporarily unavailable.",
   "visitors.loading": "Loading visit count…",
   "common.retry": "Try again",

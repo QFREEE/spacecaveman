@@ -79,7 +79,6 @@ export const zh = {
   "flower.status": "花藤状态",
   "flower.refresh": "刷新花藤",
   "visitors.total": "小站总访问次数",
-  "visitors.note": "重复访问每天只计一次（纽约时间）。",
   "visitors.unavailable": "访问计数暂时不可用。",
   "visitors.loading": "正在读取访问次数…",
   "common.retry": "重试",

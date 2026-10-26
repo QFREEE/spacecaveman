@@ -49,7 +49,6 @@ export function VisitorCounter() {
             <span key={index}>{number}</span>
           ))}
       </div>
-      <p className="fine-print">{t("visitors.note")}</p>
       {failed || views === null ? (
         <p className="fine-print">
           {t(failed ? "visitors.unavailable" : "visitors.loading")}
